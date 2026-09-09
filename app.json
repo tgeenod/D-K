@@ -1,0 +1,25 @@
+{
+  "name": "DARK-KNIGHT-XMD",
+  "description": "Javascript WhatsApp bot made by DARK-KNIGHT",
+  "logo": "https://files.catbox.moe/brlkte.jpg",
+  "keywords": ["DARK-KNIGHT-XMD"],
+  "success_url": "/",
+
+    "stack": "container",
+  "env": {
+    "SESSION_ID": {
+      "description": "Put the session-id here.",
+      "required": true,
+      "value": "" 
+    }
+
+},
+
+     "buildpacks": [
+        {
+            "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
+        }
+     ],
+  "stack": "heroku-24"
+}
+  
