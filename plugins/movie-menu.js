@@ -51,9 +51,10 @@ cmd({
  3️⃣ 𝑩𝑨𝑰𝑺𝑬𝑪𝑶𝑷𝑬𝑺 𝑆𝐸𝐴𝐑𝐶𝐻 
  4️⃣ 𝑪𝑯𝑰𝑻𝑯𝑹𝑨𝑷𝑨𝑻𝑨 𝑺𝑬𝑨𝑹𝑪𝑯         
  5️⃣ 𝑺𝑼𝑩𝒁𝑳𝑲 𝑆𝐸𝐴𝐑𝐶𝐻
- 6️⃣ 𝐏𝐔𝐏𝐈𝐋𝐕𝐈𝐃𝐄𝐎 𝑆𝐸𝐴𝐑𝐶𝐻
+ 6️⃣ 𝐌𝐎𝐕𝐈𝐄𝐏𝐑𝐎 𝑆𝐸𝐴𝐑𝐶𝐻
+ 7️⃣ 𝐏𝐔𝐏𝐈𝐋𝐕𝐈𝐃𝐄𝐎 𝑆𝐸𝐴𝐑𝐶𝐻
 
- 7️⃣ 𝑪𝑰𝑵𝑬𝑺𝑼𝑩𝒁 𝐓𝐕 𝑆𝐸𝐴𝐑𝐶𝐻
+ 8️⃣ 𝑪𝑰𝑵𝑬𝑺𝑼𝑩𝒁 𝐓𝐕 𝑆𝐸𝐴𝐑𝐶𝐻
  
  © Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳
  `;
@@ -78,8 +79,9 @@ cmd({
                     else if (selText === '3') targetPattern = "baiscopes";
                     else if (selText === '4') targetPattern = "chithrapata";
                     else if (selText === '5') targetPattern = "subzlk";
-                    else if (selText === '6') targetPattern = "pupilvideo";
-                    else if (selText === '7') targetPattern = "cinesubztv";
+                    else if (selText === '6') targetPattern = "moviepro";
+                    else if (selText === '7') targetPattern = "pupilvideo";
+                    else if (selText === '8') targetPattern = "cinesubztv";
                      
                     if (targetPattern) {
                         await conn.sendMessage(from, { react: { text: "🔍", key: selection.msg.key } });
