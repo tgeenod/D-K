@@ -47,7 +47,7 @@ cmd({
 
     let textList = "🔢 𝑅𝑒𝑝𝑙𝑦 𝐵𝑒𝑙𝑜𝑤 𝑁𝑢𝑚𝑏𝑒𝑟\n━━━━━━━━━━━━━━━━━\n\n";
     movieList.forEach(m => {
-      textList += `🔸 *${m.number}. ${m.title}* (${m.year || "N/A"})\n`;
+      textList += `🔸 *${m.number}. ${m.title}*\n`;
     });
 
     const sentMsg = await conn.sendMessage(from, {
