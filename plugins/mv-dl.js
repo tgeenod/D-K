@@ -6,6 +6,142 @@ const NodeCache = require("node-cache");
 const movieCache = new NodeCache({ stdTTL: 100, checkperiod: 120 });
 
 cmd({
+  pattern: "moviepro",
+  alias: ["mpro"],
+  desc: "🎥 Search movies from MovieBox API",
+  category: "media",
+  react: "🎬",
+  filename: __filename
+}, async (conn, mek, m, { from, q }) => {
+
+  if (!q) return await conn.sendMessage(from, { text: "Use: .moviepro <movie name>" }, { quoted: mek });
+
+  try {
+    const cacheKey = `moviepro_${q.toLowerCase()}`;
+    let data = movieCache.get(cacheKey);
+
+    if (!data) {
+      const url = `https://movieboxapi.vercel.app/api/search?query=${encodeURIComponent(q)}`;
+      const res = await axios.get(url);
+      
+      data = res.data;
+
+      if (!data.data?.items?.length) throw new Error("No results found.");
+
+      movieCache.set(cacheKey, data);
+    }
+
+    const movieList = data.data.items.map((m, i) => ({
+      number: i + 1,
+      id: m.subjectId,
+      detailPath: m.detailPath,
+      title: m.title,
+      year: m.releaseDate,
+      time: m.duration,
+      genre: m.genre,
+      thumbnail: m.cover?.url,
+      country: m.countryName,
+      imdb: m.imdbRatingValue,
+      post: m.postTitle
+    }));
+
+    let textList = "🔢 𝑅𝑒𝑝𝑙𝑦 𝐵𝑒𝑙𝑜𝑤 𝑁𝑢𝑚𝑏𝑒𝑟\n━━━━━━━━━━━━━━━━━\n\n";
+    movieList.forEach(m => {
+      textList += `🔸 *${m.number}. ${m.title}* (${m.year || "N/A"})\n`;
+    });
+
+    const sentMsg = await conn.sendMessage(from, {
+      text: `*🔍 𝐌𝐎𝐕𝐈𝐄𝐏𝐑𝐎 𝑪𝑰𝑵𝑬𝑴𝑨 𝑺𝑬𝑨𝑹𝑪𝑯 🎥*\n\n${textList}\n💬 Reply with movie number to view details.\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`,
+    }, { quoted: mek });
+
+    const movieMap = new Map();
+
+    const listener = async (update) => {
+      const msg = update.messages?.[0];
+      if (!msg?.message?.extendedTextMessage) return;
+
+      const replyText = msg.message.extendedTextMessage.text.trim();
+      const repliedId = msg.message.extendedTextMessage.contextInfo?.stanzaId;
+
+      if (replyText.toLowerCase() === "done") {
+        conn.ev.off("messages.upsert", listener);
+        return conn.sendMessage(from, { text: "✅ Cancelled." }, { quoted: msg });
+      }
+
+      if (repliedId === sentMsg.key.id) {
+        const num = parseInt(replyText);
+        const selected = movieList.find(m => m.number === num);
+        if (!selected) return conn.sendMessage(from, { text: "*Invalid movie number.*" }, { quoted: msg });
+
+        await conn.sendMessage(from, { react: { text: "🎯", key: msg.key } });
+
+        const streamUrl = `https://movieboxapi.vercel.app/api/stream?subjectId=${selected.id}&detailPath=${selected.detailPath}`;
+        const streamRes = await axios.get(streamUrl);
+    
+        const streams = streamRes.data?.data?.data?.streams;
+
+        if (!streams?.length) return conn.sendMessage(from, { text: "*No download links available.*" }, { quoted: msg });
+
+        const runtimeText = selected.time && selected.time > 0 ? `${Math.floor(selected.time / 60)} min` : "N/A";
+
+        let info = 
+          `🎬 *Title:* ${selected.title || "N/A"}\n` +
+          `📅 *Release Date:* ${selected.year || "N/A"}\n` +
+          `🕐 *Duration:* ${runtimeText}\n` +
+          `🎭 *Genre:* ${selected.genre || "N/A"}\n` +
+          `🌍 *Country:* ${selected.country || "N/A"}\n` +
+          `⭐ *IMDb Rating:* ${selected.imdb || "N/A"}\n` +
+          `📝 *Post Title:* ${selected.post || "N/A"}\n\n` +
+          `🎥 *𝑫𝒐𝒘𝒏𝒍𝒐𝒂𝒅 𝑳𝒊𝒏𝒌𝒔:* 📥\n\n`;
+        
+        streams.forEach((d, i) => {  
+          const formattedSize = parseInt(d.size) >= 1024 * 1024 * 1024 ? `${(parseInt(d.size) / (1024 * 1024 * 1024)).toFixed(2)} GB` : `${(parseInt(d.size) / (1024 * 1024)).toFixed(1)} MB`;
+          
+          info += `♦️ ${i + 1}. *${d.resolutions}p* (${d.format}) — ${formattedSize}\n`;
+        });
+        info += "\n🔢 Reply with number to download.";
+
+        const downloadMsg = await conn.sendMessage(from, {
+          image: { url: selected.thumbnail },
+          caption: info
+        }, { quoted: msg });
+
+        movieMap.set(downloadMsg.key.id, { selected, streams });
+      }
+
+      else if (movieMap.has(repliedId)) {
+        const { selected, streams } = movieMap.get(repliedId);
+        const num = parseInt(replyText);
+        const chosen = streams[num - 1];
+        if (!chosen) return conn.sendMessage(from, { text: "*Invalid number.*" }, { quoted: msg });
+
+        await conn.sendMessage(from, { react: { text: "📥", key: msg.key } });
+
+        const sizeInBytes = parseInt(chosen.size);
+        const sizeGB = sizeInBytes / (1024 * 1024 * 1024);
+        
+        const sizeMB = (sizeInBytes / (1024 * 1024)).toFixed(1);
+        const formattedSize = sizeMB >= 1024 ? `${(sizeMB / 1024).toFixed(2)} GB` : `${sizeMB} MB`;
+        
+        if (sizeGB > 2) return conn.sendMessage(from, { text: `⚠️ Large file (${formattedSize})` }, { quoted: msg });
+
+        await conn.sendMessage(from, {
+          document: { url: chosen.url },
+          mimetype: "video/mp4",
+          fileName: `${selected.title} - ${chosen.resolutions}p.mp4`,
+          caption: `🎬 *${selected.title}*\n🎥 *${chosen.resolutions}p*\n\n> © Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+        }, { quoted: msg });
+      }
+    };
+
+    conn.ev.on("messages.upsert", listener);
+
+  } catch (err) {
+    await conn.sendMessage(from, { text: `*Error:* ${err.message}` }, { quoted: mek });
+  }
+});
+
+cmd({
   pattern: "cinesubztv",
   alias: ["cinetv"],
   desc: "🎥 Search Sinhala subbed TV shows from CineSubz",
