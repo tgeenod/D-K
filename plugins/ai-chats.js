@@ -2,19 +2,15 @@ const axios = require('axios');
 const config = require('../config');
 const { cmd } = require('../command');
 
-/**
- * AI API එකෙන් පිළිතුරු ලබා ගැනීම සඳහා පොදු Function එක
- */
 async function getAIResponse(userInput) {
     try {
-        // AI එකට සිංහලෙන් පමණක් පිළිතුරු දීමට බල කිරීම සඳහා උපදෙස් එකතු කිරීම
         const prompt = `Strictly respond in 100% Sinhala language only. User message: ${userInput}`;
-        const apiUrl = `https://d-ai-beige.vercel.app/api/gemini?q=${encodeURIComponent(prompt)}`;
+        const apiUrl = `https://api-abztech.zone.id/ai/gemini?message=${encodeURIComponent(prompt)}`;
         
         const response = await axios.get(apiUrl);
 
-        if (response.data && response.data.success) {
-            return response.data.result;
+        if (response.data && response.data.status && response.data.data && response.data.data.answer) {
+            return response.data.data.answer;
         }
         return null;
     } catch (e) {
@@ -23,9 +19,6 @@ async function getAIResponse(userInput) {
     }
 }
 
-// -------------------------------------------------------------------
-// 1. .gemini COMMAND (ප්‍රශ්න ඇසීමට)
-// -------------------------------------------------------------------
 cmd({
     pattern: "gemini",
     react: "🤖",
@@ -38,7 +31,6 @@ async (conn, mek, m, { from, args, reply }) => {
         const text = args.join(" ");
         if (!text) return reply("කරුණාකර ප්‍රශ්නයක් අසන්න.");
 
-        // AI පිළිතුර ලබා ගැනීම
         const result = await getAIResponse(text);
 
         if (result) {
@@ -52,9 +44,6 @@ async (conn, mek, m, { from, args, reply }) => {
     }
 });
 
-// -------------------------------------------------------------------
-// 2. AUTO CHATBOT (සාමාන්‍ය මැසේජ් වලට 100% සිංහලෙන් පිළිතුරු දීම)
-// -------------------------------------------------------------------
 cmd({
   'on': "body"
 }, async (conn, m, store, {
@@ -64,17 +53,12 @@ cmd({
   reply
 }) => {
   try {
-    // තමන්ගේ මැසේජ් වලට හෝ Command වලට හෝ හිස් මැසේජ් වලට ක්‍රියා නොකරයි
     if (m.fromMe || !body || isCmd) return;
 
-    // Chatbot එක ON කර ඇත්නම් පමණක් ක්‍රියා කරයි
     if (config.CHAT_BOT === "true") {
-      
-      // AI පිළිතුර ලබා ගැනීම
       const aiResult = await getAIResponse(body);
 
       if (aiResult) {
-        // AI එකෙන් පිළිතුරක් ලැබුනොත් පමණක් React කර Text එක යවයි
         await conn.sendMessage(from, { react: { text: "🤖", key: m.key } });
         await conn.sendMessage(from, { text: aiResult }, { quoted: m });
       }
