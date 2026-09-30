@@ -44,6 +44,9 @@ const path = require('path')
 //const prefix = config.PREFIX
 const ownerNumber = ['94763934860']
 
+const store = makeInMemoryStore({ 
+    logger: P({ level: 'silent' }).child({ level: 'silent', stream: 'store' }) })
+
 const tempDir = path.join(os.tmpdir(), 'cache-temp')
 if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true })
@@ -91,6 +94,8 @@ async function connectToWA() {
     auth: state,
     version
   })
+
+  store.bind(conn.ev)
 
   conn.ev.on('connection.update', (update) => {
     const { connection, lastDisconnect } = update
