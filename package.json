@@ -11,7 +11,7 @@
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@vitalets/google-translate-api": "^9.2.1",
-    "@whiskeysockets/baileys": "npm:@tristancage/baileys",
+    "@whiskeysockets/baileys": "latest",
     "adm-zip": "^0.5.16",
     "axios": "^1.13.2",
     "cheerio": "^1.2.0",
