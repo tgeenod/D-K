@@ -16,11 +16,12 @@ const {
   generateForwardMessageContent,
   generateWAMessageFromContent,
   generateMessageID, 
-  makeInMemoryStore,
   jidDecode,
   fetchLatestBaileysVersion,
   Browsers
 } = require('@whiskeysockets/baileys')
+
+const makeInMemoryStore = require('@whiskeysockets/baileys/lib/Store').default || require('@whiskeysockets/baileys').makeInMemoryStore
 
 const l = console.log
 const { getBuffer, getGroupAdmins, isParticipantAdmin, getParticipantIds, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('./lib/functions')
@@ -98,7 +99,7 @@ async function connectToWA() {
   conn.ev.on('connection.update', (update) => {
     const { connection, lastDisconnect } = update
     if (connection === 'close') {
-      if (lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut) {
+      if (lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut) {
         connectToWA()
       }
     } else if (connection === 'open') {
@@ -115,18 +116,18 @@ async function connectToWA() {
       let up = `*✨ Hello, 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 Legend! ✨*
 
 ╭─〔 *🤖 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 〕  
-├─▸ *Ultra Super Fast Powerfull ⚠️* 
+├─▸ *Ultra Super Fast Powerfull ⚠️️* 
 ├─▸ *Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*  
 ╰─➤ *Your Smart WhatsApp Bot Is Ready To Use 🍁!*
 
-*❤️ Thank you for Choosing 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳!*
+*❤️️ Thank you for Choosing 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳!*
 
 ╭──〔 *🔗 Information* 〕  
 ├─ *📢 Join Channel:*  
 │   https://whatsapp.com/channel/0029VbAM4eo3AzNQZ1WleW3e
 ├─ *⭐ Join Group:*  
 │   https://chat.whatsapp.com/IGgPW6pTrH14oAWCJALYR5
-╰─ 🛠️ *Prefix:* \`${config.PREFIX}\`
+╰─ 🛠️️ *Prefix:* \`${config.PREFIX}\`
 
 > _© Made By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃_`;
 
@@ -161,7 +162,7 @@ async function connectToWA() {
     }
     if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true"){
       const jawadlike = await conn.decodeJid(conn.user.id);
-      const emojis = ['🩷', '❤', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '❣', '💕', '💞', '💓', '💗', '💖', '💘', '💝'];
+      const emojis = ['🩷', '❤', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍‍🩹', '❣', '💕', '💞', '💓', '💗', '💖', '💘', '💝'];
       const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
       await conn.sendMessage(mek.key.remoteJid, {
         react: {
@@ -217,7 +218,7 @@ async function connectToWA() {
     const groupAdmins = isGroup ? getGroupAdmins(participants) : [];
     const isBotAdmins = isGroup ? isParticipantAdmin(participants, [botNumber2, botLid, botNumber + '@s.whatsapp.net']) || groupAdmins?.includes(botNumber2) || groupAdmins?.includes(botLid) : false;
     const isAdmins = isGroup ? isParticipantAdmin(participants, [sender, senderNumber + '@s.whatsapp.net', senderNumber + '@lid']) || groupAdmins?.includes(sender) : false;
-    const isReact = m.message.reactionMessage ? true : false
+    const isReact = m.message?.reactionMessage ? true : false
 
     const reply = (teks) => {
       conn.sendMessage(from, { text: teks }, { quoted: mek })
@@ -272,7 +273,7 @@ async function connectToWA() {
 
     if (!isReact && senderNumber !== botNumber) {
       if (config.HEART_REACT === 'true') {
-        const reactions = (config.HEART_REACT_EMOJIS || '🩷,❤️️,🧡,💛,💚,🩵,💙,💜,🖤,🩶,🤍,🤎,💔,❤️‍🔥,❤️‍🩹,❣️,💕,💞,💓,💗,💖,💘,💝').split(',');
+        const reactions = (config.HEART_REACT_EMOJIS || '🩷,❤,🧡,💛,💚,🩵,💙,💜,🖤,🩶,🤍,🤎,💔,❤️‍🔥,❤️‍🩹,❣️,💕,💞,💓,💗,💖,💘,💝').split(',');
         const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
         m.react(randomReaction);
       }
@@ -283,11 +284,21 @@ async function connectToWA() {
     const randomEmoji = defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)];
     await conn.newsletterReactMessage(`120363400240662312@newsletter`, id, randomEmoji);
 
-    const bannedUsers = JSON.parse(fs.readFileSync('./lib/ban.json', 'utf-8'));
+    let bannedUsers = [];
+    try {
+      bannedUsers = JSON.parse(fs.readFileSync('./lib/ban.json', 'utf-8'));
+    } catch (e) {
+      bannedUsers = [];
+    }
     const isBanned = bannedUsers.includes(sender);
     if (isBanned) return; 
 
-    const ownerFile = JSON.parse(fs.readFileSync('./lib/sudo.json', 'utf-8'));  
+    let ownerFile = [];
+    try {
+      ownerFile = JSON.parse(fs.readFileSync('./lib/sudo.json', 'utf-8'));  
+    } catch (e) {
+      ownerFile = [];
+    }
     const ownerNumberFormatted = `${config.OWNER_NUMBER}@s.whatsapp.net`;
 
     const isFileOwner = ownerFile.includes(sender);
