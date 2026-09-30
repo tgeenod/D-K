@@ -44,20 +44,13 @@ cmd({
 
     // Upload to Catbox
      const response = await axios.post("https://catbox.moe/user/api.php", form, {
-      headers: {
-        ...form.getHeaders(),
-         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-         "Accept": "*/*",
-         "Accept-Language": "en-US,en;q=0.9",
-         "Origin": "https://catbox.moe",
-         "Referer": "https://catbox.moe/",
-      }
+      headers: form.getHeaders()
     });
-    
+
     if (!response.data) {
       throw "Error uploading to Catbox";
     }
-
+    
     const mediaUrl = response.data;
     fs.unlinkSync(tempFilePath);
 
