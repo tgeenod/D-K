@@ -121,7 +121,23 @@ async function connectToWA() {
         if (config.READ_MESSAGE === 'true') {
             await conn.readMessages([mek.key])
         }
-        if (mek.message.viewOnceMessageV2) mek.message = (getContentType(mek.message) === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message
+    
+        const now = Date.now() / 1000
+        if ((now - mek.messageTimestamp) > 60 * 5) return 
+        
+        if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_SEEN === 'true') {
+            try {
+                await conn.readMessages([mek.key])
+                if (config.AUTO_REACT_STATUS == "true") {
+                    const emojis = ['🧩', '🍉', '💜', '🌸', '🪴', '💊', '💫', '🍂', '🌟', '🎋', '😶‍🌫️️', '🫀', '🧿', '👀', '🤖', '🚩', '🥰', '🗿', '💜', '💙', '🌝', '🖤', '💚']
+                    await conn.sendMessage(mek.key.remoteJid, { react: { key: mek.key, text: emojis[Math.floor(Math.random() * emojis.length)] } }, { statusJidList: [mek.key.participant, conn.user.id] })
+                }
+            } catch (error) {}
+        }
+
+		
+		
+		/*if (mek.message.viewOnceMessageV2) mek.message = (getContentType(mek.message) === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message
         if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_SEEN === "true"){
             await conn.readMessages([mek.key])
         }
@@ -130,7 +146,7 @@ async function connectToWA() {
             const emojis = ['🩷', '❤️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤‍🔥', '❤️‍🩹', '❣', '💕', '💞', '💓', '💗', '💖', '💘', '💝']
             const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)]
             await conn.sendMessage('status@broadcast', { react: { text: randomEmoji, key: mek.key } }, { statusJidList: [mek.key.participant || mek.participant, jawadlike] })
-        }                       
+        }  */                     
         if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REPLY === "true"){
             const user = mek.key.participant || mek.participant
             const text = `${config.AUTO_STATUS_MSG}`
