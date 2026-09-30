@@ -2,9 +2,9 @@ FROM node:lts-alpine
   
 WORKDIR /usr/src/app
 
-COPY package.json .
+COPY package*.json ./
 
-RUN npm install && npm install pm2
+RUN npm install
 
 COPY . .
 
