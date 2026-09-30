@@ -16,12 +16,11 @@ const {
   generateForwardMessageContent,
   generateWAMessageFromContent,
   generateMessageID, 
+  makeInMemoryStore,
   jidDecode,
   fetchLatestBaileysVersion,
   Browsers
 } = require('@whiskeysockets/baileys')
-
-const makeInMemoryStore = require('@whiskeysockets/baileys/lib/Store').default || require('@whiskeysockets/baileys').makeInMemoryStore
 
 const l = console.log
 const { getBuffer, getGroupAdmins, isParticipantAdmin, getParticipantIds, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('./lib/functions')
@@ -42,9 +41,9 @@ const bodyparser = require('body-parser')
 const os = require('os')
 const Crypto = require('crypto')
 const path = require('path')
+//const prefix = config.PREFIX
 
 const ownerNumber = ['94763934860']
-const store = makeInMemoryStore({ logger: P().child({ level: 'silent', stream: 'store' }) })
 
 const tempDir = path.join(os.tmpdir(), 'cache-temp')
 if (!fs.existsSync(tempDir)) {
@@ -94,12 +93,10 @@ async function connectToWA() {
     version
   })
 
-  store?.bind(conn.ev)
-
   conn.ev.on('connection.update', (update) => {
     const { connection, lastDisconnect } = update
     if (connection === 'close') {
-      if (lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut) {
+      if (lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut) {
         connectToWA()
       }
     } else if (connection === 'open') {
@@ -116,18 +113,18 @@ async function connectToWA() {
       let up = `*✨ Hello, 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 Legend! ✨*
 
 ╭─〔 *🤖 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 〕  
-├─▸ *Ultra Super Fast Powerfull ⚠️️* 
+├─▸ *Ultra Super Fast Powerfull ⚠️* 
 ├─▸ *Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*  
 ╰─➤ *Your Smart WhatsApp Bot Is Ready To Use 🍁!*
 
-*❤️️ Thank you for Choosing 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳!*
+*❤️ Thank you for Choosing 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳!*
 
 ╭──〔 *🔗 Information* 〕  
 ├─ *📢 Join Channel:*  
 │   https://whatsapp.com/channel/0029VbAM4eo3AzNQZ1WleW3e
 ├─ *⭐ Join Group:*  
 │   https://chat.whatsapp.com/IGgPW6pTrH14oAWCJALYR5
-╰─ 🛠️️ *Prefix:* \`${config.PREFIX}\`
+╰─ 🛠️ *Prefix:* \`${config.PREFIX}\`
 
 > _© Made By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃_`;
 
@@ -162,7 +159,7 @@ async function connectToWA() {
     }
     if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true"){
       const jawadlike = await conn.decodeJid(conn.user.id);
-      const emojis = ['🩷', '❤', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍‍🩹', '❣', '💕', '💞', '💓', '💗', '💖', '💘', '💝'];
+      const emojis = ['🩷', '❤️️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '❣️️', '💕', '💞', '💓', '💗', '💖', '💘', '💝'];
       const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
       await conn.sendMessage(mek.key.remoteJid, {
         react: {
@@ -197,7 +194,7 @@ async function connectToWA() {
     const senderNumber = sender.split('@')[0]
     const botNumber = conn.user.id.split(':')[0]
     const pushname = mek.pushName || 'Sin Nombre'
-	  
+
     const botLid = conn.user?.lid ? conn.user?.lid.split(":")[0] + "@lid" : null
     const botLid2 = botLid ? botLid.split("@")[0] : null
     const ownernum = [`272572046434350`]
@@ -218,7 +215,7 @@ async function connectToWA() {
     const groupAdmins = isGroup ? getGroupAdmins(participants) : [];
     const isBotAdmins = isGroup ? isParticipantAdmin(participants, [botNumber2, botLid, botNumber + '@s.whatsapp.net']) || groupAdmins?.includes(botNumber2) || groupAdmins?.includes(botLid) : false;
     const isAdmins = isGroup ? isParticipantAdmin(participants, [sender, senderNumber + '@s.whatsapp.net', senderNumber + '@lid']) || groupAdmins?.includes(sender) : false;
-    const isReact = m.message?.reactionMessage ? true : false
+    const isReact = m.message.reactionMessage ? true : false
 
     const reply = (teks) => {
       conn.sendMessage(from, { text: teks }, { quoted: mek })
@@ -258,7 +255,7 @@ async function connectToWA() {
     }
 
     if (!isReact && config.AUTO_REACT === 'true') {
-      const reactions = ['🩷', '❤️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤‍🔥', '❤️‍🩹', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '👍', '😂', '😮', '😥', '🙏', '👏', '🥰', '🥹', '😭', '🔥', '🤣'];
+      const reactions = ['🩷', '❤️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤️️‍🔥', '❤️‍🩹', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '👍', '😂', '😮', '😥', '🙏', '👏', '🥰', '🥹', '😭', '🔥', '🤣'];
       const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
       m.react(randomReaction);
     }
@@ -273,7 +270,7 @@ async function connectToWA() {
 
     if (!isReact && senderNumber !== botNumber) {
       if (config.HEART_REACT === 'true') {
-        const reactions = (config.HEART_REACT_EMOJIS || '🩷,❤,🧡,💛,💚,🩵,💙,💜,🖤,🩶,🤍,🤎,💔,❤️‍🔥,❤️‍🩹,❣️,💕,💞,💓,💗,💖,💘,💝').split(',');
+        const reactions = (config.HEART_REACT_EMOJIS || '🩷,❤️,🧡,💛,💚,🩵,💙,💜,🖤,🩶,🤍,🤎,💔,❤️‍🔥,❤️‍🩹,❣️,💕,💞,💓,💗,💖,💘,💝').split(',');
         const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
         m.react(randomReaction);
       }
@@ -284,21 +281,11 @@ async function connectToWA() {
     const randomEmoji = defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)];
     await conn.newsletterReactMessage(`120363400240662312@newsletter`, id, randomEmoji);
 
-    let bannedUsers = [];
-    try {
-      bannedUsers = JSON.parse(fs.readFileSync('./lib/ban.json', 'utf-8'));
-    } catch (e) {
-      bannedUsers = [];
-    }
+    const bannedUsers = JSON.parse(fs.readFileSync('./lib/ban.json', 'utf-8'));
     const isBanned = bannedUsers.includes(sender);
     if (isBanned) return; 
 
-    let ownerFile = [];
-    try {
-      ownerFile = JSON.parse(fs.readFileSync('./lib/sudo.json', 'utf-8'));  
-    } catch (e) {
-      ownerFile = [];
-    }
+    const ownerFile = JSON.parse(fs.readFileSync('./lib/sudo.json', 'utf-8'));  
     const ownerNumberFormatted = `${config.OWNER_NUMBER}@s.whatsapp.net`;
 
     const isFileOwner = ownerFile.includes(sender);
@@ -617,7 +604,7 @@ async function connectToWA() {
     if (id.endsWith('@g.us'))
       return new Promise(async resolve => {
         v = store.contacts[id] || {};
-        if (!(v.name?.notify || v.subject))
+        if (!(v.name.notify || v.subject))
           v = conn.groupMetadata(id) || {};
 
         resolve(
@@ -657,8 +644,14 @@ async function connectToWA() {
         vcard: `BEGIN:VCARD\nVERSION:3.0\nN:${await conn.getName(
           i + '@s.whatsapp.net',
         )}\nFN:${
-          config.OWNER_NAME
-        }\nitem1.TEL;waid=${i}:${i}\nitem1.X-ABLabel:Click here to chat\nitem2.EMAIL;type=INTERNET:contact@bot.com\nitem2.X-ABLabel:GitHub\nitem3.URL:https://github.com/\nitem3.X-ABLabel:GitHub\nitem4.ADR:;;Sri Lanka;;;;\nitem4.X-ABLabel:Region\nEND:VCARD`,
+          global.OwnerName
+        }\nitem1.TEL;waid=${i}:${i}\nitem1.X-ABLabel:Click here to chat\nitem2.EMAIL;type=INTERNET:${
+          global.email
+        }\nitem2.X-ABLabel:GitHub\nitem3.URL:https://github.com/${
+          global.github
+        }/DARK-KNIGHT-XMD\nitem3.X-ABLabel:GitHub\nitem4.ADR:;;${
+          global.location
+        };;;;\nitem4.X-ABLabel:Region\nEND:VCARD`,
       });
     }
     conn.sendMessage(
@@ -692,12 +685,11 @@ async function connectToWA() {
     });
     return status;
   };
-
   conn.serializeM = mek => sms(conn, mek, store);
 }
 
 app.get("/", (req, res) => {
-  res.send(`${config.BOT_NAME} IS STARTED ✅`);
+  res.send("DARK-KNIGHT-XMD IS STARTED ✅");
 });
 app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
 setTimeout(() => {
