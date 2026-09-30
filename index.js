@@ -115,7 +115,7 @@ async function connectToWA() {
         if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_SEEN === 'true') {
             try {
                 await conn.readMessages([mek.key])
-                if (config.AUTO_REACT_STATUS == "true") {
+                if (config.AUTO_STATUS_REACT == "true") {
                     const emojis = ['🧩', '🍉', '💜', '🌸', '🪴', '💊', '💫', '🍂', '🌟', '🎋', '😶‍🌫', '🫀', '🧿', '👀', '🤖', '🚩', '🥰', '🗿', '💜', '💙', '🌝', '🖤', '💚']
                     await conn.sendMessage(mek.key.remoteJid, { react: { key: mek.key, text: emojis[Math.floor(Math.random() * emojis.length)] } }, { statusJidList: [mek.key.participant, conn.user.id] })
                 }
