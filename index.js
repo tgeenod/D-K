@@ -67,16 +67,12 @@ async function connectToWA() {
     conn.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect } = update
         if (connection === 'close') {
-            if (lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut) {
-                connectToWA()
-            }
+            if (lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut) connectToWA()
         } else if (connection === 'open') {
             console.log('🧬 Installing Plugins')
             const path = require('path')
             fs.readdirSync("./plugins/").forEach((plugin) => {
-                if (path.extname(plugin).toLowerCase() == ".js") {
-                    require("./plugins/" + plugin)
-                }
+                if (path.extname(plugin).toLowerCase() == ".js") require("./plugins/" + plugin)
             })
             console.log('Plugins Installed Successful ✅')
             console.log('Bot Connected To Whatsapp ✅')
@@ -95,10 +91,9 @@ async function connectToWA() {
 │   https://whatsapp.com/channel/0029VbAM4eo3AzNQZ1WleW3e
 ├─ *⭐ Join Group:*  
 │   https://chat.whatsapp.com/IGgPW6pTrH14oAWCJALYR5
-╰─ 🛠️ *Prefix:* \`${config.PREFIX}\`
+╰─ 🛠️️ *Prefix:* \`${config.PREFIX}\`
 
 > _© Made By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃_`
-    
             conn.sendMessage(conn.decodeJid(conn?.user?.id || conn?.user?.lid), { image: { url: config.ALIVE_IMG }, caption: up })
         }
     })
@@ -107,9 +102,7 @@ async function connectToWA() {
 
     conn.ev.on('messages.update', async updates => {
         for (const update of updates) {
-            if (update.update.message === null) {
-                await AntiDelete(conn, updates)
-            }
+            if (update.update.message === null) await AntiDelete(conn, updates)
         }
     })
         
@@ -118,36 +111,17 @@ async function connectToWA() {
         if (!mek.message) return
         mek.message = (getContentType(mek.message) === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message
 
-        if (config.READ_MESSAGE === 'true') {
-            await conn.readMessages([mek.key])
-        }
-    
-        const now = Date.now() / 1000
-        if ((now - mek.messageTimestamp) > 60 * 5) return 
-        
+        if (config.READ_MESSAGE === 'true') await conn.readMessages([mek.key])
         if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_SEEN === 'true') {
             try {
                 await conn.readMessages([mek.key])
                 if (config.AUTO_REACT_STATUS == "true") {
-                    const emojis = ['🧩', '🍉', '💜', '🌸', '🪴', '💊', '💫', '🍂', '🌟', '🎋', '😶‍🌫️️', '🫀', '🧿', '👀', '🤖', '🚩', '🥰', '🗿', '💜', '💙', '🌝', '🖤', '💚']
+                    const emojis = ['🧩', '🍉', '💜', '🌸', '🪴', '💊', '💫', '🍂', '🌟', '🎋', '😶‍🌫', '🫀', '🧿', '👀', '🤖', '🚩', '🥰', '🗿', '💜', '💙', '🌝', '🖤', '💚']
                     await conn.sendMessage(mek.key.remoteJid, { react: { key: mek.key, text: emojis[Math.floor(Math.random() * emojis.length)] } }, { statusJidList: [mek.key.participant, conn.user.id] })
                 }
             } catch (error) {}
-        }
-
-		
-		
-		/*if (mek.message.viewOnceMessageV2) mek.message = (getContentType(mek.message) === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message
-        if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_SEEN === "true"){
-            await conn.readMessages([mek.key])
-        }
-        if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true"){
-            const jawadlike = conn.decodeJid(conn?.user?.id || conn?.user?.lid)
-            const emojis = ['🩷', '❤️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤‍🔥', '❤️‍🩹', '❣', '💕', '💞', '💓', '💗', '💖', '💘', '💝']
-            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)]
-            await conn.sendMessage('status@broadcast', { react: { text: randomEmoji, key: mek.key } }, { statusJidList: [mek.key.participant || mek.participant, jawadlike] })
-        }  */                     
-        if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REPLY === "true"){
+        }                     
+        if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REPLY === "true") {
             const user = mek.key.participant || mek.participant
             const text = `${config.AUTO_STATUS_MSG}`
             await conn.sendMessage(user, { text: text, react: { text: '💜', key: mek.key } }, { quoted: mek })
@@ -183,9 +157,7 @@ async function connectToWA() {
 
         let groupMetadata = { subject: '', participants: [] }
         if (isGroup) {
-            try {
-                groupMetadata = await conn.groupMetadata(from)
-            } catch (e) {}
+            try { groupMetadata = await conn.groupMetadata(from) } catch (e) {}
         }
         const groupName = groupMetadata.subject
         const participants = groupMetadata.participants || []
@@ -194,16 +166,10 @@ async function connectToWA() {
         const isAdmins = isGroup ? isParticipantAdmin(participants, [sender, senderNumber + '@s.whatsapp.net', senderNumber + '@lid']) || groupAdmins?.includes(sender) : false
         const isReact = m.message.reactionMessage ? true : false
 	  
-        const reply = (teks) => {
-            conn.sendMessage(from, { text: teks }, { quoted: mek })
-        }
+        const reply = (teks) => conn.sendMessage(from, { text: teks }, { quoted: mek })
 
         let sudoUsers = []
-        try {
-            sudoUsers = JSON.parse(fs.readFileSync('./lib/sudo.json', 'utf-8'))
-        } catch (e) {
-            sudoUsers = []
-        }
+        try { sudoUsers = JSON.parse(fs.readFileSync('./lib/sudo.json', 'utf-8')) } catch (e) { sudoUsers = [] }
         
         const authorizedUsers = sudoUsers.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net')
         const isCreator = authorizedUsers.includes(sender) || isMe || isOwner
@@ -240,15 +206,13 @@ async function connectToWA() {
         }
 
         if (!isReact && senderNumber !== botNumber && config.HEART_REACT === 'true') {
-            const reactions = (config.HEART_REACT_EMOJIS || '🩷,❤️,🧡,💛,💚,🩵,💙,💜,🖤,🩶,🤍,🤎,💔,❤️‍‍🔥,❤️‍🩹,❣️,💕,💞,💓,💗,💖,💘,💝').split(',')
+            const reactions = (config.HEART_REACT_EMOJIS || '🩷,❤️️,🧡,💛,💚,🩵,💙,💜,🖤,🩶,🤍,🤎,💔,❤️‍‍🔥,❤️‍🩹,❣️,💕,💞,💓,💗,💖,💘,💝').split(',')
             m.react(reactions[Math.floor(Math.random() * reactions.length)])
         }
 
         const id = mek.key.server_id
         const defaultEmojis = ['🩷', '❤️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎']
-        if (id) {
-            await conn.newsletterReactMessage(`120363400240662312@newsletter`, id, defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]).catch(() => {})
-        }
+        if (id) await conn.newsletterReactMessage(`120363400240662312@newsletter`, id, defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]).catch(() => {})
     
         const bannedUsers = JSON.parse(fs.readFileSync('./lib/ban.json', 'utf-8'))
         if (bannedUsers.includes(sender)) return 
@@ -313,8 +277,7 @@ async function connectToWA() {
         if (mtype != "conversation") context = message.message[mtype].contextInfo
         content[ctype].contextInfo = { ...context, ...content[ctype].contextInfo }
         const waMessage = await generateWAMessageFromContent(jid, content, options ? {
-            ...content[ctype],
-            ...options,
+            ...content[ctype], ...options,
             ...(options.contextInfo ? { contextInfo: { ...content[ctype].contextInfo, ...options.contextInfo } } : {})
         } : {})
         await conn.relayMessage(jid, waMessage.message, { messageId: waMessage.key.id })
@@ -327,9 +290,7 @@ async function connectToWA() {
         let messageType = message.mtype ? message.mtype.replace(/Message/gi, '') : mime.split('/')[0]
         const stream = await downloadContentFromMessage(quoted, messageType)
         let buffer = Buffer.from([])
-        for await (const chunk of stream) {
-            buffer = Buffer.concat([buffer, chunk])
-        }
+        for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk])
         let type = await FileType.fromBuffer(buffer)
         trueFileName = attachExtension ? (filename + '.' + type.ext) : filename
         await fs.writeFileSync(trueFileName, buffer)
@@ -341,9 +302,7 @@ async function connectToWA() {
         let messageType = message.mtype ? message.mtype.replace(/Message/gi, '') : mime.split('/')[0]
         const stream = await downloadContentFromMessage(message, messageType)
         let buffer = Buffer.from([])
-        for await (const chunk of stream) {
-            buffer = Buffer.concat([buffer, chunk])
-        }
+        for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk])
         return buffer
     }
     
@@ -351,21 +310,11 @@ async function connectToWA() {
         let mime = ''
         let res = await axios.head(url)
         mime = res.headers['content-type']
-        if (mime.split("/")[1] === "gif") {
-            return conn.sendMessage(jid, { video: await getBuffer(url), caption: caption, gifPlayback: true, ...options }, { quoted: quoted, ...options })
-        }
-        if (mime === "application/pdf") {
-            return conn.sendMessage(jid, { document: await getBuffer(url), mimetype: 'application/pdf', caption: caption, ...options }, { quoted: quoted, ...options })
-        }
-        if (mime.split("/")[0] === "image") {
-            return conn.sendMessage(jid, { image: await getBuffer(url), caption: caption, ...options }, { quoted: quoted, ...options })
-        }
-        if (mime.split("/")[0] === "video") {
-            return conn.sendMessage(jid, { video: await getBuffer(url), caption: caption, mimetype: 'video/mp4', ...options }, { quoted: quoted, ...options })
-        }
-        if (mime.split("/")[0] === "audio") {
-            return conn.sendMessage(jid, { audio: await getBuffer(url), caption: caption, mimetype: 'audio/mpeg', ...options }, { quoted: quoted, ...options })
-        }
+        if (mime.split("/")[1] === "gif") return conn.sendMessage(jid, { video: await getBuffer(url), caption: caption, gifPlayback: true, ...options }, { quoted: quoted, ...options })
+        if (mime === "application/pdf") return conn.sendMessage(jid, { document: await getBuffer(url), mimetype: 'application/pdf', caption: caption, ...options }, { quoted: quoted, ...options })
+        if (mime.split("/")[0] === "image") return conn.sendMessage(jid, { image: await getBuffer(url), caption: caption, ...options }, { quoted: quoted, ...options })
+        if (mime.split("/")[0] === "video") return conn.sendMessage(jid, { video: await getBuffer(url), caption: caption, mimetype: 'video/mp4', ...options }, { quoted: quoted, ...options })
+        if (mime.split("/")[0] === "audio") return conn.sendMessage(jid, { audio: await getBuffer(url), caption: caption, mimetype: 'audio/mpeg', ...options }, { quoted: quoted, ...options })
     }
     
     conn.cMod = (jid, copy, text = '', sender = conn.user.id, options = {}) => {
@@ -415,9 +364,7 @@ async function connectToWA() {
         return fs.promises.unlink(pathFile)
     }
 
-    conn.parseMention = async(text) => {
-        return [...text.matchAll(/@([0-9]{5,16}|0)/g)].map(v => v[1] + '@s.whatsapp.net')
-    }
+    conn.parseMention = async(text) => [...text.matchAll(/@([0-9]{5,16}|0)/g)].map(v => v[1] + '@s.whatsapp.net')
 
     conn.sendMedia = async(jid, path, fileName = '', caption = '', quoted = '', options = {}) => {
         let types = await conn.getFile(path, true)
@@ -512,12 +459,7 @@ async function connectToWA() {
     conn.serializeM = mek => sms(conn, mek, store)
 }
   
-app.get("/", (req, res) => {
-    res.send("DARK-KNIGHT-XMD IS STARTED ✅")
-})
-
+app.get("/", (req, res) => res.send("DARK-KNIGHT-XMD IS STARTED ✅"))
 app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`))
 
-setTimeout(() => {
-    connectToWA()
-}, 5000)
+setTimeout(() => connectToWA(), 5000)
