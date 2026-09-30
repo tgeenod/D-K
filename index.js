@@ -42,20 +42,19 @@ const os = require('os')
 const Crypto = require('crypto')
 const path = require('path')
 //const prefix = config.PREFIX
-
 const ownerNumber = ['94763934860']
 
 const tempDir = path.join(os.tmpdir(), 'cache-temp')
 if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir)
+    fs.mkdirSync(tempDir, { recursive: true })
 }
 
 const clearTempDir = () => {
     fs.readdir(tempDir, (err, files) => {
-        if (err) throw err;
+        if (err) return console.log('Cache clear error:', err);
         for (const file of files) {
             fs.unlink(path.join(tempDir, file), err => {
-                if (err) throw err;
+                if (err) return; 
             });
         }
     });
@@ -117,7 +116,7 @@ async function connectToWA() {
 ├─▸ *Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*  
 ╰─➤ *Your Smart WhatsApp Bot Is Ready To Use 🍁!*
 
-*❤️ Thank you for Choosing 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳!*
+*❤️️ Thank you for Choosing 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳!*
 
 ╭──〔 *🔗 Information* 〕  
 ├─ *📢 Join Channel:*  
@@ -159,7 +158,7 @@ async function connectToWA() {
     }
     if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true"){
       const jawadlike = await conn.decodeJid(conn.user.id);
-      const emojis = ['🩷', '❤️️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '❣️️', '💕', '💞', '💓', '💗', '💖', '💘', '💝'];
+      const emojis = ['🩷', '❤', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '❣', '💕', '💞', '💓', '💗', '💖', '💘', '💝'];
       const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
       await conn.sendMessage(mek.key.remoteJid, {
         react: {
@@ -255,7 +254,7 @@ async function connectToWA() {
     }
 
     if (!isReact && config.AUTO_REACT === 'true') {
-      const reactions = ['🩷', '❤️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤️️‍🔥', '❤️‍🩹', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '👍', '😂', '😮', '😥', '🙏', '👏', '🥰', '🥹', '😭', '🔥', '🤣'];
+      const reactions = ['🩷', '❤️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '💔', '❤‍🔥', '❤️‍🩹', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '👍', '😂', '😮', '😥', '🙏', '👏', '🥰', '🥹', '😭', '🔥', '🤣'];
       const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
       m.react(randomReaction);
     }
@@ -694,4 +693,4 @@ app.get("/", (req, res) => {
 app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
 setTimeout(() => {
   connectToWA()
-}, 4000);
+}, 10000);
