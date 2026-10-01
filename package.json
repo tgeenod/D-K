@@ -11,7 +11,7 @@
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@vitalets/google-translate-api": "^9.2.1",
-    "@whiskeysockets/baileys": "latest",
+    "@whiskeysockets/baileys": "^6.7.24",
     "awesome-phonenumber": "^6.4.0",
     "adm-zip": "^0.5.16",
     "axios": "^1.13.2",
@@ -20,7 +20,7 @@
     "express": "^5.1.0",
     "ffmpeg": "^0.0.4",
     "file-type": "^16.5.4",
-    "file_size_url": "1.0.6",
+    "file_size_url": "^1.0.6",
     "fluent-ffmpeg": "^2.1.2",
     "form-data": "^4.0.3",
     "fs-extra": "^11.1.0",
@@ -38,8 +38,8 @@
     "sequelize": "^6.37.5",
     "sqlite3": "^5.1.7",
     "wa-sticker-formatter": "^4.4.4",
-    "wa_set_pkg": "1.0.5",
-    "yt-search": "2.13.1",
+    "wa_set_pkg": "^1.0.5",
+    "yt-search": "^2.13.1",
     "body-parser": "^2.3.0",
     "node-webpmux": "^3.2.1"
   }
