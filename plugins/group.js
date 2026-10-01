@@ -1,18 +1,10 @@
 const config = require('../config')
-const { cmd, commands } = require('../command')
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson} = require('../lib/functions')
 const { cmd, commands } = require('../command');
-const config = require('../config');
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('../lib/functions');
 const prefix = config.PREFIX;
 const fs = require('fs');
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson } = require('../lib/functions2');
 const { writeFileSync } = require('fs');
 const path = require('path');
-const { cmd } = require("../command");
-const { cmd } = require('../command');
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('../lib/functions')
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const { cmd } = require('../command');
 
 cmd({
     pattern: "revoke",
@@ -1139,7 +1131,7 @@ async (conn, mek, m, {
 }) => {
   try {
     const isUrl = (url) => {
-      return /https?:\/\/(www\.)?[\w\-@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([\w\-@:%_\+.~#?&
+      return /https?:\/\/(www\.)?[\w\-@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([\w\-@:%_\+.~#?&//=]*)/i.test(url);
     };
 
     if (!isGroup) return reply("❌ This command can only be used in groups.");

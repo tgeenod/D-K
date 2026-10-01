@@ -1,20 +1,11 @@
-const { cmd, commands } = require("../command");
+const { cmd, commands } = require('../command');
 const axios = require("axios");
-const { cmd } = require("../command");
-const { fetchJson, getBuffer } = require('../lib/functions');
+const { fetchJson, getBuffer, runtime } = require('../lib/functions');
 const { Sticker, StickerTypes } = require('wa-sticker-formatter');
 const config = require('../config');
-const config = require('../config')
-const { cmd, commands } = require('../command');
 const path = require('path');
 const os = require("os")
 const fs = require('fs');
-const {runtime} = require('../lib/functions')
-const axios = require('axios')
-const { cmd, commands } = require('../command')
-const os = require('os');
-const { runtime } = require('../lib/functions');
-const axios = require('axios');
 
 function waitForReply(conn, from, sender, targetId) {
     return new Promise((resolve) => {

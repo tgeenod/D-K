@@ -1,21 +1,14 @@
-const { cmd } = require("../command");
+const { cmd, commands } = require('../command');
 const axios = require("axios");
-const { cmd } = require('../command')
 const Jimp = require("jimp")
-const { fetchGif, gifToVideo } = require("../lib/fetchGif");
+const { fetchGif, gifToVideo } = require('../lib/fetchGif');
 const FormData = require("form-data");
-const axios = require('axios');
 const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
-const { cmd } = require('../command');
-const FormData = require('form-data');
 const fs = require('fs');
 const os = require('os');
 const path = require("path");
 const config = require('../config')
-const { cmd, commands } = require('../command')
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson} = require('../lib/functions')
-const { cmd, commands } = require('../command');
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson } = require('../lib/functions2');
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('../lib/functions');
 
 cmd({
   pattern: "rw",

@@ -1,18 +1,10 @@
 const config = require('../config')
-const {cmd , commands} = require('../command')
-const { cmd } = require("../command");
-const { sleep } = require("../lib/functions");
-const { exec } = require("child_process");
-const axios = require("axios");
 const { cmd, commands } = require('../command');
-const axios = require('axios');
-const { cmd } = require('../command');
+const { sleep, runtime } = require('../lib/functions');
+const { exec } = require('child_process');
+const axios = require("axios");
 const os = require("os");
-const { runtime } = require('../lib/functions');
-const config = require('../config');
 const fs = require("fs");
-const os = require('os');
-const fs = require('fs');
 const path = require('path');
 const fetch = require('node-fetch');
 

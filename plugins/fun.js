@@ -1,16 +1,10 @@
 const axios = require("axios");
-const { cmd } = require("../command");
-const config = require('../config')
 const { cmd, commands } = require('../command');
-const { fetchEmix } = require("../lib/emix-utils");
-const { getBuffer } = require("../lib/functions");
-const { Sticker, StickerTypes } = require("wa-sticker-formatter");
+const config = require('../config')
+const { fetchEmix } = require('../lib/emix-utils');
+const { getBuffer, sleep } = require('../lib/functions');
+const { Sticker, StickerTypes } = require('wa-sticker-formatter');
 const fetch = require("node-fetch");
-const { sleep } = require('../lib/functions');
-const { cmd, commands } = require("../command");
-const config = require("../config");
-const { cmd } = require('../command');
-const config = require('../config');
 
 cmd({
   pattern: "quote",

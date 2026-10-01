@@ -1,38 +1,28 @@
 const { cmd, commands } = require('../command');
 const { fetchJson } = require('../lib/functions');
-const { cmd } = require("../command");
 const fetch = require("node-fetch");
 const axios = require("axios");
-const fetch = require('node-fetch');
-const { Sticker } = require('wa-sticker-formatter');
-const { cmd } = require('../command');
+const { Sticker, createSticker, StickerTypes } = require('wa-sticker-formatter');
 const PDFDocument = require('pdfkit');
 const { Buffer } = require('buffer');
-const axios = require('axios');
 const config = require('../config');
 const googleTTS = require('google-tts-api');
 const crypto = require('crypto');
-const webp = require('node-webpmux');
 const fs = require('fs-extra');
 const { exec } = require('child_process');
-const { Sticker, createSticker, StickerTypes } = require("wa-sticker-formatter");
 const Config = require('../config');
 const path = require("path");
 const { fetchGif, fetchImage, gifToSticker } = require('../lib/sticker-utils');
-const { tmpdir } = require("os");
+const { tmpdir } = require('os');
 const Crypto = require("crypto");
 const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require("../lib/functions");
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep } = require('../lib/functions');
 const ffmpeg = require("fluent-ffmpeg");
-const fs = require("fs");
 const { videoToWebp } = require('../lib/video-utils');
-const config = require("../config");
 const converter = require('../data/converter');
 const stickerConverter = require('../data/sticker-converter');
 const FormData = require('form-data');
-const fs = require('fs');
 const os = require('os');
-const { cmd, commands } = require("../command");
 
 cmd({
     pattern: "fetch",
@@ -47,7 +37,7 @@ async (conn, mek, m, { from, quoted, body, args, reply }) => {
         const q = args.join(' ').trim(); 
         if (!q) return reply('❌ Please provide a valid URL or query.');
 
-        if (!/^https?:\/\
+        if (!/^https?:\/\//i.test(q)) return reply('❌ Please provide a valid URL.');
 
         const data = await fetchJson(q); 
         const content = JSON.stringify(data, null, 2);

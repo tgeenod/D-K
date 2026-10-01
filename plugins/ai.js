@@ -2,8 +2,6 @@ const axios = require('axios');
 const FormData = require('form-data');
 const { cmd } = require('../command');
 const config = require('../config');
-const { cmd } = require("../command");
-const axios = require("axios");
 
 cmd({
   pattern: 'topromt',

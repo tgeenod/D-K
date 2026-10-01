@@ -1,18 +1,13 @@
 const axios = require("axios");
-const { cmd } = require("../command");
+const { cmd, commands } = require('../command');
 const fetch = require("node-fetch");
-const { cmd, commands } = require("../command");
-const { cmd } = require('../command');
 const { File } = require('megajs');
-const axios = require('axios');
 const mime = require('mime-types');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const mime = require("mime-types");
 const config = require('../config');
 const NodeCache = require("node-cache");
-const { cmd, commands } = require('../command');
 const { fetchJson } = require('../lib/functions');
 const yts = require('yt-search');
 
@@ -2456,7 +2451,6 @@ cmd({
     }
 );
 
-const movieCache = new NodeCache({ stdTTL: 100, checkperiod: 120 });
 
 cmd({
   pattern: "aptoide",

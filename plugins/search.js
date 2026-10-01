@@ -1,11 +1,7 @@
 const { cmd, commands } = require('../command');
 let yts = require("yt-search")
 const axios = require("axios");
-const { cmd } = require("../command");
-const axios = require('axios');
-const { cmd } = require('../command');
 const config = require('../config');
-const {cmd , commands} = require('../command');
 const path = require("path");
 const fetch = require('node-fetch');
 const NodeCache = require("node-cache");
