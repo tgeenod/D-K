@@ -21,9 +21,6 @@ const os = require('os');
 const Crypto = require('crypto');
 const path = require('path');
 const PhoneNumber = require('awesome-phonenumber');
-const { writeExif, writeExifImg, writeExifVid } = require('./lib/exif');
-const { videoToWebp } = require('./lib/video-utils');
-const { imageToWebp } = require('./lib/image-utils');
 const ownerNumber = ['94763934860'];
 
 const tempDir = path.join(os.tmpdir(), 'cache-temp');
@@ -314,7 +311,7 @@ async function connectToWA() {
 
         if (options.asDocument) type = 'document';
         if (options.asSticker || /webp/.test(mime)) {
-            let { writeExif } = require('./lib/exif');
+            let { writeExif } = require('./exif.js');
             pathFile = await writeExif({ mimetype: mime, data }, { packname: config.STICKER_NAME, author: config.BOT_NAME, categories: options.categories ? options.categories : [] });
             await fs.promises.unlink(filename);
             type = 'sticker'; mimetype = 'image/webp';
@@ -337,7 +334,7 @@ async function connectToWA() {
         let type = '', mimetype = mime, pathFile = filename;
         if (options.asDocument) type = 'document';
         if (options.asSticker || /webp/.test(mime)) {
-            let { writeExif } = require('./lib/exif');
+            let { writeExif } = require('./exif');
             pathFile = await writeExif({ mimetype: mime, data }, { packname: options.packname ? options.packname : config.STICKER_NAME, author: options.author ? options.author : config.BOT_NAME, categories: options.categories ? options.categories : [] });
             await fs.promises.unlink(filename);
             type = 'sticker'; mimetype = 'image/webp';
