@@ -1,10 +1,10 @@
-const config = require('../config')
+const config = require('../config');
 const { cmd, commands } = require('../command');
 const { sleep, runtime } = require('../lib/functions');
 const { exec } = require('child_process');
-const axios = require("axios");
-const os = require("os");
-const fs = require("fs");
+const axios = require('axios');
+const os = require('os');
+const fs = require('fs');
 const path = require('path');
 const fetch = require('node-fetch');
 
@@ -720,7 +720,7 @@ cmd({
 }) => {
   try {
     
-    const localVersionPath = path.join(__dirname, '../data/version.json');
+    const localVersionPath = path.join(__dirname, '../lib/version.json');
     let localVersion = 'Unknown';
     let changelog = 'No changelog available.';
     if (fs.existsSync(localVersionPath)) {
@@ -730,7 +730,7 @@ cmd({
     }
 
     
-    const rawVersionUrl = 'https://raw.githubusercontent.com/bot-deploy-main/DARK-KNIGHT-XMD/main/data/version.json';
+    const rawVersionUrl = 'https://raw.githubusercontent.com/bot-deploy-main/DARK-KNIGHT-XMD/ma../lib/version.json';
     let latestVersion = 'Unknown';
     let latestChangelog = 'No changelog available.';
     try {

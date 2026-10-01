@@ -1,10 +1,10 @@
-const axios = require("axios");
+const axios = require('axios');
 const { cmd, commands } = require('../command');
-const config = require('../config')
+const config = require('../config');
 const { fetchEmix } = require('../lib/emix-utils');
 const { getBuffer, sleep } = require('../lib/functions');
 const { Sticker, StickerTypes } = require('wa-sticker-formatter');
-const fetch = require("node-fetch");
+const fetch = require('node-fetch');
 
 cmd({
   pattern: "quote",

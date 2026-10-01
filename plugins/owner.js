@@ -1,18 +1,17 @@
 const { cmd, commands } = require('../command');
-const { getAnti, setAnti } = require('../data/antidel');
-const Jimp = require("jimp");
-var { S_WHATSAPP_NET } = require('@whiskeysockets/baileys');
+const { getAnti, setAnti } = require('../lib/antidel');
+const Jimp = require('jimp');
+const { S_WHATSAPP_NET } = require('@whiskeysockets/baileys');
 const Baileys = require('@whiskeysockets/baileys');
 const config = require('../config');
 const prefix = config.PREFIX;
 const fs = require('fs');
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson } = require('../lib/functions2');
-const { writeFileSync } = require('fs');
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson, runtime } = require('../lib/functions');
+const { writeFileSync } = fs;
 const path = require('path');
-const { runtime } = require('../lib/functions');
 const axios = require('axios');
-const AdmZip = require("adm-zip");
-const { setCommitHash, getCommitHash } = require('../data/updateDB');
+const AdmZip = require('adm-zip');
+const { setCommitHash, getCommitHash } = require('../lib/updateDB');
 const settingsManager = require('../lib/settingsmanager');
 const { exec } = require('child_process');
 
@@ -975,6 +974,23 @@ async (conn, mek, m, { from, isOwner, reply }) => {
     reply("🛑 Shutting down...").then(() => process.exit());
 });
 
+cmd({
+    pattern: "broadcast",
+    desc: "Broadcast a message to all groups.",
+    category: "owner",
+    react: "📢",
+    filename: __filename
+},
+async (conn, mek, m, { from, isOwner, args, reply }) => {
+    if (!isOwner) return reply("❌ You are not the owner!");
+    if (args.length === 0) return reply("📢 Please provide a message to broadcast.");
+    const message = args.join(' ');
+    const groups = Object.keys(await conn.groupFetchAllParticipating());
+    for (const groupId of groups) {
+        await conn.sendMessage(groupId, { text: message }, { quoted: mek });
+    }
+    reply("📢 Message broadcasted to all groups.");
+});
 
 cmd({
     pattern: "setpp",
@@ -1877,6 +1893,34 @@ async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, 
 });
 
 
+cmd({
+    pattern: "setpp",
+    desc: "Set bot profile picture.",
+    category: "privacy",
+    react: "🖼️",
+    filename: __filename
+},
+async (conn, mek, m, { from, isOwner, quoted, reply }) => {
+    if (!isOwner) return reply("❌ You are not the owner!");
+    if (!quoted || !quoted.message.imageMessage) return reply("❌ Please reply to an image.");
+    try {
+        const stream = await downloadContentFromMessage(quoted.message.imageMessage, 'image');
+        let buffer = Buffer.from([]);
+        for await (const chunk of stream) {
+            buffer = Buffer.concat([buffer, chunk]);
+        }
+
+        const mediaPath = path.join(__dirname, `${Date.now()}.jpg`);
+        fs.writeFileSync(mediaPath, buffer);
+
+        
+        await conn.updateProfilePicture(conn.user.jid, { url: `file://${mediaPath}` });
+        reply("🖼️ Profile picture updated successfully!");
+    } catch (error) {
+        console.error("Error updating profile picture:", error);
+        reply(`❌ Error updating profile picture: ${error.message}`);
+    }
+});
 
 
 cmd({

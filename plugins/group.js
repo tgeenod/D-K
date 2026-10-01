@@ -1,9 +1,8 @@
-const config = require('../config')
+const config = require('../config');
 const { cmd, commands } = require('../command');
 const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('../lib/functions');
-const prefix = config.PREFIX;
 const fs = require('fs');
-const { writeFileSync } = require('fs');
+const { writeFileSync } = fs;
 const path = require('path');
 
 cmd({
@@ -1130,10 +1129,6 @@ async (conn, mek, m, {
   from, q, isGroup, isCreator, isAdmins, participants, reply
 }) => {
   try {
-    const isUrl = (url) => {
-      return /https?:\/\/(www\.)?[\w\-@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([\w\-@:%_\+.~#?&//=]*)/i.test(url);
-    };
-
     if (!isGroup) return reply("❌ This command can only be used in groups.");
     if (!isAdmins && !isCreator) return reply("❌ Only group admins can use this command.");
 

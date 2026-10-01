@@ -1,10 +1,10 @@
 const { cmd, commands } = require('../command');
-const axios = require("axios");
+const axios = require('axios');
 const { fetchJson, getBuffer, runtime } = require('../lib/functions');
 const { Sticker, StickerTypes } = require('wa-sticker-formatter');
 const config = require('../config');
 const path = require('path');
-const os = require("os")
+const os = require('os');
 const fs = require('fs');
 
 function waitForReply(conn, from, sender, targetId) {

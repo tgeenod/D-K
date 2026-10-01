@@ -1,6 +1,6 @@
 const axios = require('axios');
 const FormData = require('form-data');
-const { cmd } = require('../command');
+const { cmd, commands } = require('../command');
 const config = require('../config');
 
 cmd({

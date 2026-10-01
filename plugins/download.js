@@ -1,13 +1,13 @@
-const axios = require("axios");
+const axios = require('axios');
 const { cmd, commands } = require('../command');
-const fetch = require("node-fetch");
+const fetch = require('node-fetch');
 const { File } = require('megajs');
 const mime = require('mime-types');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const config = require('../config');
-const NodeCache = require("node-cache");
+const NodeCache = require('node-cache');
 const { fetchJson } = require('../lib/functions');
 const yts = require('yt-search');
 

@@ -1,13 +1,13 @@
 const fs = require('fs');
 const path = require('path');
-const config = require('../config')
+const config = require('../config');
 const { cmd, commands } = require('../command');
 const axios = require('axios');
 const { fetchJson, sleep } = require('../lib/functions');
 const { translate } = require('@vitalets/google-translate-api');
-const fetch = require("node-fetch");
-const Jimp = require("jimp");
-const crypto = require("crypto");
+const fetch = require('node-fetch');
+const Jimp = require('jimp');
+const crypto = require('crypto');
 
 cmd({
     on: "body"
@@ -47,7 +47,7 @@ cmd({
   on: "body"
 },    
 async (conn, mek, m, { from, body, isOwner }) => {
-    const filePath = path.join(__dirname, '../data/autoreply.json');
+    const filePath = path.join(__dirname, '../lib/autoreply.json');
     const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
     for (const text in data) {
         if (body.toLowerCase() === text.toLowerCase()) {
@@ -408,6 +408,7 @@ cmd({
     reply("❌ An error occurred while searching TikTok. Please try again later.");
   }
 });
+
 
 
 cmd({

@@ -1,13 +1,13 @@
 const { cmd, commands } = require('../command');
-const axios = require("axios");
-const Jimp = require("jimp")
+const axios = require('axios');
+const Jimp = require('jimp');
 const { fetchGif, gifToVideo } = require('../lib/fetchGif');
-const FormData = require("form-data");
+const FormData = require('form-data');
 const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
 const fs = require('fs');
 const os = require('os');
-const path = require("path");
-const config = require('../config')
+const path = require('path');
+const config = require('../config');
 const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('../lib/functions');
 
 cmd({
