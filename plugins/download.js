@@ -630,10 +630,14 @@ if (!data || !data.success || !data.result) {
 const {video, mp3, thumbnail} = data.result;
 const caption = `
 📺 Instagram Downloader. 📥
+
 🔗 *Link:* ${q}
+
 🔢 *Reply Below Number*
+
 1️⃣ *HD Quality*🔋
 2️⃣ *Audio (MP3)*🎶
+
 > Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
 const sentMsg = await conn.sendMessage(from, {
   image: {url: thumbnail},
@@ -755,11 +759,15 @@ if (!data || !data.status || !data.data) {
 const {thumbnail, SD, HD} = data.data;
 const caption = `
 📺 Twitter Downloader. 📥
+
 🔗 *Link:* ${q}
+
 🔢 *Reply Below Number*
+
 1️⃣ *SD Quality*🪫
 2️⃣ *HD Quality*🔋
 3️⃣ *Audio (MP3)*🎶
+
 > Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
 const sentMsg = await conn.sendMessage(from, {
   image: {url: thumbnail},
@@ -824,15 +832,19 @@ if (!data || !data.status) {
 const dat = data.data;
 const caption = `
 📺 Tiktok Downloader. 📥
+
 📑 *Title:* ${dat.title || "No title"}
 ⏱️ *Duration:* ${dat.duration || "N/A"}
 👍 *Likes:* ${dat.view || "0"}
 💬 *Comments:* ${dat.comment || "0"}
 🔁 *Shares:* ${dat.share || "0"}
 📥 *Downloads:* ${dat.download || "0"}
+
 🔢 *Reply Below Number*
+
 1️⃣ *HD Quality*🔋
 2️⃣ *Audio (MP3)*🎶
+
 > Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
 const sentMsg = await conn.sendMessage(from, {
   image: {url: dat.thumbnail},
@@ -958,11 +970,15 @@ if (!data || !data.status || !data.data || data.data.length === 0) {
 const media = data.data[0];
 const caption = `
 📺 Instagram Downloader. 📥
+
 🗂️ *Type:* ${media.type.toUpperCase()}
 🔗 *Link:* ${q}
+
 🔢 *Reply Below Number*
+
 1️⃣ *HD Quality*🔋
 2️⃣ *Audio (MP3)*🎶
+
 > Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
 const sentMsg = await conn.sendMessage(from, {
   image: {url: media.thumbnail},
@@ -1098,12 +1114,16 @@ if (!data?.status || !data?.data) {
 const {title, thumbnail, low, high} = data.data;
 const caption = `
 📺 *Facebook Downloader.* 📥
+
 📑 *Title:* ${title || "No title"}
 🔗 *Link:* ${q}
+
 🔢 *Reply Below Number*
+
 1️⃣ *SD Quality*🪫
 2️⃣ *HD Quality*🔋
 3️⃣ *Audio (MP3)*🎶
+
 > Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
 const sentMsg = await conn.sendMessage(from, {
   image: {url: thumbnail},
@@ -1172,15 +1192,19 @@ try {
 const result = apiRes.download;
 const caption = `
 🎵 *Song Downloader.* 📥
+
 📑 *Title:* ${data.title}
 ⏱️ *Duration:* ${data.timestamp}
 📆 *Uploaded:* ${data.ago}
 📊 *Views:* ${data.views}
 🔗 *Link:* ${data.url}
+
 🔢 *Reply Below Number*
+
 1️⃣ *Audio Type*
 2️⃣ *Document Type*
 3️⃣ *Voice Note*
+
 > Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
 const sentMsg = await conn.sendMessage(from, {
   image: {url: data.thumbnail},
@@ -1249,15 +1273,19 @@ const result = data.result;
 const {title, url, thumbnail, duration, metrics} = result;
 const caption = `
 📺 Tiktok Downloader. 📥
+
 📑 *Title:* ${title || "No title"}
 ⏱️ *Duration:* ${duration || "N/A"}s
 👍 *Likes:* ${metrics?.digg_count?.toLocaleString() || "0"}
 💬 *Comments:* ${metrics?.comment_count?.toLocaleString() || "0"}
 🔁 *Shares:* ${metrics?.share_count?.toLocaleString() || "0"}
 📥 *Downloads:* ${metrics?.download_count?.toLocaleString() || "0"}
+
 🔢 *Reply Below Number*
+
 1️⃣ *HD Quality*🔋
 2️⃣ *Audio (MP3)*🎶
+
 > Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
 const sentMsg = await conn.sendMessage(from, {
   image: {url: thumbnail},
@@ -1320,15 +1348,19 @@ try {
 const result = apiRes.download;
 const caption = `
 🎵 *Song Downloader.* 📥
+
 📑 *Title:* ${data.title}
 ⏱️ *Duration:* ${data.timestamp}
 📆 *Uploaded:* ${data.ago}
 📊 *Views:* ${data.views}
 🔗 *Link:* ${data.url}
+
 🔢 *Reply Below Number*
+
 1️⃣ *Audio Type*
 2️⃣ *Document Type*
 3️⃣ *Voice Note*
+
 > Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
 const sentMsg = await conn.sendMessage(from, {
   image: {url: data.thumbnail},
@@ -1398,12 +1430,16 @@ const sd = downloads.find(d => d.quality === "SD")?.downloadUrl;
 const hd = downloads.find(d => d.quality === "HD")?.downloadUrl;
 const caption = `
 📺 *Facebook Downloader.* 📥
+
 📑 *Title:* ${title || "No title"}
 🔗 *Link:* ${q}
+
 🔢 *Reply Below Number*
+
 1️⃣ *SD Quality*🪫
 2️⃣ *HD Quality*🔋
 3️⃣ *Audio (MP3)*🎶
+
 > Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
 const sentMsg = await conn.sendMessage(from, {
   image: {url: thumbnail},
@@ -1467,13 +1503,17 @@ if (!data || !data.status || !data.result) {
 const {desc, thumb, video_sd, video_hd, audio} = data.result;
 const caption = `
 📺 Twitter Downloader. 📥
+
 📑 *Description:* ${desc || "No description"}
 🔗 *Link:* ${q}
+
 🔢 *Reply Below Number*
+
 1️⃣ *SD Quality*🪫
 2️⃣ *HD Quality*🔋
 3️⃣ *Audio (MP3)*🎶
 4️⃣ *Audio*🎶
+
 > Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
 const sentMsg = await conn.sendMessage(from, {
   image: {url: thumb},
@@ -1551,15 +1591,19 @@ const seconds = Math.floor((result.durasi % 60000) / 1000);
 const duration = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 const caption = `
 🎧 *Spotify Downloader* 📥
+
 📑 *Title:* ${result.title}
 👤 *Artist:* ${result.artis}
 ⏱️ *Duration:* ${duration}
 🎶 *Type:* ${result.type}
 🔗 *Link:* ${q}
+
 🔢 *Reply Below Number*
+
 1️⃣ *Audio Type*
 2️⃣ *Document Type*
 3️⃣ *Voice Note*
+
 > Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙄𝙶𝙷𝚃-𝚇𝙼𝙳
 `;
 const sentMsg = await conn.sendMessage(from, {
@@ -2119,12 +2163,15 @@ try {
   };
 const caption = `
 🎥 *Video Downloader.* 📥
+
 📑 *Title:* ${data.title}
 ⏱️ *Duration:* ${data.timestamp}
 📆 *Uploaded:* ${data.ago}
 📊 *Views:* ${data.views}
 🔗 *Link:* ${data.url}
+
 🔢 *Reply Below Number*
+
 🎥 *Video Types*
 🔹 1.1 144p (Video)
 🔹 1.2 240p (Video)
@@ -2132,6 +2179,7 @@ const caption = `
 🔹 1.4 480p (Video)
 🔹 1.5 720p (Video)
 🔹 1.6 1080p (Video)
+
 📁 *Document Types:*
 🔹 2.1 144p (Document)
 🔹 2.2 240p (Document)
@@ -2139,6 +2187,7 @@ const caption = `
 🔹 2.4 480p (Document)
 🔹 2.5 720p (Document)
 🔹 2.6 1080p (Document)
+
 > Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳
 `;
 const sentMsg = await conn.sendMessage(from, {
@@ -2253,12 +2302,15 @@ try {
   };
 const caption = `
 🎥 *Video Downloader.* 📥
+
 📑 *Title:* ${data.title}
 ⏱️ *Duration:* ${data.timestamp}
 📆 *Uploaded:* ${data.ago}
 📊 *Views:* ${data.views}
 🔗 *Link:* ${data.url}
+
 🔢 *Reply Below Number*
+
 🎥 *Video Types*
 🔹 1.1 144p (Video)
 🔹 1.2 240p (Video)
@@ -2266,6 +2318,7 @@ const caption = `
 🔹 1.4 480p (Video)
 🔹 1.5 720p (Video)
 🔹 1.6 1080p (Video)
+
 📁 *Document Types:*
 🔹 2.1 144p (Document)
 🔹 2.2 240p (Document)
@@ -2273,6 +2326,7 @@ const caption = `
 🔹 2.4 480p (Document)
 🔹 2.5 720p (Document)
 🔹 2.6 1080p (Document)
+
 > Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳
 `;
 const sentMsg = await conn.sendMessage(from, {
