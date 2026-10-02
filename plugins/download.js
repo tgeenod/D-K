@@ -568,10 +568,14 @@ const videoUrl = data.results.downloadUrl;
 const thumbUrl = data.results.posterUrl;
 const caption = `
 📺 Instagram Downloader. 📥
+
 🔗 *Link:* ${q}
+
 🔢 *Reply Below Number*
+
 1️⃣ *HD Quality*🔋
 2️⃣ *Audio (MP3)*🎶
+
 > Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
 const sentMsg = await conn.sendMessage(from, {
   image: {url: thumbUrl},
