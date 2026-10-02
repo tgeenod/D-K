@@ -7,24 +7,26 @@ const { Sticker, StickerTypes } = require('wa-sticker-formatter');
 const fetch = require('node-fetch');
 
 cmd({
-    pattern: "quote",
-    react: "💬",
-    filename: __filename
+  pattern: "quote",
+  category: "fun",
+  react: "💬",
+  filename: __filename
 }, async (conn, m, store, { from, reply }) => {
-    try {
-        const response = await axios.get("https://api.quotable.io/random");
-        const { content, author } = response.data;
+  try {
+    const response = await axios.get("https://api.quotable.io/random");
+    const { content, author } = response.data;
 
-        const message = `💬 *"${content}"*\n- ${author}\n\n> *QUOTES BY 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
-        reply(message);
-    } catch (error) {
-        console.error("Error fetching quote:", error);
-        reply("⚠️ API issue or coding error, please check the logs!");
-    }
+    const message = `💬 *"${content}"*\n- ${author}\n\n> *QUOTES BY 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
+    reply(message);
+  } catch (error) {
+    console.error("Error fetching quote:", error);
+    reply("⚠️ API issue or coding error, please check the logs!");
+  }
 });
 
 cmd({
     pattern: "msg",
+    category: "fun",
     react: "🔁",
     filename: __filename
 },
@@ -58,6 +60,7 @@ async (conn, mek, m, { from, reply, isCreator, q }) => {
 
 cmd({
     pattern: "emix",
+    category: "fun",
     react: "😃",
     use: ".emix 😂,🙂",
     filename: __filename,
@@ -99,114 +102,118 @@ cmd({
 });
 
 cmd({
-    pattern: "ship",
-    alias: ["match", "love"],
-    react: "❤️",
-    filename: __filename
+  pattern: "ship",
+  alias: ["match", "love"],
+  react: "❤️",
+  category: "fun",
+  filename: __filename
 }, async (conn, m, store, { from, isGroup, groupMetadata, reply, sender }) => {
-    try {
-        if (!isGroup) return reply("❌ This command can only be used in groups.");
+  try {
+    if (!isGroup) return reply("❌ This command can only be used in groups.");
 
-        const specialNumber = config.DEV ? `${config.DEV}@s.whatsapp.net` : null;
-        const participants = groupMetadata.participants.map(user => user.id);
+    const specialNumber = config.DEV ? `${config.DEV}@s.whatsapp.net` : null;
+    const participants = groupMetadata.participants.map(user => user.id);
 
-        let randomPair;
+    let randomPair;
 
-        if (specialNumber && participants.includes(specialNumber) && sender !== specialNumber) {
-            randomPair = specialNumber;
-        } else {
+    if (specialNumber && participants.includes(specialNumber) && sender !== specialNumber) {
+      randomPair = specialNumber;
+    } else {
 
-            do {
-                randomPair = participants[Math.floor(Math.random() * participants.length)];
-            } while (randomPair === sender);
+      do {
+        randomPair = participants[Math.floor(Math.random() * participants.length)];
+      } while (randomPair === sender);
+    }
+
+    const message = `💘 *Match Found!* 💘\n❤️ @${sender.split("@")[0]} + @${randomPair.split("@")[0]}\n💖 Congratulations! 🎉`;
+
+    await conn.sendMessage(from, {
+      text: message,
+      contextInfo: {
+        mentionedJid: [sender, randomPair],
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: "120363400240662312@newsletter",
+          newsletterName: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
+          serverMessageId: 143
         }
+      }
+    });
 
-        const message = `💘 *Match Found!* 💘\n❤️ @${sender.split("@")[0]} + @${randomPair.split("@")[0]}\n💖 Congratulations! 🎉`;
-
-        await conn.sendMessage(from, {
-            text: message,
-            contextInfo: {
-                mentionedJid: [sender, randomPair],
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: "120363400240662312@newsletter",
-                    newsletterName: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
-                    serverMessageId: 143
-                }
-            }
-        });
-
-    } catch (error) {
-        console.error("❌ Error in ship command:", error);
-        reply("⚠️ An error occurred while processing the command. Please try again.");
-    }
+  } catch (error) {
+    console.error("❌ Error in ship command:", error);
+    reply("⚠️ An error occurred while processing the command. Please try again.");
+  }
 });
 
 cmd({
-    pattern: "boy",
-    react: "👦",
-    filename: __filename
+  pattern: "boy",
+  react: "👦",
+  category: "fun",
+  filename: __filename
 }, async (conn, mek, store, { isGroup, groupMetadata, reply, sender }) => {
-    try {
-        if (!isGroup) return reply("❌ This command can only be used in groups!");
+  try {
+    if (!isGroup) return reply("❌ This command can only be used in groups!");
 
-        const participants = groupMetadata.participants;
+    const participants = groupMetadata.participants;
 
-        const eligible = participants.filter(p => !p.id.includes(conn.user.id.split('@')[0]));
+    const eligible = participants.filter(p => !p.id.includes(conn.user.id.split('@')[0]));
 
-        if (eligible.length < 1) return reply("❌ No eligible participants found!");
+    if (eligible.length < 1) return reply("❌ No eligible participants found!");
 
-        const randomUser = eligible[Math.floor(Math.random() * eligible.length)];
+    const randomUser = eligible[Math.floor(Math.random() * eligible.length)];
 
-        await conn.sendMessage(
-        mek.chat,
-        {
-            text: `👦 *Happy Boy!* \n\n@${randomUser.id.split('@')[0]} is your handsome boy! 😎`,
-            mentions: [randomUser.id]
-        },
-        { quoted: mek }
-        );
+    await conn.sendMessage(
+      mek.chat,
+      {
+        text: `👦 *Happy Boy!* \n\n@${randomUser.id.split('@')[0]} is your handsome boy! 😎`,
+        mentions: [randomUser.id]
+      },
+      { quoted: mek }
+    );
 
-    } catch (error) {
-        console.error("Error in .boy command:", error);
-        reply(`❌ Error: ${error.message}`);
-    }
+  } catch (error) {
+    console.error("Error in .boy command:", error);
+    reply(`❌ Error: ${error.message}`);
+  }
 });
 
 cmd({
-    pattern: "girl",
-    react: "👧",
-    filename: __filename
+  pattern: "girl",
+  react: "👧",
+  category: "fun",
+  filename: __filename
 }, async (conn, mek, store, { isGroup, groupMetadata, reply, sender }) => {
-    try {
-        if (!isGroup) return reply("❌ This command can only be used in groups!");
+  try {
+    if (!isGroup) return reply("❌ This command can only be used in groups!");
 
-        const participants = groupMetadata.participants;
+    const participants = groupMetadata.participants;
 
-        const eligible = participants.filter(p => !p.id.includes(conn.user.id.split('@')[0]));
+    const eligible = participants.filter(p => !p.id.includes(conn.user.id.split('@')[0]));
 
-        if (eligible.length < 1) return reply("❌ No eligible participants found!");
+    if (eligible.length < 1) return reply("❌ No eligible participants found!");
 
-        const randomUser = eligible[Math.floor(Math.random() * eligible.length)];
+    const randomUser = eligible[Math.floor(Math.random() * eligible.length)];
 
-        await conn.sendMessage(
-        mek.chat,
-        {
-            text: `👧 *Happy girl!* \n\n@${randomUser.id.split('@')[0]} is your beautiful girl! 💖`,
-            mentions: [randomUser.id]
-        },
-        { quoted: mek }
-        );
+    await conn.sendMessage(
+      mek.chat,
+      {
+        text: `👧 *Happy girl!* \n\n@${randomUser.id.split('@')[0]} is your beautiful girl! 💖`,
+        mentions: [randomUser.id]
+      },
+      { quoted: mek }
+    );
 
-    } catch (error) {
-        console.error("Error in .girl command:", error);
-        reply(`❌ Error: ${error.message}`);
-    }
+  } catch (error) {
+    console.error("Error in .girl command:", error);
+    reply(`❌ Error: ${error.message}`);
+  }
 });
 
 cmd({
     pattern: "hack",
+    category: "fun",
     filename: __filename
 },
 async (conn, mek, m, {
@@ -220,33 +227,33 @@ async (conn, mek, m, {
         }
 
         const steps = [
-        '💻 *HACK STARTING...* 💻',
+            '💻 *HACK STARTING...* 💻',
 
-        '*Initializing hacking tools...* 🛠️',
-        '*Connecting to remote servers...* 🌐',
+            '*Initializing hacking tools...* 🛠️',
+            '*Connecting to remote servers...* 🌐',
 
-        '```[██████████] 10%``` ⏳'                                            ,
-        '```[███████████████████] 20%``` ⏳'                                   ,
-        '```[███████████████████████] 30%``` ⏳'                               ,
-        '```[██████████████████████████] 40%``` ⏳'                            ,
-        '```[███████████████████████████████] 50%``` ⏳'                       ,
-        '```[█████████████████████████████████████] 60%``` ⏳'                 ,
-        '```[██████████████████████████████████████████] 70%``` ⏳'            ,
-        '```[██████████████████████████████████████████████] 80%``` ⏳'        ,
-        '```[██████████████████████████████████████████████████] 90%``` ⏳'    ,
-        '```[████████████████████████████████████████████████████] 100%``` ✅',
+            '```[██████████] 10%``` ⏳'                                            ,
+            '```[███████████████████] 20%``` ⏳'                                   ,
+            '```[███████████████████████] 30%``` ⏳'                               ,
+            '```[██████████████████████████] 40%``` ⏳'                            ,
+            '```[███████████████████████████████] 50%``` ⏳'                       ,
+            '```[█████████████████████████████████████] 60%``` ⏳'                 ,
+            '```[██████████████████████████████████████████] 70%``` ⏳'            ,
+            '```[██████████████████████████████████████████████] 80%``` ⏳'        ,
+            '```[██████████████████████████████████████████████████] 90%``` ⏳'    ,
+            '```[████████████████████████████████████████████████████] 100%``` ✅',
 
-        '🔒 *System Breach: Successful!* 🔓',
-        '🚀 *Command Execution: Complete!* 🎯',
+            '🔒 *System Breach: Successful!* 🔓',
+            '🚀 *Command Execution: Complete!* 🎯',
 
-        '*📡 Transmitting data...* 📤',
-        '_🕵️‍♂️ Ensuring stealth..._ 🤫',
-        '*🔧 Finalizing operations...* 🏁',
+            '*📡 Transmitting data...* 📤',
+            '_🕵️‍♂️ Ensuring stealth..._ 🤫',
+            '*🔧 Finalizing operations...* 🏁',
 
-        '⚠️ *Note:* All actions are for demonstration purposes only.',
-        '⚠️ *Reminder:* Ethical hacking is the only way to ensure security.',
+            '⚠️ *Note:* All actions are for demonstration purposes only.',
+            '⚠️ *Reminder:* Ethical hacking is the only way to ensure security.',
 
-        '> *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 HACKING-COMPLETE ☣*'
+            '> *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 HACKING-COMPLETE ☣*'
         ];
 
         for (const line of steps) {
@@ -260,74 +267,77 @@ async (conn, mek, m, {
 });
 
 cmd({
-    pattern: "friend",
-    alias: ["fcheck"],
-    react: "💖",
-    filename: __filename,
-    use: "@tag1 @tag2",
+  pattern: "friend",
+  alias: ["fcheck"],
+  category: "fun",
+  react: "💖",
+  filename: __filename,
+  use: "@tag1 @tag2",
 }, async (conn, mek, m, { args, reply }) => {
-    try {
-        if (args.length < 2) {
-            return reply("Please mention two users to calculate compatibility.\nUsage: `.compatibility @user1 @user2`");
-        }
-
-        let user1 = m.mentionedJid[0];
-        let user2 = m.mentionedJid[1];
-
-        const specialNumber = config.DEV ? `${config.DEV}@s.whatsapp.net` : null;
-
-        let compatibilityScore = Math.floor(Math.random() * 1000) + 1;
-
-        if (user1 === specialNumber || user2 === specialNumber) {
-            compatibilityScore = 1000;
-            return reply(`💖 Compatibility between @${user1.split('@')[0]} and @${user2.split('@')[0]}: ${compatibilityScore}+/1000 💖`);
-        }
-
-        await conn.sendMessage(mek.chat, {
-            text: `💖 Compatibility between @${user1.split('@')[0]} and @${user2.split('@')[0]}: ${compatibilityScore}/1000 💖`,
-            mentions: [user1, user2],
-        }, { quoted: mek });
-
-    } catch (error) {
-        console.log(error);
-        reply(`❌ Error: ${error.message}`);
+  try {
+    if (args.length < 2) {
+      return reply("Please mention two users to calculate compatibility.\nUsage: `.compatibility @user1 @user2`");
     }
+
+    let user1 = m.mentionedJid[0];
+    let user2 = m.mentionedJid[1];
+
+    const specialNumber = config.DEV ? `${config.DEV}@s.whatsapp.net` : null;
+
+    let compatibilityScore = Math.floor(Math.random() * 1000) + 1;
+
+    if (user1 === specialNumber || user2 === specialNumber) {
+      compatibilityScore = 1000;
+      return reply(`💖 Compatibility between @${user1.split('@')[0]} and @${user2.split('@')[0]}: ${compatibilityScore}+/1000 💖`);
+    }
+
+    await conn.sendMessage(mek.chat, {
+      text: `💖 Compatibility between @${user1.split('@')[0]} and @${user2.split('@')[0]}: ${compatibilityScore}/1000 💖`,
+      mentions: [user1, user2],
+    }, { quoted: mek });
+
+  } catch (error) {
+    console.log(error);
+    reply(`❌ Error: ${error.message}`);
+  }
 });
 
-cmd({
-    pattern: "aura",
-    react: "💀",
-    filename: __filename,
-    use: "@tag",
+  cmd({
+  pattern: "aura",
+  category: "fun",
+  react: "💀",
+  filename: __filename,
+  use: "@tag",
 }, async (conn, mek, m, { args, reply }) => {
-    try {
-        if (args.length < 1) {
-            return reply("Please mention a user to calculate their aura.\nUsage: `.aura @user`");
-        }
-
-        let user = m.mentionedJid[0];
-        const specialNumber = config.DEV ? `${config.DEV}@s.whatsapp.net` : null;
-
-        let auraScore = Math.floor(Math.random() * 1000) + 1;
-
-        if (user === specialNumber) {
-            auraScore = 999999;
-            return reply(`💀 Aura of @${user.split('@')[0]}: ${auraScore}+ 🗿`);
-        }
-
-        await conn.sendMessage(mek.chat, {
-            text: `💀 Aura of @${user.split('@')[0]}: ${auraScore}/1000 🗿`,
-            mentions: [user],
-        }, { quoted: mek });
-
-    } catch (error) {
-        console.log(error);
-        reply(`❌ Error: ${error.message}`);
+  try {
+    if (args.length < 1) {
+      return reply("Please mention a user to calculate their aura.\nUsage: `.aura @user`");
     }
+
+    let user = m.mentionedJid[0];
+    const specialNumber = config.DEV ? `${config.DEV}@s.whatsapp.net` : null;
+
+    let auraScore = Math.floor(Math.random() * 1000) + 1;
+
+    if (user === specialNumber) {
+      auraScore = 999999;
+      return reply(`💀 Aura of @${user.split('@')[0]}: ${auraScore}+ 🗿`);
+    }
+
+    await conn.sendMessage(mek.chat, {
+      text: `💀 Aura of @${user.split('@')[0]}: ${auraScore}/1000 🗿`,
+      mentions: [user],
+    }, { quoted: mek });
+
+  } catch (error) {
+    console.log(error);
+    reply(`❌ Error: ${error.message}`);
+  }
 });
 
 cmd({
     pattern: "8ball",
+    category: "fun",
     react: "🎱",
     filename: __filename
 },
@@ -335,9 +345,9 @@ async (conn, mek, m, { from, q, reply }) => {
     if (!q) return reply("Ask a yes/no question! Example: .8ball Will I be rich?");
 
     let responses = [
-    "Yes!", "No.", "Maybe...", "Definitely!", "Not sure.",
-    "Ask again later.", "I don't think so.", "Absolutely!",
-    "No way!", "Looks promising!"
+        "Yes!", "No.", "Maybe...", "Definitely!", "Not sure.",
+        "Ask again later.", "I don't think so.", "Absolutely!",
+        "No way!", "Looks promising!"
     ];
 
     let answer = responses[Math.floor(Math.random() * responses.length)];
@@ -347,31 +357,32 @@ async (conn, mek, m, { from, q, reply }) => {
 
 cmd({
     pattern: "compliment",
+    category: "fun",
     react: "😊",
     filename: __filename,
     use: "@tag (optional)"
 }, async (conn, mek, m, { reply }) => {
     let compliments = [
-    "You're amazing just the way you are! 💖",
-    "You light up every room you walk into! 🌟",
-    "Your smile is contagious! 😊",
-    "You're a genius in your own way! 🧠",
-    "You bring happiness to everyone around you! 🥰",
-    "You're like a human sunshine! ☀️",
-    "Your kindness makes the world a better place! ❤️",
-    "You're unique and irreplaceable! ✨",
-    "You're a great listener and a wonderful friend! 🤗",
-    "Your positive vibes are truly inspiring! 💫",
-    "You're stronger than you think! 💪",
-    "Your creativity is beyond amazing! 🎨",
-    "You make life more fun and interesting! 🎉",
-    "Your energy is uplifting to everyone around you! 🔥",
-    "You're a true leader, even if you don’t realize it! 🏆",
-    "Your words have the power to make people smile! 😊",
-    "You're so talented, and the world needs your skills! 🎭",
-    "You're a walking masterpiece of awesomeness! 🎨",
-    "You're proof that kindness still exists in the world! 💕",
-    "You make even the hardest days feel a little brighter! ☀️"
+        "You're amazing just the way you are! 💖",
+        "You light up every room you walk into! 🌟",
+        "Your smile is contagious! 😊",
+        "You're a genius in your own way! 🧠",
+        "You bring happiness to everyone around you! 🥰",
+        "You're like a human sunshine! ☀️",
+        "Your kindness makes the world a better place! ❤️",
+        "You're unique and irreplaceable! ✨",
+        "You're a great listener and a wonderful friend! 🤗",
+        "Your positive vibes are truly inspiring! 💫",
+        "You're stronger than you think! 💪",
+        "Your creativity is beyond amazing! 🎨",
+        "You make life more fun and interesting! 🎉",
+        "Your energy is uplifting to everyone around you! 🔥",
+        "You're a true leader, even if you don’t realize it! 🏆",
+        "Your words have the power to make people smile! 😊",
+        "You're so talented, and the world needs your skills! 🎭",
+        "You're a walking masterpiece of awesomeness! 🎨",
+        "You're proof that kindness still exists in the world! 💕",
+        "You make even the hardest days feel a little brighter! ☀️"
     ];
 
     let randomCompliment = compliments[Math.floor(Math.random() * compliments.length)];
@@ -380,14 +391,15 @@ cmd({
     let target = mentionedUser ? `@${mentionedUser.split("@")[0]}` : "";
 
     let message = mentionedUser
-    ? `${sender} complimented ${target}:\n😊 *${randomCompliment}*`
-    : `${sender}, you forgot to tag someone! But hey, here's a compliment for you:\n😊 *${randomCompliment}*`;
+        ? `${sender} complimented ${target}:\n😊 *${randomCompliment}*`
+        : `${sender}, you forgot to tag someone! But hey, here's a compliment for you:\n😊 *${randomCompliment}*`;
 
     await conn.sendMessage(mek.chat, { text: message, mentions: [mek.sender, mentionedUser].filter(Boolean) }, { quoted: mek });
 });
 
 cmd({
     pattern: "lovetest",
+    category: "fun",
     react: "❤️",
     filename: __filename,
     use: "@tag1 @tag2"
@@ -400,12 +412,12 @@ cmd({
     let lovePercent = Math.floor(Math.random() * 100) + 1;
 
     let messages = [
-    { range: [90, 100], text: "💖 *A match made in heaven!* True love exists!" },
-    { range: [75, 89], text: "😍 *Strong connection!* This love is deep and meaningful." },
-    { range: [50, 74], text: "😊 *Good compatibility!* You both can make it work." },
-    { range: [30, 49], text: "🤔 *It’s complicated!* Needs effort, but possible!" },
-    { range: [10, 29], text: "😅 *Not the best match!* Maybe try being just friends?" },
-    { range: [1, 9], text: "💔 *Uh-oh!* This love is as real as a Bollywood breakup!" }
+        { range: [90, 100], text: "💖 *A match made in heaven!* True love exists!" },
+        { range: [75, 89], text: "😍 *Strong connection!* This love is deep and meaningful." },
+        { range: [50, 74], text: "😊 *Good compatibility!* You both can make it work." },
+        { range: [30, 49], text: "🤔 *It’s complicated!* Needs effort, but possible!" },
+        { range: [10, 29], text: "😅 *Not the best match!* Maybe try being just friends?" },
+        { range: [1, 9], text: "💔 *Uh-oh!* This love is as real as a Bollywood breakup!" }
     ];
 
     let loveMessage = messages.find(msg => lovePercent >= msg.range[0] && lovePercent <= msg.range[1]).text;
@@ -416,100 +428,103 @@ cmd({
 });
 
 cmd(
-{
-    pattern: "emoji",
-    react: "🙂",
-    filename: __filename,
-    use: "<text>"
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
+    {
+        pattern: "emoji",
+        category: "fun",
+        react: "🙂",
+        filename: __filename,
+        use: "<text>"
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
 
-        let text = args.join(" ");
+            let text = args.join(" ");
 
-        let emojiMapping = {
-            "a": "🅰️",
-            "b": "🅱️",
-            "c": "🇨️",
-            "d": "🇩️",
-            "e": "🇪️",
-            "f": "🇫️",
-            "g": "🇬️",
-            "h": "🇭️",
-            "i": "🇮️",
-            "j": "🇯️",
-            "k": "🇰️",
-            "l": "🇱️",
-            "m": "🇲️",
-            "n": "🇳️",
-            "o": "🅾️",
-            "p": "🇵️",
-            "q": "🇶️",
-            "r": "🇷️",
-            "s": "🇸️",
-            "t": "🇹️",
-            "u": "🇺️",
-            "v": "🇻️",
-            "w": "🇼️",
-            "x": "🇽️",
-            "y": "🇾️",
-            "z": "🇿️",
-            "0": "0️⃣",
-            "1": "1️⃣",
-            "2": "2️⃣",
-            "3": "3️⃣",
-            "4": "4️⃣",
-            "5": "5️⃣",
-            "6": "6️⃣",
-            "7": "7️⃣",
-            "8": "8️⃣",
-            "9": "9️⃣",
-            " ": "␣",
-        };
+            let emojiMapping = {
+                "a": "🅰️",
+                "b": "🅱️",
+                "c": "🇨️",
+                "d": "🇩️",
+                "e": "🇪️",
+                "f": "🇫️",
+                "g": "🇬️",
+                "h": "🇭️",
+                "i": "🇮️",
+                "j": "🇯️",
+                "k": "🇰️",
+                "l": "🇱️",
+                "m": "🇲️",
+                "n": "🇳️",
+                "o": "🅾️",
+                "p": "🇵️",
+                "q": "🇶️",
+                "r": "🇷️",
+                "s": "🇸️",
+                "t": "🇹️",
+                "u": "🇺️",
+                "v": "🇻️",
+                "w": "🇼️",
+                "x": "🇽️",
+                "y": "🇾️",
+                "z": "🇿️",
+                "0": "0️⃣",
+                "1": "1️⃣",
+                "2": "2️⃣",
+                "3": "3️⃣",
+                "4": "4️⃣",
+                "5": "5️⃣",
+                "6": "6️⃣",
+                "7": "7️⃣",
+                "8": "8️⃣",
+                "9": "9️⃣",
+                " ": "␣",
+            };
 
-        let emojiText = text.toLowerCase().split("").map(char => emojiMapping[char] || char).join("");
+            let emojiText = text.toLowerCase().split("").map(char => emojiMapping[char] || char).join("");
 
-        if (!text) {
-            return reply("Please provide some text to convert into emojis!");
+            if (!text) {
+                return reply("Please provide some text to convert into emojis!");
+            }
+
+            await conn.sendMessage(mek.chat, {
+                text: emojiText,
+            }, { quoted: mek });
+
+        } catch (error) {
+            console.log(error);
+            reply(`Error: ${error.message}`);
         }
-
-        await conn.sendMessage(mek.chat, {
-            text: emojiText,
-        }, { quoted: mek });
-
-    } catch (error) {
-        console.log(error);
-        reply(`Error: ${error.message}`);
     }
-}
 );
 
 cmd({
-    pattern: "joke",
-    react: "🤣",
-    filename: __filename
+  pattern: "joke",
+  react: "🤣",
+  category: "fun",
+  filename: __filename
 }, async (conn, m, store, { reply }) => {
-    try {
-        const response = await axios.get("https://official-joke-api.appspot.com/random_joke");
-        const joke = response.data;
+  try {
+    const response = await axios.get("https://official-joke-api.appspot.com/random_joke");
+    const joke = response.data;
 
-        if (!joke || !joke.setup || !joke.punchline) {
-            return reply("❌ Failed to fetch a joke. Please try again.");
-        }
-
-        const jokeMessage = `🤣 *Here's a random joke for you!* 🤣\n\n*${joke.setup}*\n\n${joke.punchline} 😆\n\n> *© Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
-
-        return reply(jokeMessage);
-    } catch (error) {
-        console.error("❌ Error in joke command:", error);
-        return reply("⚠️ An error occurred while fetching the joke. Please try again.");
+    if (!joke || !joke.setup || !joke.punchline) {
+      return reply("❌ Failed to fetch a joke. Please try again.");
     }
+
+    const jokeMessage = `🤣 *Here's a random joke for you!* 🤣\n\n*${joke.setup}*\n\n${joke.punchline} 😆\n\n> *© Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
+
+    return reply(jokeMessage);
+  } catch (error) {
+    console.error("❌ Error in joke command:", error);
+    return reply("⚠️ An error occurred while fetching the joke. Please try again.");
+  }
 });
 
 cmd({
     pattern: "flirt",
     alias: ["masom", "line"],
     react: "💘",
+    category: "fun",
     filename: __filename,
 },
 async (conn, mek, m, { from, reply }) => {
@@ -544,6 +559,7 @@ cmd({
     pattern: "truth",
     alias: ["truthquestion"],
     react: "❓",
+    category: "fun",
     filename: __filename,
 },
 async (conn, mek, m, { from, reply }) => {
@@ -579,6 +595,7 @@ cmd({
     pattern: "dare",
     alias: ["truthordare"],
     react: "🎯",
+    category: "fun",
     filename: __filename,
 },
 async (conn, mek, m, { from, reply }) => {
@@ -614,31 +631,33 @@ async (conn, mek, m, { from, reply }) => {
 });
 
 cmd({
-    pattern: "fact",
-    react: "🧠",
-    filename: __filename
+  pattern: "fact",
+  react: "🧠",
+  category: "fun",
+  filename: __filename
 }, async (conn, m, store, { reply }) => {
-    try {
-        const response = await axios.get("https://uselessfacts.jsph.pl/random.json?language=en");
-        const fact = response.data.text;
+  try {
+    const response = await axios.get("https://uselessfacts.jsph.pl/random.json?language=en");
+    const fact = response.data.text;
 
-        if (!fact) {
-            return reply("❌ Failed to fetch a fun fact. Please try again.");
-        }
-
-        const factMessage = `🧠 *Random Fun Fact* 🧠\n\n${fact}\n\nIsn't that interesting? 😄\n\n> *© Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
-
-        return reply(factMessage);
-    } catch (error) {
-        console.error("❌ Error in fact command:", error);
-        return reply("⚠️ An error occurred while fetching a fun fact. Please try again later.");
+    if (!fact) {
+      return reply("❌ Failed to fetch a fun fact. Please try again.");
     }
+
+    const factMessage = `🧠 *Random Fun Fact* 🧠\n\n${fact}\n\nIsn't that interesting? 😄\n\n> *© Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
+
+    return reply(factMessage);
+  } catch (error) {
+    console.error("❌ Error in fact command:", error);
+    return reply("⚠️ An error occurred while fetching a fun fact. Please try again later.");
+  }
 });
 
 cmd({
     pattern: "pickupline",
     alias: ["pickup"],
     react: "💬",
+    category: "fun",
     filename: __filename,
 },
 async (conn, mek, m, { from, reply }) => {
@@ -668,6 +687,7 @@ cmd({
     pattern: "character",
     alias: ["char"],
     react: "🔥",
+    category: "fun",
     filename: __filename,
 },
 async (conn, mek, m, { from, isGroup, text, reply }) => {
@@ -683,27 +703,27 @@ async (conn, mek, m, { from, isGroup, text, reply }) => {
         }
 
         const userChar = [
-        "Sigma",
-        "Generous",
-        "Grumpy",
-        "Overconfident",
-        "Obedient",
-        "Good",
-        "Simp",
-        "Kind",
-        "Patient",
-        "Pervert",
-        "Cool",
-        "Helpful",
-        "Brilliant",
-        "Sexy",
-        "Hot",
-        "Gorgeous",
-        "Cute",
+            "Sigma",
+            "Generous",
+            "Grumpy",
+            "Overconfident",
+            "Obedient",
+            "Good",
+            "Simp",
+            "Kind",
+            "Patient",
+            "Pervert",
+            "Cool",
+            "Helpful",
+            "Brilliant",
+            "Sexy",
+            "Hot",
+            "Gorgeous",
+            "Cute",
         ];
 
         const userCharacterSelection =
-        userChar[Math.floor(Math.random() * userChar.length)];
+            userChar[Math.floor(Math.random() * userChar.length)];
 
         const message = `Character of @${mentionedUser.split("@")[0]} is *${userCharacterSelection}* 🔥⚡`;
 
@@ -719,106 +739,110 @@ async (conn, mek, m, { from, isGroup, text, reply }) => {
 });
 
 cmd({
-    pattern: "repeat",
-    alias: ["rp", "rpm"],
-    filename: __filename
+  pattern: "repeat",
+  alias: ["rp", "rpm"],
+  category: "fun",
+  filename: __filename
 }, async (conn, m, store, { args, reply }) => {
-    try {
-        if (!args[0]) {
-            return reply("✳️ Use this command like:\n*Example:* .repeat 10,I love you");
-        }
-
-        const [countStr, ...messageParts] = args.join(" ").split(",");
-        const count = parseInt(countStr.trim());
-        const message = messageParts.join(",").trim();
-
-        if (isNaN(count) || count <= 0 || count > 300) {
-            return reply("❎ Please specify a valid number between 1 and 300.");
-        }
-
-        if (!message) {
-            return reply("❎ Please provide a message to repeat.");
-        }
-
-        const repeatedMessage = Array(count).fill(message).join("\n");
-
-        reply(`🔄 Repeated ${count} times:\n\n${repeatedMessage}`);
-    } catch (error) {
-        console.error("❌ Error in repeat command:", error);
-        reply("❎ An error occurred while processing your request.");
+  try {
+    if (!args[0]) {
+      return reply("✳️ Use this command like:\n*Example:* .repeat 10,I love you");
     }
+
+    const [countStr, ...messageParts] = args.join(" ").split(",");
+    const count = parseInt(countStr.trim());
+    const message = messageParts.join(",").trim();
+
+    if (isNaN(count) || count <= 0 || count > 300) {
+      return reply("❎ Please specify a valid number between 1 and 300.");
+    }
+
+    if (!message) {
+      return reply("❎ Please provide a message to repeat.");
+    }
+
+    const repeatedMessage = Array(count).fill(message).join("\n");
+
+    reply(`🔄 Repeated ${count} times:\n\n${repeatedMessage}`);
+  } catch (error) {
+    console.error("❌ Error in repeat command:", error);
+    reply("❎ An error occurred while processing your request.");
+  }
 });
 
 cmd({
-    pattern: "sends",
-    filename: __filename
+  pattern: "sends",
+  category: "fun",
+  filename: __filename
 }, async (conn, m, store, { args, reply, senderNumber }) => {
-    try {
-        const botOwner = conn.user.id.split(":")[0];
+  try {
+    const botOwner = conn.user.id.split(":")[0];
 
-        if (senderNumber !== botOwner) {
-            return reply("❎ Only the bot owner can use this command.");
-        }
-
-        if (!args[0]) {
-            return reply("✳️ Use this command like:\n *Example:* .send 10,I love you");
-        }
-
-        const [countStr, ...messageParts] = args.join(" ").split(",");
-        const count = parseInt(countStr.trim());
-        const message = messageParts.join(",").trim();
-
-        if (isNaN(count) || count <= 0 || count > 100) {
-            return reply("❎ Please specify a valid number between 1 and 100.");
-        }
-
-        if (!message) {
-            return reply("❎ Please provide a message to send.");
-        }
-
-        reply(`⏳ Sending "${message}" ${count} times. This may take a while...`);
-
-        for (let i = 0; i < count; i++) {
-            await conn.sendMessage(m.from, { text: message }, { quoted: m });
-            await sleep(1000);
-        }
-
-        reply(`✅ Successfully sent the message ${count} times.`);
-    } catch (error) {
-        console.error("❌ Error in ask command:", error);
-        reply("❎ An error occurred while processing your request.");
+    if (senderNumber !== botOwner) {
+      return reply("❎ Only the bot owner can use this command.");
     }
+
+    if (!args[0]) {
+      return reply("✳️ Use this command like:\n *Example:* .send 10,I love you");
+    }
+
+    const [countStr, ...messageParts] = args.join(" ").split(",");
+    const count = parseInt(countStr.trim());
+    const message = messageParts.join(",").trim();
+
+    if (isNaN(count) || count <= 0 || count > 100) {
+      return reply("❎ Please specify a valid number between 1 and 100.");
+    }
+
+    if (!message) {
+      return reply("❎ Please provide a message to send.");
+    }
+
+    reply(`⏳ Sending "${message}" ${count} times. This may take a while...`);
+
+    for (let i = 0; i < count; i++) {
+      await conn.sendMessage(m.from, { text: message }, { quoted: m });
+      await sleep(1000);
+    }
+
+    reply(`✅ Successfully sent the message ${count} times.`);
+  } catch (error) {
+    console.error("❌ Error in ask command:", error);
+    reply("❎ An error occurred while processing your request.");
+  }
 });
 
 cmd({
-    pattern: "readmore",
-    alias: ["rm", "rmore", "readm"],
-    use: ".readmore <text>",
-    react: "📝",
-    filename: __filename
+  pattern: "readmore",
+  alias: ["rm", "rmore", "readm"],
+  category: "convert",
+  use: ".readmore <text>",
+  react: "📝",
+  filename: __filename
 }, async (conn, m, store, { args } = {}) => {
-    try {
-        const inputText = args?.length ? args.join(" ") : "No text provided.";
-        const readMore = String.fromCharCode(8206).repeat(4000);
-        const message = `${inputText}${readMore}`;
+  try {
+    const inputText = args?.length ? args.join(" ") : "No text provided.";
+    const readMore = String.fromCharCode(8206).repeat(4000);
+    const message = `${inputText}${readMore}`;
 
-        const chatId = m?.from || m?.key?.remoteJid;
-        if (!chatId) throw new Error("Chat ID not found in message object.");
+    const chatId = m?.from || m?.key?.remoteJid;
+    if (!chatId) throw new Error("Chat ID not found in message object.");
 
-        await conn.sendMessage(chatId, { text: message, quoted: m });
-    } catch (error) {
-        console.error("❌ Error in readmore command:", error);
+    await conn.sendMessage(chatId, { text: message, quoted: m });
+  } catch (error) {
+    console.error("❌ Error in readmore command:", error);
 
-        if (m?.reply) {
-            m.reply("❌ An error occurred: " + error.message);
-        } else if (m?.from) {
-            await conn.sendMessage(m.from, { text: "❌ An error occurred: " + error.message });
-        }
+    if (m?.reply) {
+      m.reply("❌ An error occurred: " + error.message);
+    } else if (m?.from) {
+      await conn.sendMessage(m.from, { text: "❌ An error occurred: " + error.message });
     }
+  }
 });
 
 cmd({
     pattern: "happy",
+    category: "imagine",
     react: "😂",
     filename: __filename
 },
@@ -826,26 +850,26 @@ async (conn, mek, m, { from, reply }) => {
     try {
         const loadingMessage = await conn.sendMessage(from, { text: '😂' });
         const emojiMessages = [
-        "😃", "😄", "😁", "😊", "😎", "🥳",
-        "😸", "😹", "🌞", "🌈", "😃", "😄",
-        "😁", "😊", "😎", "🥳", "😸", "😹",
-        "🌞", "🌈", "😃", "😄", "😁", "😊"
+            "😃", "😄", "😁", "😊", "😎", "🥳",
+            "😸", "😹", "🌞", "🌈", "😃", "😄",
+            "😁", "😊", "😎", "🥳", "😸", "😹",
+            "🌞", "🌈", "😃", "😄", "😁", "😊"
         ];
 
         for (const line of emojiMessages) {
             await new Promise(resolve => setTimeout(resolve, 1000));
             await conn.relayMessage(
-            from,
-            {
-                protocolMessage: {
-                    key: loadingMessage.key,
-                    type: 14,
-                    editedMessage: {
-                        conversation: line,
+                from,
+                {
+                    protocolMessage: {
+                        key: loadingMessage.key,
+                        type: 14,
+                        editedMessage: {
+                            conversation: line,
+                        },
                     },
                 },
-            },
-            {}
+                {}
             );
         }
     } catch (e) {
@@ -856,6 +880,7 @@ async (conn, mek, m, { from, reply }) => {
 
 cmd({
     pattern: "heart",
+    category: "fun",
     react: "❤️",
     filename: __filename
 },
@@ -863,26 +888,26 @@ async (conn, mek, m, { from, reply }) => {
     try {
         const loadingMessage = await conn.sendMessage(from, { text: '🖤' });
         const emojiMessages = [
-        "💖", "💗", "💕", "🩷", "💛", "💚",
-        "🩵", "💙", "💜", "🖤", "🩶", "🤍",
-        "🤎", "❤️‍🔥", "💞", "💓", "💘", "💝",
-        "♥️", "💟", "❤️‍🩹", "❤️"
+            "💖", "💗", "💕", "🩷", "💛", "💚",
+            "🩵", "💙", "💜", "🖤", "🩶", "🤍",
+            "🤎", "❤️‍🔥", "💞", "💓", "💘", "💝",
+            "♥️", "💟", "❤️‍🩹", "❤️"
         ];
 
         for (const line of emojiMessages) {
             await new Promise(resolve => setTimeout(resolve, 1000));
             await conn.relayMessage(
-            from,
-            {
-                protocolMessage: {
-                    key: loadingMessage.key,
-                    type: 14,
-                    editedMessage: {
-                        conversation: line,
+                from,
+                {
+                    protocolMessage: {
+                        key: loadingMessage.key,
+                        type: 14,
+                        editedMessage: {
+                            conversation: line,
+                        },
                     },
                 },
-            },
-            {}
+                {}
             );
         }
     } catch (e) {
@@ -893,6 +918,7 @@ async (conn, mek, m, { from, reply }) => {
 
 cmd({
     pattern: "angry",
+    category: "fun",
     react: "🤡",
     filename: __filename
 },
@@ -900,24 +926,24 @@ async (conn, mek, m, { from, reply }) => {
     try {
         const loadingMessage = await conn.sendMessage(from, { text: '👽' });
         const emojiMessages = [
-        "😡", "😠", "🤬", "😤", "😾", "😡",
-        "😠", "🤬", "😤", "😾"
+            "😡", "😠", "🤬", "😤", "😾", "😡",
+            "😠", "🤬", "😤", "😾"
         ];
 
         for (const line of emojiMessages) {
             await new Promise(resolve => setTimeout(resolve, 1000));
             await conn.relayMessage(
-            from,
-            {
-                protocolMessage: {
-                    key: loadingMessage.key,
-                    type: 14,
-                    editedMessage: {
-                        conversation: line,
+                from,
+                {
+                    protocolMessage: {
+                        key: loadingMessage.key,
+                        type: 14,
+                        editedMessage: {
+                            conversation: line,
+                        },
                     },
                 },
-            },
-            {}
+                {}
             );
         }
     } catch (e) {
@@ -928,6 +954,7 @@ async (conn, mek, m, { from, reply }) => {
 
 cmd({
     pattern: "sad",
+    category: "fun",
     react: "😶",
     filename: __filename
 },
@@ -935,25 +962,25 @@ async (conn, mek, m, { from, reply }) => {
     try {
         const loadingMessage = await conn.sendMessage(from, { text: '😔' });
         const emojiMessages = [
-        "🥺", "😟", "😕", "😖", "😫", "🙁",
-        "😩", "😥", "😓", "😪", "😢", "😔",
-        "😞", "😭", "💔", "😭", "😿"
+            "🥺", "😟", "😕", "😖", "😫", "🙁",
+            "😩", "😥", "😓", "😪", "😢", "😔",
+            "😞", "😭", "💔", "😭", "😿"
         ];
 
         for (const line of emojiMessages) {
             await new Promise(resolve => setTimeout(resolve, 1000));
             await conn.relayMessage(
-            from,
-            {
-                protocolMessage: {
-                    key: loadingMessage.key,
-                    type: 14,
-                    editedMessage: {
-                        conversation: line,
+                from,
+                {
+                    protocolMessage: {
+                        key: loadingMessage.key,
+                        type: 14,
+                        editedMessage: {
+                            conversation: line,
+                        },
                     },
                 },
-            },
-            {}
+                {}
             );
         }
     } catch (e) {
@@ -964,6 +991,7 @@ async (conn, mek, m, { from, reply }) => {
 
 cmd({
     pattern: "shy",
+    category: "fun",
     react: "🧐",
     filename: __filename
 },
@@ -971,24 +999,24 @@ async (conn, mek, m, { from, reply }) => {
     try {
         const loadingMessage = await conn.sendMessage(from, { text: '🧐' });
         const emojiMessages = [
-        "😳", "😊", "😶", "🙈", "🙊",
-        "😳", "😊", "😶", "🙈", "🙊"
+            "😳", "😊", "😶", "🙈", "🙊",
+            "😳", "😊", "😶", "🙈", "🙊"
         ];
 
         for (const line of emojiMessages) {
             await new Promise(resolve => setTimeout(resolve, 1000));
             await conn.relayMessage(
-            from,
-            {
-                protocolMessage: {
-                    key: loadingMessage.key,
-                    type: 14,
-                    editedMessage: {
-                        conversation: line,
+                from,
+                {
+                    protocolMessage: {
+                        key: loadingMessage.key,
+                        type: 14,
+                        editedMessage: {
+                            conversation: line,
+                        },
                     },
                 },
-            },
-            {}
+                {}
             );
         }
     } catch (e) {
@@ -999,6 +1027,7 @@ async (conn, mek, m, { from, reply }) => {
 
 cmd({
     pattern: "moon",
+    category: "fun",
     react: "🌚",
     filename: __filename
 },
@@ -1006,28 +1035,28 @@ async (conn, mek, m, { from, reply }) => {
     try {
         const loadingMessage = await conn.sendMessage(from, { text: '🌝' });
         const emojiMessages = [
-        "🌗", "🌘", "🌑", "🌒", "🌓", "🌔",
-        "🌕", "🌖", "🌗", "🌘", "🌑", "🌒",
-        "🌓", "🌔", "🌕", "🌖", "🌗", "🌘",
-        "🌑", "🌒", "🌓", "🌔", "🌕", "🌖",
-        "🌗", "🌘", "🌑", "🌒", "🌓", "🌔",
-        "🌕", "🌖", "🌝🌚"
+            "🌗", "🌘", "🌑", "🌒", "🌓", "🌔",
+            "🌕", "🌖", "🌗", "🌘", "🌑", "🌒",
+            "🌓", "🌔", "🌕", "🌖", "🌗", "🌘",
+            "🌑", "🌒", "🌓", "🌔", "🌕", "🌖",
+            "🌗", "🌘", "🌑", "🌒", "🌓", "🌔",
+            "🌕", "🌖", "🌝🌚"
         ];
 
         for (const line of emojiMessages) {
             await new Promise(resolve => setTimeout(resolve, 1000));
             await conn.relayMessage(
-            from,
-            {
-                protocolMessage: {
-                    key: loadingMessage.key,
-                    type: 14,
-                    editedMessage: {
-                        conversation: line,
+                from,
+                {
+                    protocolMessage: {
+                        key: loadingMessage.key,
+                        type: 14,
+                        editedMessage: {
+                            conversation: line,
+                        },
                     },
                 },
-            },
-            {}
+                {}
             );
         }
     } catch (e) {
@@ -1038,6 +1067,7 @@ async (conn, mek, m, { from, reply }) => {
 
 cmd({
     pattern: "confused",
+    category: "fun",
     react: "🤔",
     filename: __filename
 },
@@ -1045,24 +1075,24 @@ async (conn, mek, m, { from, reply }) => {
     try {
         const loadingMessage = await conn.sendMessage(from, { text: '🤔' });
         const emojiMessages = [
-        "😕", "😟", "😵", "🤔", "😖",
-        "😲", "😦", "🤷", "🤷‍♂️", "🤷‍♀️"
+            "😕", "😟", "😵", "🤔", "😖",
+            "😲", "😦", "🤷", "🤷‍♂️", "🤷‍♀️"
         ];
 
         for (const line of emojiMessages) {
             await new Promise(resolve => setTimeout(resolve, 1000));
             await conn.relayMessage(
-            from,
-            {
-                protocolMessage: {
-                    key: loadingMessage.key,
-                    type: 14,
-                    editedMessage: {
-                        conversation: line,
+                from,
+                {
+                    protocolMessage: {
+                        key: loadingMessage.key,
+                        type: 14,
+                        editedMessage: {
+                            conversation: line,
+                        },
                     },
                 },
-            },
-            {}
+                {}
             );
         }
     } catch (e) {
@@ -1073,6 +1103,7 @@ async (conn, mek, m, { from, reply }) => {
 
 cmd({
     pattern: "hot",
+    category: "fun",
     react: "💋",
     filename: __filename
 },
@@ -1080,26 +1111,26 @@ async (conn, mek, m, { from, reply }) => {
     try {
         const loadingMessage = await conn.sendMessage(from, { text: '💋' });
         const emojiMessages = [
-        "🥵", "❤️", "💋", "😫", "🤤",
-        "😋", "🥵", "🥶", "🙊", "😻",
-        "🙈", "💋", "🫂", "🫀", "👅",
-        "👄", "💋"
+            "🥵", "❤️", "💋", "😫", "🤤",
+            "😋", "🥵", "🥶", "🙊", "😻",
+            "🙈", "💋", "🫂", "🫀", "👅",
+            "👄", "💋"
         ];
 
         for (const line of emojiMessages) {
             await new Promise(resolve => setTimeout(resolve, 1000));
             await conn.relayMessage(
-            from,
-            {
-                protocolMessage: {
-                    key: loadingMessage.key,
-                    type: 14,
-                    editedMessage: {
-                        conversation: line,
+                from,
+                {
+                    protocolMessage: {
+                        key: loadingMessage.key,
+                        type: 14,
+                        editedMessage: {
+                            conversation: line,
+                        },
                     },
                 },
-            },
-            {}
+                {}
             );
         }
     } catch (e) {
@@ -1110,6 +1141,7 @@ async (conn, mek, m, { from, reply }) => {
 
 cmd({
     pattern: "nikal",
+    category: "fun",
     react: "🗿",
     filename: __filename
 },
@@ -1118,23 +1150,23 @@ async (conn, mek, m, { from, reply }) => {
         const loadingMessage = await conn.sendMessage(from, { text: 'KHANX-AI🗿' });
 
         const asciiMessages = [
-        "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀⠀     ⢳⡀⠀⡏⠀⠀⠀   ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀⠀  ⠀    ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲     ⣿  ⣸   Nikal   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀      ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀⠀__⠀   ⠀   ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀⠀  ⠀  ⢳⡀⠀⡏⠀⠀⠀   ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀⠀       ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲     ⣿  ⣸   Lavde   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀      ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀|__|⠀⠀   ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀     ⠀   ⢳⡀⠀⡏⠀⠀    ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀⠀⠀      ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲    ⣿  ⣸   Pehli   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀     ⣿  ⢹⠀           ⡇\n  ⠙⢿⣯⠄⠀⠀(P)⠀⠀     ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀     ⠀   ⢳⡀⠀⡏⠀⠀    ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀   ⠀     ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲    ⣿  ⣸  Fursat  ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀        ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀⠀__ ⠀  ⠀   ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀⠀      ⢳⡀⠀⡏⠀⠀    ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀ ⠀      ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲    ⣿  ⣸  Meeee   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀       ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀|__| ⠀    ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀   ⠀  ⠀⢳⡀⠀⡏⠀⠀       ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀  ⠀       ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲   ⣿  ⣸   Nikal   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀       ⣿  ⢹⠀           ⡇\n  ⠙⢿⣯⠄⠀⠀lodu⠀⠀   ⡿ ⠀⡇⠀⠀⠀⠀   ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀  ⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀"
+            "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀⠀     ⢳⡀⠀⡏⠀⠀⠀   ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀⠀  ⠀    ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲     ⣿  ⣸   Nikal   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀      ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀⠀__⠀   ⠀   ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀⠀  ⠀  ⢳⡀⠀⡏⠀⠀⠀   ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀⠀       ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲     ⣿  ⣸   Lavde   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀      ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀|__|⠀⠀   ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀     ⠀   ⢳⡀⠀⡏⠀⠀    ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀⠀⠀      ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲    ⣿  ⣸   Pehli   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀     ⣿  ⢹⠀           ⡇\n  ⠙⢿⣯⠄⠀⠀(P)⠀⠀     ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀     ⠀   ⢳⡀⠀⡏⠀⠀    ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀   ⠀     ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲    ⣿  ⣸  Fursat  ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀        ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀⠀__ ⠀  ⠀   ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀⠀      ⢳⡀⠀⡏⠀⠀    ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀ ⠀      ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲    ⣿  ⣸  Meeee   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀       ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀|__| ⠀    ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀   ⠀  ⠀⢳⡀⠀⡏⠀⠀       ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀  ⠀       ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲   ⣿  ⣸   Nikal   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀       ⣿  ⢹⠀           ⡇\n  ⠙⢿⣯⠄⠀⠀lodu⠀⠀   ⡿ ⠀⡇⠀⠀⠀⠀   ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀  ⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀"
         ];
 
         for (const asciiMessage of asciiMessages) {
             await new Promise(resolve => setTimeout(resolve, 500));
             await conn.relayMessage(
-            from,
-            {
-                protocolMessage: {
-                    key: loadingMessage.key,
-                    type: 14,
-                    editedMessage: {
-                        conversation: asciiMessage,
+                from,
+                {
+                    protocolMessage: {
+                        key: loadingMessage.key,
+                        type: 14,
+                        editedMessage: {
+                            conversation: asciiMessage,
+                        },
                     },
                 },
-            },
-            {}
+                {}
             );
         }
     } catch (e) {

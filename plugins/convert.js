@@ -27,6 +27,7 @@ const FormData = require('form-data');
 cmd({
     pattern: "fetch",
     alias: ["get", "api"],
+    category: "convert",
     react: "🌐",
     filename: __filename
 },
@@ -59,6 +60,7 @@ cmd({
     pattern: "tiny",
     alias: ['short', 'shorturl'],
     react: "🫧",
+    category: "convert",
     use: "<url>",
     filename: __filename,
 },
@@ -85,49 +87,51 @@ async (conn, mek, m, { from, quoted, isOwner, isAdmins, reply, args }) => {
 });
 
 cmd({
-    pattern: 'brat',
-    alias: ['bratsticker'],
-    react: '💅',
-    filename: __filename,
+  pattern: 'brat',
+  alias: ['bratsticker'],
+  react: '💅',
+  category: 'convert',
+  filename: __filename,
 },
 async (conn, mek, m, { args, reply }) => {
 
-    const text = (args.length ? args.join(' ') : m?.quoted?.text) || null;
+  const text = (args.length ? args.join(' ') : m?.quoted?.text) || null;
 
-    if (!text) return reply('❌ Please enter text!\n\nExample: .brat Hello');
+  if (!text) return reply('❌ Please enter text!\n\nExample: .brat Hello');
 
-    await conn.sendMessage(m.chat, { react: { text: '⏳', key: mek.key } });
+  await conn.sendMessage(m.chat, { react: { text: '⏳', key: mek.key } });
 
-    try {
+  try {
 
-        const apiUrl = `https://api.yupra.my.id/api/image/brat?text=${encodeURIComponent(text)}`;
-        const res = await fetch(apiUrl);
+    const apiUrl = `https://api.yupra.my.id/api/image/brat?text=${encodeURIComponent(text)}`;
+    const res = await fetch(apiUrl);
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const buffer = await res.buffer();
+    const buffer = await res.buffer();
 
-        const sticker = new Sticker(buffer, {
-            pack: 'NovaCore AI',
-            author: 'Brat Generator',
-            type: 'full',
-            quality: 80
-        });
+    const sticker = new Sticker(buffer, {
+      pack: 'NovaCore AI',
+      author: 'Brat Generator',
+      type: 'full',
+      quality: 80
+    });
 
-        await conn.sendMessage(m.chat, { sticker: await sticker.build() }, { quoted: mek });
-        await conn.sendMessage(m.chat, { react: { text: '✅', key: mek.key } });
+    await conn.sendMessage(m.chat, { sticker: await sticker.build() }, { quoted: mek });
+    await conn.sendMessage(m.chat, { react: { text: '✅', key: mek.key } });
 
-    } catch (e) {
-        console.error(e);
-        await conn.sendMessage(m.chat, { react: { text: '❌', key: mek.key } });
-        reply(`⚠️ Failed to create sticker: ${e.message}`);
-    }
+  } catch (e) {
+    console.error(e);
+    await conn.sendMessage(m.chat, { react: { text: '❌', key: mek.key } });
+    reply(`⚠️ Failed to create sticker: ${e.message}`);
+  }
 });
 
 cmd({
     pattern: "topdf",
     alias: ["pdf","topdf"],use: '.topdf',
     react: "📄",
+    category: "convert",
     filename: __filename
 },
 async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
@@ -145,9 +149,9 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
                 mimetype: 'application/pdf',
                 fileName: '𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳.pdf',
                 caption: `
-                *📄 PDF created successully!*
+*📄 PDF created successully!*
 
-                > © Created By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`
+> © Created By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`
             }, { quoted: mek });
         });
 
@@ -165,6 +169,7 @@ cmd({
     pattern: "trt",
     alias: ["translate"],
     react: "⚡",
+    category: "convert",
     filename: __filename
 },
 async (conn, mek, m, { from, q, reply }) => {
@@ -182,11 +187,11 @@ async (conn, mek, m, { from, q, reply }) => {
 
         const translationMessage = `> *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 TRANSLATION*
 
-        > 🔤 *Original*: ${textToTranslate}
+> 🔤 *Original*: ${textToTranslate}
 
-        > 🔠 *Translated*: ${translation}
+> 🔠 *Translated*: ${translation}
 
-        > 🌐 *Language*: ${targetLang.toUpperCase()}`;
+> 🌐 *Language*: ${targetLang.toUpperCase()}`;
 
         return reply(translationMessage);
     } catch (e) {
@@ -197,198 +202,204 @@ async (conn, mek, m, { from, q, reply }) => {
 
 cmd({
     pattern: "tts",
+    category: "convert",
     react: "👧",
     filename: __filename
 },
 async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
-        if(!q) return reply("Need some text.")
-        const url = googleTTS.getAudioUrl(q, {
-            lang: 'hi-IN',
-            slow: false,
-            host: 'https://translate.google.com',
-        })
-        await conn.sendMessage(from, { audio: { url: url }, mimetype: 'audio/mpeg', ptt: false }, { quoted: mek })
+try{
+if(!q) return reply("Need some text.")
+    const url = googleTTS.getAudioUrl(q, {
+  lang: 'hi-IN',
+  slow: false,
+  host: 'https://translate.google.com',
+})
+await conn.sendMessage(from, { audio: { url: url }, mimetype: 'audio/mpeg', ptt: false }, { quoted: mek })
     }catch(a){
-        reply(`${a}`)
-    }
+reply(`${a}`)
+}
 })
 
 cmd({
-    pattern: "caption",
-    alias: ["cap", "recaption", "c"],
-    react: '✏️',
-    filename: __filename
+  pattern: "caption",
+  alias: ["cap", "recaption", "c"],
+  react: '✏️',
+  category: "convert",
+  filename: __filename
 }, async (client, message, match, { from }) => {
-    try {
-        if (!message.quoted) {
-            return await client.sendMessage(from, {
-                text: "*❗️ Please reply to a media message (image/video/document) to add caption!*\n\n*Usage:*\n- Reply to media with .caption [your text]\n- Or just .caption [text] to add caption to previous media"
-            }, { quoted: message });
-        }
+  try {
+    if (!message.quoted) {
+      return await client.sendMessage(from, {
+        text: "*❗️ Please reply to a media message (image/video/document) to add caption!*\n\n*Usage:*\n- Reply to media with .caption [your text]\n- Or just .caption [text] to add caption to previous media"
+      }, { quoted: message });
+    }
 
-        const quotedMsg = message.quoted;
-        if (!quotedMsg || !quotedMsg.download) {
-            return await client.sendMessage(from, {
-                text: "❌ The quoted message is not valid media"
-            }, { quoted: message });
-        }
+    const quotedMsg = message.quoted;
+    if (!quotedMsg || !quotedMsg.download) {
+      return await client.sendMessage(from, {
+        text: "❌ The quoted message is not valid media"
+      }, { quoted: message });
+    }
 
-        const buffer = await quotedMsg.download();
-        const mtype = quotedMsg.mtype;
+    const buffer = await quotedMsg.download();
+    const mtype = quotedMsg.mtype;
 
-        const cmdText = message.body.split(' ')[0].toLowerCase();
-        const newCaption = message.body.slice(cmdText.length).trim();
+    const cmdText = message.body.split(' ')[0].toLowerCase();
+    const newCaption = message.body.slice(cmdText.length).trim();
 
-        if (!buffer) {
-            return await client.sendMessage(from, {
-                text: "❌ Failed to download the media"
-            }, { quoted: message });
-        }
+    if (!buffer) {
+      return await client.sendMessage(from, {
+        text: "❌ Failed to download the media"
+      }, { quoted: message });
+    }
 
-        const messageContent = {
-            caption: newCaption,
-            mimetype: quotedMsg.mimetype
-        };
+    const messageContent = {
+      caption: newCaption,
+      mimetype: quotedMsg.mimetype
+    };
 
-        switch (mtype) {
-            case "imageMessage":
-            messageContent.image = buffer;
-            messageContent.mimetype = messageContent.mimetype || "image/jpeg";
-            break;
-            case "videoMessage":
-            messageContent.video = buffer;
-            messageContent.mimetype = messageContent.mimetype || "video/mp4";
-            break;
-            case "documentMessage":
-            messageContent.document = buffer;
-            messageContent.mimetype = messageContent.mimetype || "application/octet-stream";
-            break;
-            case "audioMessage":
-            messageContent.audio = buffer;
-            messageContent.mimetype = messageContent.mimetype || "audio/mp4";
-            messageContent.ptt = quotedMsg.ptt || false;
-            break;
-            default:
-            return await client.sendMessage(from, {
-                text: "❌ Only image, video, document and audio messages can be recaptioned"
-            }, { quoted: message });
-        }
-
-        await client.sendMessage(from, messageContent, { quoted: message });
-
-    } catch (error) {
-        console.error("Caption Error:", error);
-        await client.sendMessage(from, {
-            text: "❌ Error adding caption:\n" + (error.message || error.toString())
+    switch (mtype) {
+      case "imageMessage":
+        messageContent.image = buffer;
+        messageContent.mimetype = messageContent.mimetype || "image/jpeg";
+        break;
+      case "videoMessage":
+        messageContent.video = buffer;
+        messageContent.mimetype = messageContent.mimetype || "video/mp4";
+        break;
+      case "documentMessage":
+        messageContent.document = buffer;
+        messageContent.mimetype = messageContent.mimetype || "application/octet-stream";
+        break;
+      case "audioMessage":
+        messageContent.audio = buffer;
+        messageContent.mimetype = messageContent.mimetype || "audio/mp4";
+        messageContent.ptt = quotedMsg.ptt || false;
+        break;
+      default:
+        return await client.sendMessage(from, {
+          text: "❌ Only image, video, document and audio messages can be recaptioned"
         }, { quoted: message });
     }
+
+    await client.sendMessage(from, messageContent, { quoted: message });
+
+  } catch (error) {
+    console.error("Caption Error:", error);
+    await client.sendMessage(from, {
+      text: "❌ Error adding caption:\n" + (error.message || error.toString())
+    }, { quoted: message });
+  }
 });
 
 cmd(
-{
-    pattern: 'take',
-    alias: ['rename', 'stake'],
-    use: '<reply media or URL>',
-    filename: __filename,
-},
-async (conn, mek, m, { quoted, args, q, reply, from }) => {
-    if (!mek.quoted) return reply(`*Reply to any sticker.*`);
-    if (!q) return reply(`*Please provide a pack name using .take <packname>*`);
+    {
+        pattern: 'take',
+        alias: ['rename', 'stake'],
+        category: 'convert',
+        use: '<reply media or URL>',
+        filename: __filename,
+    },
+    async (conn, mek, m, { quoted, args, q, reply, from }) => {
+        if (!mek.quoted) return reply(`*Reply to any sticker.*`);
+        if (!q) return reply(`*Please provide a pack name using .take <packname>*`);
 
-    let mime = mek.quoted.mtype;
-    let pack = q;
+        let mime = mek.quoted.mtype;
+        let pack = q;
 
-    if (mime === "imageMessage" || mime === "stickerMessage") {
-        let media = await mek.quoted.download();
-        let sticker = new Sticker(media, {
-            pack: pack,
-            type: StickerTypes.FULL,
-            categories: ["🤩", "🎉"],
-            id: "12345",
-            quality: 75,
-            background: 'transparent',
-        });
-        const buffer = await sticker.toBuffer();
-        return conn.sendMessage(mek.chat, { sticker: buffer }, { quoted: mek });
-    } else {
-        return reply("*Uhh, Please reply to an image.*");
+        if (mime === "imageMessage" || mime === "stickerMessage") {
+            let media = await mek.quoted.download();
+            let sticker = new Sticker(media, {
+                pack: pack,
+                type: StickerTypes.FULL,
+                categories: ["🤩", "🎉"],
+                id: "12345",
+                quality: 75,
+                background: 'transparent',
+            });
+            const buffer = await sticker.toBuffer();
+            return conn.sendMessage(mek.chat, { sticker: buffer }, { quoted: mek });
+        } else {
+            return reply("*Uhh, Please reply to an image.*");
+        }
     }
-}
 );
 
 cmd(
-{
-    pattern: 'sticker',
-    alias: ['s', 'stickergif'],
-    use: '<reply media or URL>',
-    filename: __filename,
-},
-async (conn, mek, m, { quoted, args, q, reply, from }) => {
-    if (!mek.quoted) return reply(`*Reply to any Image or Video, Sir.*`);
-    let mime = mek.quoted.mtype;
-    let pack = Config.STICKER_NAME || "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳";
+    {
+        pattern: 'sticker',
+        alias: ['s', 'stickergif'],
+        category: 'convert',
+        use: '<reply media or URL>',
+        filename: __filename,
+    },
+    async (conn, mek, m, { quoted, args, q, reply, from }) => {
+        if (!mek.quoted) return reply(`*Reply to any Image or Video, Sir.*`);
+        let mime = mek.quoted.mtype;
+        let pack = Config.STICKER_NAME || "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳";
 
-    if (mime === "imageMessage" || mime === "stickerMessage") {
-        let media = await mek.quoted.download();
-        let sticker = new Sticker(media, {
-            pack: pack,
-            type: StickerTypes.FULL,
-            categories: ["🤩", "🎉"],
-            id: "12345",
-            quality: 75,
-            background: 'transparent',
-        });
-        const buffer = await sticker.toBuffer();
-        return conn.sendMessage(mek.chat, { sticker: buffer }, { quoted: mek });
-    } else {
-        return reply("*Uhh, Please reply to an image.*");
+        if (mime === "imageMessage" || mime === "stickerMessage") {
+            let media = await mek.quoted.download();
+            let sticker = new Sticker(media, {
+                pack: pack,
+                type: StickerTypes.FULL,
+                categories: ["🤩", "🎉"],
+                id: "12345",
+                quality: 75,
+                background: 'transparent',
+            });
+            const buffer = await sticker.toBuffer();
+            return conn.sendMessage(mek.chat, { sticker: buffer }, { quoted: mek });
+        } else {
+            return reply("*Uhh, Please reply to an image.*");
+        }
     }
-}
 );
 
 cmd(
-{
+  {
     pattern: 'vsticker',
     alias: ['gsticker', 'g2s', 'gs', 'v2s', 'vs',],
+    category: 'convert',
     use: '<reply media or URL>',
     filename: __filename,
-},
-async (conn, mek, m, { quoted, args, reply }) => {
+  },
+  async (conn, mek, m, { quoted, args, reply }) => {
     try {
-        if (!mek.quoted) return reply('*Reply to a video or GIF to convert it to a sticker!*');
+      if (!mek.quoted) return reply('*Reply to a video or GIF to convert it to a sticker!*');
 
-        const mime = mek.quoted.mtype;
-        if (!['videoMessage', 'imageMessage'].includes(mime)) {
-            return reply('*Please reply to a valid video or GIF.*');
-        }
+      const mime = mek.quoted.mtype;
+      if (!['videoMessage', 'imageMessage'].includes(mime)) {
+        return reply('*Please reply to a valid video or GIF.*');
+      }
 
-        const media = await mek.quoted.download();
+      const media = await mek.quoted.download();
 
-        const webpBuffer = await videoToWebp(media);
+      const webpBuffer = await videoToWebp(media);
 
-        const sticker = new Sticker(webpBuffer, {
-            pack: config.STICKER_NAME || 'My Pack',
-            author: '',
-            type: StickerTypes.FULL,
-            categories: ['🤩', '🎉'],
-            id: '12345',
-            quality: 75,
-            background: 'transparent',
-        });
+      const sticker = new Sticker(webpBuffer, {
+        pack: config.STICKER_NAME || 'My Pack',
+        author: '',
+        type: StickerTypes.FULL,
+        categories: ['🤩', '🎉'],
+        id: '12345',
+        quality: 75,
+        background: 'transparent',
+      });
 
-        const stickerBuffer = await sticker.toBuffer();
-        return conn.sendMessage(mek.chat, { sticker: stickerBuffer }, { quoted: mek });
+      const stickerBuffer = await sticker.toBuffer();
+      return conn.sendMessage(mek.chat, { sticker: stickerBuffer }, { quoted: mek });
     } catch (error) {
-        console.error(error);
-        reply(`❌ An error occurred: ${error.message}`);
+      console.error(error);
+      reply(`❌ An error occurred: ${error.message}`);
     }
-}
+  }
 );
 
 cmd({
     pattern: "attp",
     react: "✨",
+    category: "convert",
     use: ".attp HI",
     filename: __filename,
 }, async (conn, mek, m, { args, reply }) => {
@@ -405,90 +416,93 @@ cmd({
 });
 
 cmd({
-    pattern: "tts2",
-    react: "🔊",
-    filename: __filename
+  pattern: "tts2",
+  category: "convert",
+  react: "🔊",
+  filename: __filename
 },
 async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
+  try {
 
-        if (!q) {
-            return reply("Please provide text for conversion! Usage: `.tts2 <text>`");
-        }
-
-        let voiceLanguage = 'en-US';
-        let selectedVoice = 'male';
-
-        if (args[0] === "male") {
-            voiceLanguage = 'en-US';
-        } else if (args[0] === "female") {
-            voiceLanguage = 'en-GB';
-            selectedVoice = 'female';
-        } else if (args[0] === "loud") {
-            voiceLanguage = 'en-US';
-        } else if (args[0] === "deep") {
-            voiceLanguage = 'en-US';
-        } else {
-            voiceLanguage = 'en-US';
-        }
-
-        const url = googleTTS.getAudioUrl(q, {
-            lang: voiceLanguage,
-            slow: false,
-            host: 'https://translate.google.com'
-        });
-
-        await conn.sendMessage(from, {
-            audio: { url: url },
-            mimetype: 'audio/mpeg',
-            ptt: false
-        }, { quoted: mek });
-
-    } catch (error) {
-        console.error(error);
-        reply(`Error: ${error.message}`);
+    if (!q) {
+      return reply("Please provide text for conversion! Usage: `.tts2 <text>`");
     }
+
+    let voiceLanguage = 'en-US';
+    let selectedVoice = 'male';
+
+    if (args[0] === "male") {
+      voiceLanguage = 'en-US';
+    } else if (args[0] === "female") {
+      voiceLanguage = 'en-GB';
+      selectedVoice = 'female';
+    } else if (args[0] === "loud") {
+      voiceLanguage = 'en-US';
+    } else if (args[0] === "deep") {
+      voiceLanguage = 'en-US';
+    } else {
+      voiceLanguage = 'en-US';
+    }
+
+    const url = googleTTS.getAudioUrl(q, {
+      lang: voiceLanguage,
+      slow: false,
+      host: 'https://translate.google.com'
+    });
+
+    await conn.sendMessage(from, {
+      audio: { url: url },
+      mimetype: 'audio/mpeg',
+      ptt: false
+    }, { quoted: mek });
+
+  } catch (error) {
+    console.error(error);
+    reply(`Error: ${error.message}`);
+  }
 });
 
 cmd({
-    pattern: "tts3",
-    react: "🔊",
-    filename: __filename
+  pattern: "tts3",
+  category: "convert",
+  react: "🔊",
+  filename: __filename
 },
 async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
+  try {
 
-        if (!q) {
-            return reply("Please provide text for conversion! Usage: `.tts3 <text>`");
-        }
-
-        let voiceLanguage = 'en-US';
-
-        if (args[0] === "ur" || args[0] === "urdu") {
-            voiceLanguage = 'ur';
-        }
-
-        const url = googleTTS.getAudioUrl(q, {
-            lang: voiceLanguage,
-            slow: false,
-            host: 'https://translate.google.com'
-        });
-
-        await conn.sendMessage(from, {
-            audio: { url: url },
-            mimetype: 'audio/mpeg',
-            ptt: false
-        }, { quoted: mek });
-
-    } catch (error) {
-        console.error(error);
-        reply(`Error: ${error.message}`);
+    if (!q) {
+      return reply("Please provide text for conversion! Usage: `.tts3 <text>`");
     }
+
+    let voiceLanguage = 'en-US';
+
+    if (args[0] === "ur" || args[0] === "urdu") {
+      voiceLanguage = 'ur';
+    }
+
+    const url = googleTTS.getAudioUrl(q, {
+      lang: voiceLanguage,
+      slow: false,
+      host: 'https://translate.google.com'
+    });
+
+    await conn.sendMessage(from, {
+      audio: { url: url },
+      mimetype: 'audio/mpeg',
+      ptt: false
+    }, { quoted: mek });
+
+  } catch (error) {
+    console.error(error);
+    reply(`Error: ${error.message}`);
+  }
 });
 
 cmd({
     pattern: 'convert',
     alias: ['sticker2img', 'stoimg', 'stickertoimage', 's2i'],
+    category: 'convert',
     react: '🖼️',
     filename: __filename
 }, async (client, match, message, { from }) => {
@@ -529,6 +543,7 @@ cmd({
 
 cmd({
     pattern: 'tomp3',
+    category: 'convert',
     react: '🎵',
     filename: __filename
 }, async (client, match, message, { from }) => {
@@ -575,6 +590,7 @@ cmd({
 
 cmd({
     pattern: 'toptt',
+    category: 'convert',
     react: '🎙️',
     filename: __filename
 }, async (client, match, message, { from }) => {
@@ -621,139 +637,141 @@ cmd({
 });
 
 cmd({
-    'pattern': "tourl",
-    'alias': ["imgtourl", "imgurl", "url", "geturl", "upload"],
-    'react': '🖇',
-    'desc': "Convert media to Catbox URL",
-    'category': "utility",
-    'use': ".tourl [reply to media]",
-    'filename': __filename
+  'pattern': "tourl",
+  'alias': ["imgtourl", "imgurl", "url", "geturl", "upload"],
+  'react': '🖇',
+  'desc': "Convert media to Catbox URL",
+  'category': "utility",
+  'use': ".tourl [reply to media]",
+  'filename': __filename
 }, async (client, message, args, { reply }) => {
-    try {
+  try {
 
-        const quotedMsg = message.quoted ? message.quoted : message;
-        const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
+    const quotedMsg = message.quoted ? message.quoted : message;
+    const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
 
-        if (!mimeType) {
-            throw "Please reply to an image, video, or audio file";
-        }
-
-        const mediaBuffer = await quotedMsg.download();
-        const tempFilePath = path.join(os.tmpdir(), `catbox_upload_${Date.now()}`);
-        fs.writeFileSync(tempFilePath, mediaBuffer);
-
-        let extension = '';
-        if (mimeType.includes('image/jpeg')) extension = '.jpg';
-        else if (mimeType.includes('image/png')) extension = '.png';
-        else if (mimeType.includes('video')) extension = '.mp4';
-        else if (mimeType.includes('audio')) extension = '.mp3';
-
-        const fileName = `file${extension}`;
-
-        const form = new FormData();
-        form.append('fileToUpload', fs.createReadStream(tempFilePath), fileName);
-        form.append('reqtype', 'fileupload');
-
-        const response = await axios.post("https://catbox.moe/user/api.php", form, {
-            headers: form.getHeaders()
-        });
-
-        if (!response.data) {
-            throw "Error uploading to Catbox";
-        }
-
-        const mediaUrl = response.data;
-        fs.unlinkSync(tempFilePath);
-
-        let mediaType = 'File';
-        if (mimeType.includes('image')) mediaType = 'Image';
-        else if (mimeType.includes('video')) mediaType = 'Video';
-        else if (mimeType.includes('audio')) mediaType = 'Audio';
-
-        await reply(
-        `*${mediaType} Uploaded Successfully*\n\n` +
-        `*Size:* ${formatBytes(mediaBuffer.length)}\n` +
-        `*URL:* ${mediaUrl}\n\n` +
-        `> © Uploaded by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`
-        );
-
-    } catch (error) {
-        console.error(error);
-        await reply(`Error: ${error.message || error}`);
+    if (!mimeType) {
+      throw "Please reply to an image, video, or audio file";
     }
+
+    const mediaBuffer = await quotedMsg.download();
+    const tempFilePath = path.join(os.tmpdir(), `catbox_upload_${Date.now()}`);
+    fs.writeFileSync(tempFilePath, mediaBuffer);
+
+    let extension = '';
+    if (mimeType.includes('image/jpeg')) extension = '.jpg';
+    else if (mimeType.includes('image/png')) extension = '.png';
+    else if (mimeType.includes('video')) extension = '.mp4';
+    else if (mimeType.includes('audio')) extension = '.mp3';
+
+    const fileName = `file${extension}`;
+
+    const form = new FormData();
+    form.append('fileToUpload', fs.createReadStream(tempFilePath), fileName);
+    form.append('reqtype', 'fileupload');
+
+     const response = await axios.post("https://catbox.moe/user/api.php", form, {
+      headers: form.getHeaders()
+    });
+
+    if (!response.data) {
+      throw "Error uploading to Catbox";
+    }
+
+    const mediaUrl = response.data;
+    fs.unlinkSync(tempFilePath);
+
+    let mediaType = 'File';
+    if (mimeType.includes('image')) mediaType = 'Image';
+    else if (mimeType.includes('video')) mediaType = 'Video';
+    else if (mimeType.includes('audio')) mediaType = 'Audio';
+
+    await reply(
+      `*${mediaType} Uploaded Successfully*\n\n` +
+      `*Size:* ${formatBytes(mediaBuffer.length)}\n` +
+      `*URL:* ${mediaUrl}\n\n` +
+      `> © Uploaded by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`
+    );
+
+  } catch (error) {
+    console.error(error);
+    await reply(`Error: ${error.message || error}`);
+  }
 });
 
 function formatBytes(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
 cmd({
-    pattern: "img2url",
-    alias: ["imgurl2", "url2", "geturl2"],
-    react: "🖇",
-    use: ".img2url [reply to image]",
-    filename: __filename,
+  pattern: "img2url",
+  alias: ["imgurl2", "url2", "geturl2"],
+  react: "🖇",
+  category: "convert",
+  use: ".img2url [reply to image]",
+  filename: __filename,
 }, async (client, message, args, { reply }) => {
-    try {
-        const quotedMsg = message.quoted ? message.quoted : message;
-        const mimeType = (quotedMsg.msg || quotedMsg).mimetype || "";
+  try {
+    const quotedMsg = message.quoted ? message.quoted : message;
+    const mimeType = (quotedMsg.msg || quotedMsg).mimetype || "";
 
-        if (!mimeType || !mimeType.startsWith("image/")) {
-            throw "⚠️ Please reply to an image (JPG, PNG, or GIF)";
-        }
-
-        const mediaBuffer = await quotedMsg.download();
-        const tempFilePath = path.join(os.tmpdir(), `imgbb_${Date.now()}`);
-        fs.writeFileSync(tempFilePath, mediaBuffer);
-
-        const form = new FormData();
-        form.append("image", fs.createReadStream(tempFilePath));
-
-        const expiration = 600;
-
-        const imgbbApiKey = "eb6ec8d812ae32e7a1a765740fd1b497";
-
-        const response = await axios.post(
-        `https://api.imgbb.com/1/upload?expiration=${expiration}&key=${imgbbApiKey}`,
-        form,
-        { headers: form.getHeaders() }
-        );
-
-        fs.unlinkSync(tempFilePath);
-
-        const data = response.data.data;
-        if (!data || !data.url) throw "❌ Upload failed.";
-
-        await reply(
-        `✅ *Image Uploaded Successfully!*\n\n` +
-        `🖼 *Filename:* ${data.image.filename}\n` +
-        `📏 *Size:* ${formatBytes(mediaBuffer.length)}\n` +
-        `🔗 *Direct URL:* ${data.url}\n` +
-
-        `> © Uploaded by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`
-        );
-
-    } catch (error) {
-        console.error(error);
-        await reply(`❌ Error: ${error.message || error}`);
+    if (!mimeType || !mimeType.startsWith("image/")) {
+      throw "⚠️ Please reply to an image (JPG, PNG, or GIF)";
     }
+
+    const mediaBuffer = await quotedMsg.download();
+    const tempFilePath = path.join(os.tmpdir(), `imgbb_${Date.now()}`);
+    fs.writeFileSync(tempFilePath, mediaBuffer);
+
+    const form = new FormData();
+    form.append("image", fs.createReadStream(tempFilePath));
+
+    const expiration = 600;
+
+    const imgbbApiKey = "eb6ec8d812ae32e7a1a765740fd1b497";
+
+    const response = await axios.post(
+      `https://api.imgbb.com/1/upload?expiration=${expiration}&key=${imgbbApiKey}`,
+      form,
+      { headers: form.getHeaders() }
+    );
+
+    fs.unlinkSync(tempFilePath);
+
+    const data = response.data.data;
+    if (!data || !data.url) throw "❌ Upload failed.";
+
+    await reply(
+      `✅ *Image Uploaded Successfully!*\n\n` +
+      `🖼 *Filename:* ${data.image.filename}\n` +
+      `📏 *Size:* ${formatBytes(mediaBuffer.length)}\n` +
+      `🔗 *Direct URL:* ${data.url}\n` +
+
+      `> © Uploaded by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`
+    );
+
+  } catch (error) {
+    console.error(error);
+    await reply(`❌ Error: ${error.message || error}`);
+  }
 });
 
 function formatBytes(bytes) {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
 cmd({
     pattern: "aivoice",
     alias: ["vai", "voicex", "voiceai"],
+    category: "convert",
     react: "🪃",
     filename: __filename
 },
@@ -794,18 +812,18 @@ async (conn, mek, m, {
         });
 
         const voiceModels = [
-        { number: "1", name: "Hatsune Miku", model: "miku" },
-        { number: "2", name: "Nahida (Exclusive)", model: "nahida" },
-        { number: "3", name: "Nami", model: "nami" },
-        { number: "4", name: "Ana (Female)", model: "ana" },
-        { number: "5", name: "Optimus Prime", model: "optimus_prime" },
-        { number: "6", name: "Goku", model: "goku" },
-        { number: "7", name: "Taylor Swift", model: "taylor_swift" },
-        { number: "8", name: "Elon Musk", model: "elon_musk" },
-        { number: "9", name: "Mickey Mouse", model: "mickey_mouse" },
-        { number: "10", name: "Kendrick Lamar", model: "kendrick_lamar" },
-        { number: "11", name: "Angela Adkinsh", model: "angela_adkinsh" },
-        { number: "12", name: "Eminem", model: "eminem" }
+            { number: "1", name: "Hatsune Miku", model: "miku" },
+            { number: "2", name: "Nahida (Exclusive)", model: "nahida" },
+            { number: "3", name: "Nami", model: "nami" },
+            { number: "4", name: "Ana (Female)", model: "ana" },
+            { number: "5", name: "Optimus Prime", model: "optimus_prime" },
+            { number: "6", name: "Goku", model: "goku" },
+            { number: "7", name: "Taylor Swift", model: "taylor_swift" },
+            { number: "8", name: "Elon Musk", model: "elon_musk" },
+            { number: "9", name: "Mickey Mouse", model: "mickey_mouse" },
+            { number: "10", name: "Kendrick Lamar", model: "kendrick_lamar" },
+            { number: "11", name: "Angela Adkinsh", model: "angela_adkinsh" },
+            { number: "12", name: "Eminem", model: "eminem" }
         ];
 
         let menuText = "╭━━━〔 *AI VOICE MODELS* 〕━━━⊷\n";
@@ -836,8 +854,8 @@ async (conn, mek, m, {
             if (!receivedMsg || !receivedMsg.message) return;
 
             const receivedText = receivedMsg.message.conversation ||
-            receivedMsg.message.extendedTextMessage?.text ||
-            receivedMsg.message.buttonsResponseMessage?.selectedButtonId;
+                              receivedMsg.message.extendedTextMessage?.text ||
+                              receivedMsg.message.buttonsResponseMessage?.selectedButtonId;
             const senderID = receivedMsg.key.remoteJid;
             const isReplyToBot = receivedMsg.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
 

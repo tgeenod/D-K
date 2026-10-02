@@ -11,19 +11,21 @@ const fetch = require('node-fetch');
 cmd({
     pattern: "live",
     react: "⤵️",
+    category: "main",
     filename: __filename
 },
 async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
-        return await conn.sendMessage(from,{image: {url: config.ALIVE_IMG},caption: config.LIVE_MSG},{quoted: mek})
-    }catch(e){
-        console.log(e)
-        reply(`${e}`)
-    }
+try{
+return await conn.sendMessage(from,{image: {url: config.ALIVE_IMG},caption: config.LIVE_MSG},{quoted: mek})
+}catch(e){
+console.log(e)
+reply(`${e}`)
+}
 })
 
 cmd({
     pattern: "restart",
+    category: "main",
     filename: __filename
 },
 async (conn, mek, m, { reply, isCreator }) => {
@@ -43,6 +45,7 @@ async (conn, mek, m, { reply, isCreator }) => {
 
 cmd({
     pattern: "bible",
+    category: "main",
     react: "📖",
     filename: __filename
 }, async (conn, mek, m, { args, reply }) => {
@@ -61,10 +64,10 @@ cmd({
             const { reference: ref, text, translation_name } = response.data;
 
             reply(
-            `📜 *Bible Verse Found!*\n\n` +
-            `📖 *Reference:* ${ref}\n` +
-            `📚 *Text:* ${text}\n\n` +
-            `🗂️ *Translation:* ${translation_name}\n\n © 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+                `📜 *Bible Verse Found!*\n\n` +
+                `📖 *Reference:* ${ref}\n` +
+                `📚 *Text:* ${text}\n\n` +
+                `🗂️ *Translation:* ${translation_name}\n\n © 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
             );
         } else {
             reply("❌ *Verse not found.* Please check the reference and try again.");
@@ -79,6 +82,7 @@ cmd({
     pattern: "pair",
     alias: ["getpair", "code"],
     react: "✅",
+    category: "main",
     use: ".pair 94771234567",
     filename: __filename
 }, async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, senderNumber, reply }) => {
@@ -113,39 +117,40 @@ cmd({
 
 cmd({
     pattern: "system",
+    category: "main",
     react: "🧬",
     filename: __filename
 },
 async (conn, mek, m, { from, sender, reply }) => {
     try {
         const status = `
-        ╭──〔 🤖 *SYSTEM INFO* 〕──◉
-        │
-        │ ✨ _Bot System Information_
-        │
-        │ 👑 *Owner:* ${config.OWNER_NAME}
-        │ ⚡ *Version:* 2.0.0
-        │ 📝 *Prefix:* [${config.PREFIX}]
-        │ 📳 *Mode:* [${config.MODE}]
-        │ 💾 *RAM:* ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
-        │ ⌛ *Uptime:* ${runtime(process.uptime())}
-        │ 🖥️ *Host:* ${os.hostname()}
-        ╰───────────────◉
-        > ${config.DESCRIPTION}`;
+╭──〔 🤖 *SYSTEM INFO* 〕──◉
+│
+│ ✨ _Bot System Information_
+│
+│ 👑 *Owner:* ${config.OWNER_NAME}
+│ ⚡ *Version:* 2.0.0
+│ 📝 *Prefix:* [${config.PREFIX}]
+│ 📳 *Mode:* [${config.MODE}]
+│ 💾 *RAM:* ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
+│ ⌛ *Uptime:* ${runtime(process.uptime())}
+│ 🖥️ *Host:* ${os.hostname()}
+╰───────────────◉
+> ${config.DESCRIPTION}`;
 
         const FakeVCard = {
-            key: {
-                fromMe: false,
-                participant: "0@s.whatsapp.net",
-                remoteJid: "status@broadcast"
-            },
-            message: {
-                contactMessage: {
-                    displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-                    vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
-                }
-            }
-        };
+      key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
+        }
+      }
+    };
 
         await conn.sendMessage(from, {
             text: status,
@@ -169,39 +174,40 @@ async (conn, mek, m, { from, sender, reply }) => {
 
 cmd({
     pattern: "alive",
+    category: "main",
     react: "⚡",
     filename: __filename
 },
 async (conn, mek, m, { from, sender, reply }) => {
     try {
         const status = `
-        ╭──〔 🤖 *ALIVE STATUS* 〕──◉
-        │
-        │ ✨ _Bot is Active & Online!_
-        │
-        │ 🧠 *Owner:* ${config.OWNER_NAME}
-        │ ⚡ *Version:* 2.0.0
-        │ 📝 *Prefix:* [${config.PREFIX}]
-        │ 📳 *Mode:* [${config.MODE}]
-        │ 💾 *RAM:* ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
-        │ 🖥️ *Host:* ${os.hostname()}
-        │ ⌛ *Uptime:* ${runtime(process.uptime())}
-        ╰───────────────◉
-        > ${config.DESCRIPTION}`;
+╭──〔 🤖 *ALIVE STATUS* 〕──◉
+│
+│ ✨ _Bot is Active & Online!_
+│
+│ 🧠 *Owner:* ${config.OWNER_NAME}
+│ ⚡ *Version:* 2.0.0
+│ 📝 *Prefix:* [${config.PREFIX}]
+│ 📳 *Mode:* [${config.MODE}]
+│ 💾 *RAM:* ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
+│ 🖥️ *Host:* ${os.hostname()}
+│ ⌛ *Uptime:* ${runtime(process.uptime())}
+╰───────────────◉
+> ${config.DESCRIPTION}`;
 
         const FakeVCard = {
-            key: {
-                fromMe: false,
-                participant: "0@s.whatsapp.net",
-                remoteJid: "status@broadcast"
-            },
-            message: {
-                contactMessage: {
-                    displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-                    vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
-                }
-            }
-        };
+      key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
+        }
+      }
+    };
 
         await conn.sendMessage(from, {
             image: { url: config.ALIVE_IMG },
@@ -227,6 +233,7 @@ async (conn, mek, m, { from, sender, reply }) => {
 cmd({
     pattern: "owner",
     react: "✅",
+    category: "main",
     filename: __filename
 },
 async (conn, mek, m, { from }) => {
@@ -235,10 +242,10 @@ async (conn, mek, m, { from }) => {
         const ownerName = config.OWNER_NAME;
 
         const vcard = 'BEGIN:VCARD\n' +
-        'VERSION:3.0\n' +
-        `FN:${ownerName}\n` +
-        `TEL;type=CELL;type=VOICE;waid=${ownerNumber.replace('+', '')}:${ownerNumber}\n` +
-        'END:VCARD';
+                      'VERSION:3.0\n' +
+                      `FN:${ownerName}\n` +
+                      `TEL;type=CELL;type=VOICE;waid=${ownerNumber.replace('+', '')}:${ownerNumber}\n` +
+                      'END:VCARD';
 
         const sentVCard = await conn.sendMessage(from, {
             contacts: {
@@ -248,31 +255,31 @@ async (conn, mek, m, { from }) => {
         });
 
         const FakeVCard = {
-            key: {
-                fromMe: false,
-                participant: "0@s.whatsapp.net",
-                remoteJid: "status@broadcast"
-            },
-            message: {
-                contactMessage: {
-                    displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-                    vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
-                }
-            }
-        };
+      key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
+        }
+      }
+    };
 
         await conn.sendMessage(from, {
             image: { url: config.ALIVE_IMG },
             caption: `
-            ╭━〔 *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 〕━··๏
-            ┃◈╭───────────┈⊷
-            ┃◈┃• *Here is the owner details*
-            ┃◈┃• *Name* - ${ownerName}
-            ┃◈┃• *Number* ${ownerNumber}
-            ┃◈┃• *Version*: 2.0.0 Beta
-            ┃◈└───────────┈⊷
-            ╰──────────────┈⊷
-            > © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`,
+╭━〔 *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 〕━··๏
+┃◈╭───────────┈⊷
+┃◈┃• *Here is the owner details*
+┃◈┃• *Name* - ${ownerName}
+┃◈┃• *Number* ${ownerNumber}
+┃◈┃• *Version*: 2.0.0 Beta
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`,
 
             contextInfo: {
                 mentionedJid: [`${ownerNumber.replace('+', '')}@s.whatsapp.net`],
@@ -294,98 +301,99 @@ async (conn, mek, m, { from }) => {
 
 cmd({
     pattern: "biblelist",
+    category: "main",
     react: "📜",
     filename: __filename
 }, async (conn, mek, m, { reply }) => {
     try {
 
         const bibleList = `
-        📜 *Old Testament*:
-        1. Genesis
-        2. Exodus
-        3. Leviticus
-        4. Numbers
-        5. Deuteronomy
-        6. Joshua
-        7. Judges
-        8. Ruth
-        9. 1 Samuel
-        10. 2 Samuel
-        11. 1 Kings
-        12. 2 Kings
-        13. 1 Chronicles
-        14. 2 Chronicles
-        15. Ezra
-        16. Nehemiah
-        17. Esther
-        18. Job
-        19. Psalms
-        20. Proverbs
-        21. Ecclesiastes
-        22. Song of Solomon
-        23. Isaiah
-        24. Jeremiah
-        25. Lamentations
-        26. Ezekiel
-        27. Daniel
-        28. Hosea
-        29. Joel
-        30. Amos
-        31. Obadiah
-        32. Jonah
-        33. Micah
-        34. Nahum
-        35. Habakkuk
-        36. Zephaniah
-        37. Haggai
-        38. Zechariah
-        39. Malachi
+📜 *Old Testament*:
+1. Genesis
+2. Exodus
+3. Leviticus
+4. Numbers
+5. Deuteronomy
+6. Joshua
+7. Judges
+8. Ruth
+9. 1 Samuel
+10. 2 Samuel
+11. 1 Kings
+12. 2 Kings
+13. 1 Chronicles
+14. 2 Chronicles
+15. Ezra
+16. Nehemiah
+17. Esther
+18. Job
+19. Psalms
+20. Proverbs
+21. Ecclesiastes
+22. Song of Solomon
+23. Isaiah
+24. Jeremiah
+25. Lamentations
+26. Ezekiel
+27. Daniel
+28. Hosea
+29. Joel
+30. Amos
+31. Obadiah
+32. Jonah
+33. Micah
+34. Nahum
+35. Habakkuk
+36. Zephaniah
+37. Haggai
+38. Zechariah
+39. Malachi
 
-        📖 *New Testament*:
-        1. Matthew
-        2. Mark
-        3. Luke
-        4. John
-        5. Acts
-        6. Romans
-        7. 1 Corinthians
-        8. 2 Corinthians
-        9. Galatians
-        10. Ephesians
-        11. Philippians
-        12. Colossians
-        13. 1 Thessalonians
-        14. 2 Thessalonians
-        15. 1 Timothy
-        16. 2 Timothy
-        17. Titus
-        18. Philemon
-        19. Hebrews
-        20. James
-        21. 1 Peter
-        22. 2 Peter
-        23. 1 John
-        24. 2 John
-        25. 3 John
-        26. Jude
-        27. Revelation
+📖 *New Testament*:
+1. Matthew
+2. Mark
+3. Luke
+4. John
+5. Acts
+6. Romans
+7. 1 Corinthians
+8. 2 Corinthians
+9. Galatians
+10. Ephesians
+11. Philippians
+12. Colossians
+13. 1 Thessalonians
+14. 2 Thessalonians
+15. 1 Timothy
+16. 2 Timothy
+17. Titus
+18. Philemon
+19. Hebrews
+20. James
+21. 1 Peter
+22. 2 Peter
+23. 1 John
+24. 2 John
+25. 3 John
+26. Jude
+27. Revelation
 
-        🇱🇰𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳🇱🇰
-        `;
+🇱🇰𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳🇱🇰
+`;
 
         const FakeVCard = {
-            key: {
-                fromMe: false,
-                participant: "0@s.whatsapp.net",
-                remoteJid: "status@broadcast"
-            },
-            message: {
-                contactMessage: {
-                    displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-                    vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
-                }
-            }
-        };
+      key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
+        }
+      }
+    };
 
         const imageUrl = "https://files.catbox.moe/guczru.jpg";
 
@@ -396,8 +404,8 @@ cmd({
         await conn.sendMessage(m.chat, {
             image: { url: imageUrl },
             caption: `📖 *BIBLE LIST BY 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*:\n\n` +
-            `Here is the complete list of books in the Bible:\n\n` +
-            bibleList.trim()
+                     `Here is the complete list of books in the Bible:\n\n` +
+                     bibleList.trim()
         }, { quoted: FakeVCard });
     } catch (error) {
         console.error(error);
@@ -408,71 +416,72 @@ cmd({
 cmd({
     pattern: "support",
     alias : "version",
+    category: "main",
     react: "🫅",
     filename: __filename
 },
 async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
     try {
 
-        let dec = `
-        ⟣───────────────⟢
-        ▧ *ᴄʀᴇᴀᴛᴏʀ* : *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*
-        ▧ *ᴍᴏᴅᴇ* : *${config.MODE}*
-        ▧ *ᴘʀᴇғɪx* : *${config.PREFIX}*
-        ▧ *ʀᴀᴍ* : ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(require('os').totalmem / 1024 / 1024)}MB
-        ▧ *ᴠᴇʀsɪᴏɴ* : *V.2* ⚡
-        ▧ *ᴜᴘᴛɪᴍᴇ* : ${runtime(process.uptime())}
+let dec = `
+⟣───────────────⟢
+▧ *ᴄʀᴇᴀᴛᴏʀ* : *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*
+▧ *ᴍᴏᴅᴇ* : *${config.MODE}*
+▧ *ᴘʀᴇғɪx* : *${config.PREFIX}*
+▧ *ʀᴀᴍ* : ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(require('os').totalmem / 1024 / 1024)}MB
+▧ *ᴠᴇʀsɪᴏɴ* : *V.2* ⚡
+▧ *ᴜᴘᴛɪᴍᴇ* : ${runtime(process.uptime())}
 
-        ⟣───────────────⟢
+⟣───────────────⟢
 
-        > ☣️ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️
+> ☣️ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️
 
-        ⟣───────────────⟢
+⟣───────────────⟢
 
-        *CHANNEL 🛠️*
-        https://whatsapp.com/channel/0029VbAM4eo3AzNQZ1WleW3e
+*CHANNEL 🛠️*
+https://whatsapp.com/channel/0029VbAM4eo3AzNQZ1WleW3e
 
-        *GROUP 👥*
-        https://chat.whatsapp.com/IGgPW6pTrH14oAWCJALYR5
+*GROUP 👥*
+https://chat.whatsapp.com/IGgPW6pTrH14oAWCJALYR5
 
-        *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-owner🧑‍💻*
-        https://wa.me/+94771825192?text=Support!
+*𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-owner🧑‍💻*
+https://wa.me/+94771825192?text=Support!
 
-        ⟣───────────────⟢
+⟣───────────────⟢
 
-        `;
+`;
 
         const FakeVCard = {
-            key: {
-                fromMe: false,
-                participant: "0@s.whatsapp.net",
-                remoteJid: "status@broadcast"
-            },
-            message: {
-                contactMessage: {
-                    displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-                    vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
-                }
-            }
-        };
+      key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
+        }
+      }
+    };
 
         await conn.sendMessage(
-        from,
-        {
-            image: { url: config.ALIVE_IMG },
-            caption: dec,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363400240662312@newsletter',
-                    newsletterName: '𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳',
-                    serverMessageId: 143
+            from,
+            {
+                image: { url: config.ALIVE_IMG },
+                caption: dec,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363400240662312@newsletter',
+                        newsletterName: '𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳',
+                        serverMessageId: 143
+                    }
                 }
-            }
-        },
-        { quoted: FakeVCard });
+            },
+            { quoted: FakeVCard });
 
     } catch (e) {
         console.log(e);
@@ -483,6 +492,7 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 cmd({
     pattern: "online",
     alias: ["getonline"],
+    category: "main",
     react: "🟢",
     filename: __filename
 },
@@ -503,11 +513,11 @@ async (conn, mek, m, { from, quoted, isGroup, isAdmins, isCreator, fromMe, reply
 
         for (const participant of groupData.participants) {
             presencePromises.push(
-            conn.presenceSubscribe(participant.id)
-            .then(() => {
+                conn.presenceSubscribe(participant.id)
+                    .then(() => {
 
-                return conn.sendPresenceUpdate('composing', participant.id);
-            })
+                        return conn.sendPresenceUpdate('composing', participant.id);
+                    })
             );
         }
 
@@ -542,7 +552,7 @@ async (conn, mek, m, { from, quoted, isGroup, isAdmins, isCreator, fromMe, reply
 
                 const onlineArray = Array.from(onlineMembers);
                 const onlineList = onlineArray.map((member, index) =>
-                `${index + 1}. @${member.split('@')[0]}`
+                    `${index + 1}. @${member.split('@')[0]}`
                 ).join('\n');
 
                 const message = `🟢 *Online Members* (${onlineArray.length}/${groupData.participants.length}):\n\n${onlineList}`;
@@ -563,194 +573,199 @@ async (conn, mek, m, { from, quoted, isGroup, isAdmins, isCreator, fromMe, reply
 });
 
 cmd({
-    pattern: "fluxai",
-    alias: ["flux", "imagine"],
-    react: "🚀",
-    filename: __filename
+  pattern: "fluxai",
+  alias: ["flux", "imagine"],
+  react: "🚀",
+  category: "main",
+  filename: __filename
 }, async (conn, mek, m, { q, reply }) => {
-    try {
-        if (!q) return reply("Please provide a prompt for the image.");
+  try {
+    if (!q) return reply("Please provide a prompt for the image.");
 
-        await reply("> *CREATING IMAGINE ...🔥*");
+    await reply("> *CREATING IMAGINE ...🔥*");
 
-        const apiUrl = `https://api.siputzx.my.id/api/ai/flux?prompt=${encodeURIComponent(q)}`;
+    const apiUrl = `https://api.siputzx.my.id/api/ai/flux?prompt=${encodeURIComponent(q)}`;
 
-        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
 
-        if (!response || !response.data) {
-            return reply("Error: The API did not return a valid image. Try again later.");
-        }
-
-        const imageBuffer = Buffer.from(response.data, "binary");
-
-        await conn.sendMessage(m.chat, {
-            image: imageBuffer,
-            caption: `💸 *Imagine Generated By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n✨ Prompt: *${q}*`
-        });
-
-    } catch (error) {
-        console.error("FluxAI Error:", error);
-        reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+    if (!response || !response.data) {
+      return reply("Error: The API did not return a valid image. Try again later.");
     }
+
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    await conn.sendMessage(m.chat, {
+      image: imageBuffer,
+      caption: `💸 *Imagine Generated By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n✨ Prompt: *${q}*`
+    });
+
+  } catch (error) {
+    console.error("FluxAI Error:", error);
+    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+  }
 });
 
 cmd({
-    pattern: "stablediffusion",
-    alias: ["sdiffusion", "imagine2"],
-    react: "🚀",
-    filename: __filename
+  pattern: "stablediffusion",
+  alias: ["sdiffusion", "imagine2"],
+  react: "🚀",
+  category: "main",
+  filename: __filename
 }, async (conn, mek, m, { q, reply }) => {
-    try {
-        if (!q) return reply("Please provide a prompt for the image.");
+  try {
+    if (!q) return reply("Please provide a prompt for the image.");
 
-        await reply("> *CREATING IMAGINE ...🔥*");
+    await reply("> *CREATING IMAGINE ...🔥*");
 
-        const apiUrl = `https://api.siputzx.my.id/api/ai/magicstudio?prompt=${encodeURIComponent(q)}`;
+    const apiUrl = `https://api.siputzx.my.id/api/ai/magicstudio?prompt=${encodeURIComponent(q)}`;
 
-        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
 
-        if (!response || !response.data) {
-            return reply("Error: The API did not return a valid image. Try again later.");
-        }
-
-        const imageBuffer = Buffer.from(response.data, "binary");
-
-        await conn.sendMessage(m.chat, {
-            image: imageBuffer,
-            caption: `💸 *Imagine Generated BY 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*🚀\n✨ Prompt: *${q}*`
-        });
-
-    } catch (error) {
-        console.error("FluxAI Error:", error);
-        reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+    if (!response || !response.data) {
+      return reply("Error: The API did not return a valid image. Try again later.");
     }
+
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    await conn.sendMessage(m.chat, {
+      image: imageBuffer,
+      caption: `💸 *Imagine Generated BY 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*🚀\n✨ Prompt: *${q}*`
+    });
+
+  } catch (error) {
+    console.error("FluxAI Error:", error);
+    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+  }
 });
 
 cmd({
-    pattern: "stabilityai",
-    alias: ["stability", "imagine3"],
-    react: "🚀",
-    filename: __filename
+  pattern: "stabilityai",
+  alias: ["stability", "imagine3"],
+  react: "🚀",
+  category: "main",
+  filename: __filename
 }, async (conn, mek, m, { q, reply }) => {
-    try {
-        if (!q) return reply("Please provide a prompt for the image.");
+  try {
+    if (!q) return reply("Please provide a prompt for the image.");
 
-        await reply("> *CREATING IMAGINE ...🔥*");
+    await reply("> *CREATING IMAGINE ...🔥*");
 
-        const apiUrl = `https://api.siputzx.my.id/api/ai/stabilityai?prompt=${encodeURIComponent(q)}`;
+    const apiUrl = `https://api.siputzx.my.id/api/ai/stabilityai?prompt=${encodeURIComponent(q)}`;
 
-        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
 
-        if (!response || !response.data) {
-            return reply("Error: The API did not return a valid image. Try again later.");
-        }
-
-        const imageBuffer = Buffer.from(response.data, "binary");
-
-        await conn.sendMessage(m.chat, {
-            image: imageBuffer,
-            caption: `💸 *Imagine Generated BY 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*🚀\n✨ Prompt: *${q}*`
-        });
-
-    } catch (error) {
-        console.error("FluxAI Error:", error);
-        reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+    if (!response || !response.data) {
+      return reply("Error: The API did not return a valid image. Try again later.");
     }
+
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    await conn.sendMessage(m.chat, {
+      image: imageBuffer,
+      caption: `💸 *Imagine Generated BY 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*🚀\n✨ Prompt: *${q}*`
+    });
+
+  } catch (error) {
+    console.error("FluxAI Error:", error);
+    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+  }
 });
 
 cmd({
-    pattern: 'version',
-    react: '🚀',
-    filename: __filename
+  pattern: 'version',
+  react: '🚀',
+  category: 'main',
+  filename: __filename
 }, async (conn, mek, m, {
-    from, sender, pushname, reply
+  from, sender, pushname, reply
 }) => {
+  try {
+
+    const localVersionPath = path.join(__dirname, '../lib/version.json');
+    let localVersion = 'Unknown';
+    let changelog = 'No changelog available.';
+    if (fs.existsSync(localVersionPath)) {
+      const localData = JSON.parse(fs.readFileSync(localVersionPath));
+      localVersion = localData.version;
+      changelog = localData.changelog;
+    }
+
+    const rawVersionUrl = 'https://raw.githubusercontent.com/bot-deploy-main/DARK-KNIGHT-XMD/ma../lib/version.json';
+    let latestVersion = 'Unknown';
+    let latestChangelog = 'No changelog available.';
     try {
+      const { data } = await axios.get(rawVersionUrl);
+      latestVersion = data.version;
+      latestChangelog = data.changelog;
+    } catch (error) {
+      console.error('Failed to fetch latest version:', error);
+    }
 
-        const localVersionPath = path.join(__dirname, '../lib/version.json');
-        let localVersion = 'Unknown';
-        let changelog = 'No changelog available.';
-        if (fs.existsSync(localVersionPath)) {
-            const localData = JSON.parse(fs.readFileSync(localVersionPath));
-            localVersion = localData.version;
-            changelog = localData.changelog;
-        }
+    const pluginPath = path.join(__dirname, '../plugins');
+    const pluginCount = fs.readdirSync(pluginPath).filter(file => file.endsWith('.js')).length;
 
-        const rawVersionUrl = 'https://raw.githubusercontent.com/bot-deploy-main/DARK-KNIGHT-XMD/ma../lib/version.json';
-        let latestVersion = 'Unknown';
-        let latestChangelog = 'No changelog available.';
-        try {
-            const { data } = await axios.get(rawVersionUrl);
-            latestVersion = data.version;
-            latestChangelog = data.changelog;
-        } catch (error) {
-            console.error('Failed to fetch latest version:', error);
-        }
+    const totalCommands = commands.length;
 
-        const pluginPath = path.join(__dirname, '../plugins');
-        const pluginCount = fs.readdirSync(pluginPath).filter(file => file.endsWith('.js')).length;
+    const uptime = runtime(process.uptime());
+    const ramUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
+    const totalRam = (os.totalmem() / 1024 / 1024).toFixed(2);
+    const hostName = os.hostname();
+    const lastUpdate = fs.statSync(localVersionPath).mtime.toLocaleString();
 
-        const totalCommands = commands.length;
+    const githubRepo = 'https://github.com/DARK-KNIGHT/DARK-KNIGHT-XMD';
 
-        const uptime = runtime(process.uptime());
-        const ramUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
-        const totalRam = (os.totalmem() / 1024 / 1024).toFixed(2);
-        const hostName = os.hostname();
-        const lastUpdate = fs.statSync(localVersionPath).mtime.toLocaleString();
+    let updateMessage = `✅ Your 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 bot is up-to-date!`;
+    if (localVersion !== latestVersion) {
+      updateMessage = `🚀 Your 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 bot is outdated!
+🔹 *Current Version:* ${localVersion}
+🔹 *Latest Version:* ${latestVersion}
 
-        const githubRepo = 'https://github.com/DARK-KNIGHT/DARK-KNIGHT-XMD';
+Use *.update* to update.`;
+    }
 
-        let updateMessage = `✅ Your 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 bot is up-to-date!`;
-        if (localVersion !== latestVersion) {
-            updateMessage = `🚀 Your 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 bot is outdated!
-            🔹 *Current Version:* ${localVersion}
-            🔹 *Latest Version:* ${latestVersion}
-
-            Use *.update* to update.`;
-        }
-
-        const statusMessage = `🌟 *Good ${new Date().getHours() < 12 ? 'Morning' : 'Night'}, ${pushname}!* 🌟\n\n` +
-        `📌 *Bot Name:* 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳\n🔖 *Current Version:* ${localVersion}\n📢 *Latest Version:* ${latestVersion}\n📂 *Total Plugins:* ${pluginCount}\n🔢 *Total Commands:* ${totalCommands}\n\n` +
-        `💾 *System Info:*\n⏳ *Uptime:* ${uptime}\n📟 *RAM Usage:* ${ramUsage}MB / ${totalRam}MB\n⚙️ *Host Name:* ${hostName}\n📅 *Last Update:* ${lastUpdate}\n\n` +
-        `📝 *Changelog:*\n${latestChangelog}\n\n` +
-        `⭐ *GitHub Repo:* ${githubRepo}\n👤 *Owner:* [𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃](https://github.com/DARK-KNIGHT/)\n\n${updateMessage}\n\n🚀 *Hey! Don't forget to fork & star the repo!*`;
+    const statusMessage = `🌟 *Good ${new Date().getHours() < 12 ? 'Morning' : 'Night'}, ${pushname}!* 🌟\n\n` +
+      `📌 *Bot Name:* 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳\n🔖 *Current Version:* ${localVersion}\n📢 *Latest Version:* ${latestVersion}\n📂 *Total Plugins:* ${pluginCount}\n🔢 *Total Commands:* ${totalCommands}\n\n` +
+      `💾 *System Info:*\n⏳ *Uptime:* ${uptime}\n📟 *RAM Usage:* ${ramUsage}MB / ${totalRam}MB\n⚙️ *Host Name:* ${hostName}\n📅 *Last Update:* ${lastUpdate}\n\n` +
+      `📝 *Changelog:*\n${latestChangelog}\n\n` +
+      `⭐ *GitHub Repo:* ${githubRepo}\n👤 *Owner:* [𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃](https://github.com/DARK-KNIGHT/)\n\n${updateMessage}\n\n🚀 *Hey! Don't forget to fork & star the repo!*`;
 
         const FakeVCard = {
-            key: {
-                fromMe: false,
-                participant: "0@s.whatsapp.net",
-                remoteJid: "status@broadcast"
-            },
-            message: {
-                contactMessage: {
-                    displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-                    vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
-                }
-            }
-        };
+      key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
+        }
+      }
+    };
 
-        await conn.sendMessage(from, {
-            image: { url: config.ALIVE_IMG },
-            caption: statusMessage,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363400240662312@newsletter',
-                    newsletterName: '𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳',
-                    serverMessageId: 143
-                }
-            }
-        }, { quoted: FakeVCard });
-    } catch (error) {
-        console.error('Error fetching version info:', error);
-        reply('❌ An error occurred while checking the bot version.');
-    }
+    await conn.sendMessage(from, {
+      image: { url: config.ALIVE_IMG },
+      caption: statusMessage,
+      contextInfo: {
+        mentionedJid: [m.sender],
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: '120363400240662312@newsletter',
+          newsletterName: '𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳',
+          serverMessageId: 143
+        }
+      }
+    }, { quoted: FakeVCard });
+  } catch (error) {
+    console.error('Error fetching version info:', error);
+    reply('❌ An error occurred while checking the bot version.');
+  }
 });
 
 cmd({
     pattern: "uptime",
+    category: "main",
     react: "⏱️",
     filename: __filename
 },
@@ -760,105 +775,105 @@ async (conn, mek, m, { from, reply }) => {
         const startTime = new Date(Date.now() - process.uptime() * 1000);
 
         const style1 = `╭───『 UPTIME 』───⳹
-        │
-        │ ⏱️ ${uptime}
-        │
-        │ 🚀 Started: ${startTime.toLocaleString()}
-        │
-        ╰────────────────⳹
-        ${config.DESCRIPTION}`;
+│
+│ ⏱️ ${uptime}
+│
+│ 🚀 Started: ${startTime.toLocaleString()}
+│
+╰────────────────⳹
+${config.DESCRIPTION}`;
 
         const style2 = `•——[ UPTIME ]——•
-        │
-        ├─ ⏳ ${uptime}
-        ├─ 🕒 Since: ${startTime.toLocaleTimeString()}
-        │
-        •——[ ${config.BOT_NAME} ]——•`;
+  │
+  ├─ ⏳ ${uptime}
+  ├─ 🕒 Since: ${startTime.toLocaleTimeString()}
+  │
+  •——[ ${config.BOT_NAME} ]——•`;
 
         const style3 = `▄▀▄▀▄ BOT UPTIME ▄▀▄▀▄
 
-        ♢ Running: ${uptime}
-        ♢ Since: ${startTime.toLocaleDateString()}
+  ♢ Running: ${uptime}
+  ♢ Since: ${startTime.toLocaleDateString()}
 
-        ${config.DESCRIPTION}`;
+  ${config.DESCRIPTION}`;
 
         const style4 = `┌──────────────────────┐
-        │  ⚡ UPTIME STATUS ⚡  │
-        ├──────────────────────┤
-        │ • Time: ${uptime}
-        │ • Started: ${startTime.toLocaleString()}
-        │ • Version: 2.0.0
-        └──────────────────────┘`;
+│  ⚡ UPTIME STATUS ⚡  │
+├──────────────────────┤
+│ • Time: ${uptime}
+│ • Started: ${startTime.toLocaleString()}
+│ • Version: 2.0.0
+└──────────────────────┘`;
 
         const style5 = `▰▰▰▰▰ UPTIME ▰▰▰▰▰
 
-        ⏳ ${uptime}
-        🕰️ ${startTime.toLocaleString()}
+  ⏳ ${uptime}
+  🕰️ ${startTime.toLocaleString()}
 
-        ${config.DESCRIPTION}`;
+  ${config.DESCRIPTION}`;
 
         const style6 = `╔══════════════════════╗
-        ║   ${config.BOT_NAME} UPTIME    ║
-        ╠══════════════════════╣
-        ║ > RUNTIME: ${uptime}
-        ║ > SINCE: ${startTime.toLocaleString()}
-        ╚══════════════════════╝`;
+║   ${config.BOT_NAME} UPTIME    ║
+╠══════════════════════╣
+║ > RUNTIME: ${uptime}
+║ > SINCE: ${startTime.toLocaleString()}
+╚══════════════════════╝`;
 
         const style7 = `┌───────────────┐
-        │  ⏱️  UPTIME  │
-        └───────────────┘
-        │
-        │ ${uptime}
-        │
-        │ Since ${startTime.toLocaleDateString()}
-        │
-        ┌───────────────┐
-        │  ${config.BOT_NAME}  │
-        └───────────────┘`;
+│  ⏱️  UPTIME  │
+└───────────────┘
+│
+│ ${uptime}
+│
+│ Since ${startTime.toLocaleDateString()}
+│
+┌───────────────┐
+│  ${config.BOT_NAME}  │
+└───────────────┘`;
 
         const style8 = `⏱️ *Uptime Report* ⏱️
 
-        🟢 Online for: ${uptime}
-        📅 Since: ${startTime.toLocaleString()}
+🟢 Online for: ${uptime}
+📅 Since: ${startTime.toLocaleString()}
 
-        ${config.DESCRIPTION}`;
+${config.DESCRIPTION}`;
 
         const style9 = `╔♫═⏱️═♫══════════╗
-        ${config.BOT_NAME} UPTIME
-        ╚♫═⏱️═♫══════════╝
+   ${config.BOT_NAME} UPTIME
+╚♫═⏱️═♫══════════╝
 
-        •・゜゜・* ✧  *・゜゜・•
-        ✧ ${uptime}
-        ✧ Since ${startTime.toLocaleDateString()}
-        •・゜゜・* ✧  *・゜゜・•`;
+•・゜゜・* ✧  *・゜゜・•
+ ✧ ${uptime}
+ ✧ Since ${startTime.toLocaleDateString()}
+•・゜゜・* ✧  *・゜゜・•`;
 
         const style10 = `┏━━━━━━━━━━━━━━━━━━┓
-        ┃  UPTIME ANALYSIS  ┃
-        ┗━━━━━━━━━━━━━━━━━━┛
+┃  UPTIME ANALYSIS  ┃
+┗━━━━━━━━━━━━━━━━━━┛
 
-        ◈ Duration: ${uptime}
-        ◈ Start Time: ${startTime.toLocaleString()}
-        ◈ Stability: 100%
-        ◈ Version:  2.0.0
+◈ Duration: ${uptime}
+◈ Start Time: ${startTime.toLocaleString()}
+◈ Stability: 100%
+◈ Version:  2.0.0
 
-        ${config.DESCRIPTION}`;
+${config.DESCRIPTION}`;
 
         const styles = [style1, style2, style3, style4, style5, style6, style7, style8, style9, style10];
         const selectedStyle = styles[Math.floor(Math.random() * styles.length)];
 
         const FakeVCard = {
-            key: {
-                fromMe: false,
-                participant: "0@s.whatsapp.net",
-                remoteJid: "status@broadcast"
-            },
-            message: {
-                contactMessage: {
-                    displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-                    vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
-                }
-            }
-        };
+      key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
+        }
+      }
+    };
 
         await conn.sendMessage(from, {
             text: selectedStyle,
@@ -883,6 +898,7 @@ async (conn, mek, m, { from, reply }) => {
 cmd({
     pattern: "ping",
     use: '.ping',
+    category: "main",
     react: "⚡",
     filename: __filename
 }, async (conn, mek, m, { from, sender, reply }) => {
@@ -911,18 +927,18 @@ cmd({
         }
 
         const FakeVCard = {
-            key: {
-                fromMe: false,
-                participant: "0@s.whatsapp.net",
-                remoteJid: "status@broadcast"
-            },
-            message: {
-                contactMessage: {
-                    displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-                    vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
-                }
-            }
-        };
+      key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
+        }
+      }
+    };
 
         await conn.sendMessage(from, {
             text: `> *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ʀᴇsᴘᴏɴsᴇ: ${ping} ms ${randomEmoji}*\n> *sᴛᴀᴛᴜs: ${color} ${badge}*\n> *ᴠᴇʀsɪᴏɴ: 2.0.0*`,
@@ -947,6 +963,7 @@ cmd({
 cmd({
     pattern: "ping2",
     use: '.ping',
+    category: "main",
     react: "🍂",
     filename: __filename
 },
@@ -974,19 +991,19 @@ async (conn, mek, m, { from, quoted, sender, reply }) => {
         const text = `> *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 SPEED: ${responseTime.toFixed(2)}ms ${reactionEmoji}*`;
 
         const FakeVCard = {
-            key: {
-                fromMe: false,
-                participant: '0@s.whatsapp.net',
-                remoteJid: "status@broadcast"
-            },
-            message: {
-                contactMessage: {
-                    displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-                    vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃\nORG:dark;\nTEL;type=CELL;type=VOICE;waid=254700000000:+254 700 000000\nEND:VCARD",
-                    jpegThumbnail: Buffer.from([])
-                }
-            }
-        };
+      key: {
+        fromMe: false,
+        participant: '0@s.whatsapp.net',
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃\nORG:dark;\nTEL;type=CELL;type=VOICE;waid=254700000000:+254 700 000000\nEND:VCARD",
+          jpegThumbnail: Buffer.from([])
+        }
+      }
+    };
 
         await conn.sendMessage(from, {
             text,
@@ -1011,6 +1028,7 @@ async (conn, mek, m, { from, quoted, sender, reply }) => {
 cmd({
     pattern: "repo",
     react: "📂",
+    category: "main",
     filename: __filename,
 },
 async (conn, mek, m, { from, reply }) => {
@@ -1024,141 +1042,141 @@ async (conn, mek, m, { from, reply }) => {
         const repoData = await response.json();
 
         const style1 = `╭───『 ${config.BOT_NAME} REPO 』───⳹
-        │
-        │ 📦 *Repository*: ${repoData.name}
-        │ 👑 *Owner*: ${repoData.owner.login}
-        │ ⭐ *Stars*: ${repoData.stargazers_count}
-        │ ⑂ *Forks*: ${repoData.forks_count}
-        │ 🔗 *URL*: ${repoData.html_url}
-        │
-        │ 📝 *Description*:
-        │ ${repoData.description || 'No description'}
-        │
-        ╰────────────────⳹
-        > ${config.DESCRIPTION}`;
+│
+│ 📦 *Repository*: ${repoData.name}
+│ 👑 *Owner*: ${repoData.owner.login}
+│ ⭐ *Stars*: ${repoData.stargazers_count}
+│ ⑂ *Forks*: ${repoData.forks_count}
+│ 🔗 *URL*: ${repoData.html_url}
+│
+│ 📝 *Description*:
+│ ${repoData.description || 'No description'}
+│
+╰────────────────⳹
+> ${config.DESCRIPTION}`;
 
         const style2 = `•——[ GITHUB INFO ]——•
-        │
-        ├─ 🏷️ ${repoData.name}
-        ├─ 👤 ${repoData.owner.login}
-        ├─ ✨ ${repoData.stargazers_count} Stars
-        ├─ ⑂ ${repoData.forks_count} Forks
-        │
-        •——[ ${config.BOT_NAME} ]——•
-        > ${config.DESCRIPTION}`;
+  │
+  ├─ 🏷️ ${repoData.name}
+  ├─ 👤 ${repoData.owner.login}
+  ├─ ✨ ${repoData.stargazers_count} Stars
+  ├─ ⑂ ${repoData.forks_count} Forks
+  │
+  •——[ ${config.BOT_NAME} ]——•
+  > ${config.DESCRIPTION}`;
 
         const style3 = `▄▀▄▀▄ REPOSITORY INFO ▄▀▄▀▄
 
-        ♢ *Project*: ${repoData.name}
-        ♢ *Author*: ${repoData.owner.login}
-        ♢ *Stars*: ${repoData.stargazers_count} ✨
-        ♢ *Forks*: ${repoData.forks_count} ⑂
-        ♢ *Updated*: ${new Date(repoData.updated_at).toLocaleDateString()}
+  ♢ *Project*: ${repoData.name}
+  ♢ *Author*: ${repoData.owner.login}
+  ♢ *Stars*: ${repoData.stargazers_count} ✨
+  ♢ *Forks*: ${repoData.forks_count} ⑂
+  ♢ *Updated*: ${new Date(repoData.updated_at).toLocaleDateString()}
 
-        🔗 ${repoData.html_url}
+  🔗 ${repoData.html_url}
 
-        > ${config.DESCRIPTION}`;
+  > ${config.DESCRIPTION}`;
 
         const style4 = `┌──────────────────────┐
-        │  ⚡ ${config.BOT_NAME} REPO  ⚡  │
-        ├──────────────────────┤
-        │ • Name: ${repoData.name}
-        │ • Owner: ${repoData.owner.login}
-        │ • Stars: ${repoData.stargazers_count}
-        │ • Forks: ${repoData.forks_count}
-        │ • URL: ${repoData.html_url}
-        │ • Desc: ${repoData.description || 'None'}
-        └──────────────────────┘
-        > ${config.DESCRIPTION}`;
+│  ⚡ ${config.BOT_NAME} REPO  ⚡  │
+├──────────────────────┤
+│ • Name: ${repoData.name}
+│ • Owner: ${repoData.owner.login}
+│ • Stars: ${repoData.stargazers_count}
+│ • Forks: ${repoData.forks_count}
+│ • URL: ${repoData.html_url}
+│ • Desc: ${repoData.description || 'None'}
+└──────────────────────┘
+> ${config.DESCRIPTION}`;
 
         const style5 = `▰▰▰▰▰ REPO INFO ▰▰▰▰▰
 
-        🏷️  *${repoData.name}*
-        👨‍💻  ${repoData.owner.login}
+  🏷️  *${repoData.name}*
+  👨‍💻  ${repoData.owner.login}
 
-        ⭐ ${repoData.stargazers_count}  ⑂ ${repoData.forks_count}
-        🔗 ${repoData.html_url}
+  ⭐ ${repoData.stargazers_count}  ⑂ ${repoData.forks_count}
+  🔗 ${repoData.html_url}
 
-        📜 ${repoData.description || 'No description'}
+  📜 ${repoData.description || 'No description'}
 
-        > ${config.DESCRIPTION}`;
+  > ${config.DESCRIPTION}`;
 
         const style6 = `╔══════════════════════╗
-        ║   ${config.BOT_NAME} REPO    ║
-        ╠══════════════════════╣
-        ║ > NAME: ${repoData.name}
-        ║ > OWNER: ${repoData.owner.login}
-        ║ > STARS: ${repoData.stargazers_count}
-        ║ > FORKS: ${repoData.forks_count}
-        ║ > URL: ${repoData.html_url}
-        ║ > DESC: ${repoData.description || 'None'}
-        ╚══════════════════════╝
-        > ${config.DESCRIPTION}`;
+║   ${config.BOT_NAME} REPO    ║
+╠══════════════════════╣
+║ > NAME: ${repoData.name}
+║ > OWNER: ${repoData.owner.login}
+║ > STARS: ${repoData.stargazers_count}
+║ > FORKS: ${repoData.forks_count}
+║ > URL: ${repoData.html_url}
+║ > DESC: ${repoData.description || 'None'}
+╚══════════════════════╝
+> ${config.DESCRIPTION}`;
 
         const style7 = `┌───────────────┐
-        │  📂  REPO  │
-        └───────────────┘
-        │
-        │ *Project*: ${repoData.name}
-        │ *Author*: ${repoData.owner.login}
-        │
-        │ ✨ ${repoData.stargazers_count} Stars
-        │ ⑂ ${repoData.forks_count} Forks
-        │
-        │ 🔗 ${repoData.html_url}
-        │
-        ┌───────────────┐
-        │  📝  DESC  │
-        └───────────────┘
-        ${repoData.description || 'No description'}
+│  📂  REPO  │
+└───────────────┘
+│
+│ *Project*: ${repoData.name}
+│ *Author*: ${repoData.owner.login}
+│
+│ ✨ ${repoData.stargazers_count} Stars
+│ ⑂ ${repoData.forks_count} Forks
+│
+│ 🔗 ${repoData.html_url}
+│
+┌───────────────┐
+│  📝  DESC  │
+└───────────────┘
+${repoData.description || 'No description'}
 
-        > ${config.DESCRIPTION}`;
+> ${config.DESCRIPTION}`;
 
         const style8 = `✦ ${config.BOT_NAME} Repository ✦
 
-        📌 *${repoData.name}*
-        👤 @${repoData.owner.login}
+📌 *${repoData.name}*
+👤 @${repoData.owner.login}
 
-        ⭐ ${repoData.stargazers_count} Stars | ⑂ ${repoData.forks_count} Forks
-        🔄 Last updated: ${new Date(repoData.updated_at).toLocaleDateString()}
+⭐ ${repoData.stargazers_count} Stars | ⑂ ${repoData.forks_count} Forks
+🔄 Last updated: ${new Date(repoData.updated_at).toLocaleDateString()}
 
-        🔗 GitHub: ${repoData.html_url}
+🔗 GitHub: ${repoData.html_url}
 
-        ${repoData.description || 'No description available'}
+${repoData.description || 'No description available'}
 
-        > ${config.DESCRIPTION}`;
+> ${config.DESCRIPTION}`;
 
         const style9 = `╔♫═🎧═♫══════════╗
-        ${config.BOT_NAME} REPO
-        ╚♫═🎧═♫══════════╝
+   ${config.BOT_NAME} REPO
+╚♫═🎧═♫══════════╝
 
-        •・゜゜・* ✧  *・゜゜・•
-        ✧ *Name*: ${repoData.name}
-        ✧ *Owner*: ${repoData.owner.login}
-        ✧ *Stars*: ${repoData.stargazers_count}
-        ✧ *Forks*: ${repoData.forks_count}
-        •・゜゜・* ✧  *・゜゜・•
+•・゜゜・* ✧  *・゜゜・•
+ ✧ *Name*: ${repoData.name}
+ ✧ *Owner*: ${repoData.owner.login}
+ ✧ *Stars*: ${repoData.stargazers_count}
+ ✧ *Forks*: ${repoData.forks_count}
+•・゜゜・* ✧  *・゜゜・•
 
-        🔗 ${repoData.html_url}
+🔗 ${repoData.html_url}
 
-        ${repoData.description || 'No description'}
+${repoData.description || 'No description'}
 
-        > ${config.DESCRIPTION}`;
+> ${config.DESCRIPTION}`;
 
         const style10 = `┏━━━━━━━━━━━━━━━━━━┓
-        ┃  REPOSITORY REPORT  ┃
-        ┗━━━━━━━━━━━━━━━━━━┛
+┃  REPOSITORY REPORT  ┃
+┗━━━━━━━━━━━━━━━━━━┛
 
-        ◈ Project: ${repoData.name}
-        ◈ Maintainer: ${repoData.owner.login}
-        ◈ Popularity: ★ ${repoData.stargazers_count} | ⑂ ${repoData.forks_count}
-        ◈ Last Update: ${new Date(repoData.updated_at).toLocaleDateString()}
-        ◈ URL: ${repoData.html_url}
+◈ Project: ${repoData.name}
+◈ Maintainer: ${repoData.owner.login}
+◈ Popularity: ★ ${repoData.stargazers_count} | ⑂ ${repoData.forks_count}
+◈ Last Update: ${new Date(repoData.updated_at).toLocaleDateString()}
+◈ URL: ${repoData.html_url}
 
-        Description:
-        ${repoData.description || 'No description provided'}
+Description:
+${repoData.description || 'No description provided'}
 
-        > ${config.DESCRIPTION}`;
+> ${config.DESCRIPTION}`;
 
         const styles = [style1, style2, style3, style4, style5, style6, style7, style8, style9, style10];
         const selectedStyle = styles[Math.floor(Math.random() * styles.length)];

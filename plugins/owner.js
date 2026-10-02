@@ -17,6 +17,7 @@ const { exec } = require('child_process');
 
 cmd({
     pattern: "antidelete",
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, reply, text, isCreator }) => {
@@ -51,201 +52,206 @@ async (conn, mek, m, { from, reply, text, isCreator }) => {
 cmd({
     pattern: "fullpp",
     alias: ["pp"],
+    category: "owner",
     filename: __filename
 },
 async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
 
-    try {
+try {
 
-        let ig = await m.quoted.download();
+  let ig = await m.quoted.download();
 
-        const jimp = await Jimp.read(ig),
-        min = jimp.getWidth(),
-        max = jimp.getHeight(),
-        cropped = jimp.crop(0, 0, min, max);
+  const jimp = await Jimp.read(ig),
+    min = jimp.getWidth(),
+    max = jimp.getHeight(),
+    cropped = jimp.crop(0, 0, min, max);
 
-        const img = await cropped.scaleToFit(720, 720).getBufferAsync(Jimp.MIME_JPEG);
-        const preview = await cropped.normalize().getBufferAsync(Jimp.MIME_JPEG);
+  const img = await cropped.scaleToFit(720, 720).getBufferAsync(Jimp.MIME_JPEG);
+  const preview = await cropped.normalize().getBufferAsync(Jimp.MIME_JPEG);
 
-        await conn.query({
-            tag: 'iq',
-            attrs: {
+  await conn.query({
+    tag: 'iq',
+    attrs: {
 
-                to: S_WHATSAPP_NET,
-                type: 'set',
-                xmlns: 'w:profile:picture',
-            },
-            content: [
-            {
-                tag: 'picture',
-                attrs: { type: 'image' },
-                content: img,
-            },
-            ],
-        });
+      to: S_WHATSAPP_NET,
+      type: 'set',
+      xmlns: 'w:profile:picture',
+    },
+    content: [
+      {
+        tag: 'picture',
+        attrs: { type: 'image' },
+        content: img,
+      },
+    ],
+  });
 
-        return m.reply( "done");
-    } catch (err) {
-        console.error('Error:', err);
-        return err;
-    }
+  return m.reply( "done");
+} catch (err) {
+  console.error('Error:', err);
+  return err;
+}
 
 })
 
 cmd({
-    pattern: "broadcast",
-    filename: __filename,
-    use: "<text for broadcast.>"
+  pattern: "broadcast",
+  category: "owner",
+  filename: __filename,
+  use: "<text for broadcast.>"
 }, async (conn, mek, m, { q, isGroup, isAdmins, reply }) => {
-    try {
-        if (!isGroup) return reply("❌ This command can only be used in groups!");
-        if (!isAdmins) return reply("❌ You need to be an admin to broadcast in this group!");
+  try {
+    if (!isGroup) return reply("❌ This command can only be used in groups!");
+    if (!isAdmins) return reply("❌ You need to be an admin to broadcast in this group!");
 
-        if (!q) return reply("❌ Provide text to broadcast in all groups!");
+    if (!q) return reply("❌ Provide text to broadcast in all groups!");
 
-        let allGroups = await conn.groupFetchAllParticipating();
-        let groupIds = Object.keys(allGroups);
+    let allGroups = await conn.groupFetchAllParticipating();
+    let groupIds = Object.keys(allGroups);
 
-        reply(`📢 Sending Broadcast To ${groupIds.length} Groups...\n⏳ Estimated Time: ${groupIds.length * 1.5} seconds`);
+    reply(`📢 Sending Broadcast To ${groupIds.length} Groups...\n⏳ Estimated Time: ${groupIds.length * 1.5} seconds`);
 
-        for (let groupId of groupIds) {
-            try {
-                await sleep(1500);
-                await conn.sendMessage(groupId, { text: q });
-            } catch (err) {
-                console.log(`❌ Failed to send broadcast to ${groupId}:`, err);
-            }
-        }
-
-        return reply(`✅ Successfully sent broadcast to ${groupIds.length} groups!`);
-
-    } catch (err) {
-        await m.error(`❌ Error: ${err}\n\nCommand: broadcast`, err);
+    for (let groupId of groupIds) {
+      try {
+        await sleep(1500);
+        await conn.sendMessage(groupId, { text: q });
+      } catch (err) {
+        console.log(`❌ Failed to send broadcast to ${groupId}:`, err);
+      }
     }
+
+    return reply(`✅ Successfully sent broadcast to ${groupIds.length} groups!`);
+
+  } catch (err) {
+    await m.error(`❌ Error: ${err}\n\nCommand: broadcast`, err);
+  }
 });
 
 cmd({
-    pattern: "send",
-    alias: ["sendme", 'save'],
-    react: '📤',
-    filename: __filename
+  pattern: "send",
+  alias: ["sendme", 'save'],
+  react: '📤',
+  category: "owner",
+  filename: __filename
 }, async (client, message, match, { from }) => {
-    try {
-        if (!match.quoted) {
-            return await client.sendMessage(from, {
-                text: "*🍁 Please reply to a message!*"
-            }, { quoted: message });
-        }
+  try {
+    if (!match.quoted) {
+      return await client.sendMessage(from, {
+        text: "*🍁 Please reply to a message!*"
+      }, { quoted: message });
+    }
 
-        const buffer = await match.quoted.download();
-        const mtype = match.quoted.mtype;
-        const options = { quoted: message };
+    const buffer = await match.quoted.download();
+    const mtype = match.quoted.mtype;
+    const options = { quoted: message };
 
-        let messageContent = {};
-        switch (mtype) {
-            case "imageMessage":
-            messageContent = {
-                image: buffer,
-                caption: match.quoted.text || '',
-                mimetype: match.quoted.mimetype || "image/jpeg"
-            };
-            break;
-            case "videoMessage":
-            messageContent = {
-                video: buffer,
-                caption: match.quoted.text || '',
-                mimetype: match.quoted.mimetype || "video/mp4"
-            };
-            break;
-            case "audioMessage":
-            messageContent = {
-                audio: buffer,
-                mimetype: "audio/mp4",
-                ptt: match.quoted.ptt || false
-            };
-            break;
-            default:
-            return await client.sendMessage(from, {
-                text: "❌ Only image, video, and audio messages are supported"
-            }, { quoted: message });
-        }
-
-        await client.sendMessage(from, messageContent, options);
-    } catch (error) {
-        console.error("Forward Error:", error);
-        await client.sendMessage(from, {
-            text: "❌ Error forwarding message:\n" + error.message
+    let messageContent = {};
+    switch (mtype) {
+      case "imageMessage":
+        messageContent = {
+          image: buffer,
+          caption: match.quoted.text || '',
+          mimetype: match.quoted.mimetype || "image/jpeg"
+        };
+        break;
+      case "videoMessage":
+        messageContent = {
+          video: buffer,
+          caption: match.quoted.text || '',
+          mimetype: match.quoted.mimetype || "video/mp4"
+        };
+        break;
+      case "audioMessage":
+        messageContent = {
+          audio: buffer,
+          mimetype: "audio/mp4",
+          ptt: match.quoted.ptt || false
+        };
+        break;
+      default:
+        return await client.sendMessage(from, {
+          text: "❌ Only image, video, and audio messages are supported"
         }, { quoted: message });
     }
+
+    await client.sendMessage(from, messageContent, options);
+  } catch (error) {
+    console.error("Forward Error:", error);
+    await client.sendMessage(from, {
+      text: "❌ Error forwarding message:\n" + error.message
+    }, { quoted: message });
+  }
 });
 
 cmd({
-    pattern: "vv3",
-    react: '🪀',
-    filename: __filename
+  pattern: "vv3",
+  react: '🪀',
+  category: "owner",
+  filename: __filename
 }, async (client, message, match, { from }) => {
-    try {
-        const botNumber = client.user.id.split(":")[0] + "@s.whatsapp.net";
+  try {
+    const botNumber = client.user.id.split(":")[0] + "@s.whatsapp.net";
 
-        if (message.sender !== botNumber) {
-            return await client.sendMessage(from, {
-                text: "❌ You are not authorized to use this command."
-            }, { quoted: message });
-        }
+    if (message.sender !== botNumber) {
+      return await client.sendMessage(from, {
+        text: "❌ You are not authorized to use this command."
+      }, { quoted: message });
+    }
 
-        if (!match.quoted) {
-            return await client.sendMessage(from, {
-                text: "*🍁 Please reply to a message!*"
-            }, { quoted: message });
-        }
+    if (!match.quoted) {
+      return await client.sendMessage(from, {
+        text: "*🍁 Please reply to a message!*"
+      }, { quoted: message });
+    }
 
-        const buffer = await match.quoted.download();
-        const mtype = match.quoted.mtype;
-        const options = { quoted: message };
+    const buffer = await match.quoted.download();
+    const mtype = match.quoted.mtype;
+    const options = { quoted: message };
 
-        let messageContent = {};
-        switch (mtype) {
-            case "imageMessage":
-            messageContent = {
-                image: buffer,
-                caption: match.quoted.text || '',
-                mimetype: match.quoted.mimetype || "image/jpeg"
-            };
-            break;
-            case "videoMessage":
-            messageContent = {
-                video: buffer,
-                caption: match.quoted.text || '',
-                mimetype: match.quoted.mimetype || "video/mp4"
-            };
-            break;
-            case "audioMessage":
-            messageContent = {
-                audio: buffer,
-                mimetype: "audio/mp4",
-                ptt: match.quoted.ptt || false
-            };
-            break;
-            default:
-            return await client.sendMessage(from, {
-                text: "❌ Only image, video, and audio messages are supported"
-            }, { quoted: message });
-        }
-
-        await client.sendMessage(message.sender, messageContent, options);
-
-    } catch (error) {
-        console.error("Forward Error:", error);
-        await client.sendMessage(from, {
-            text: "❌ Error forwarding message:\n" + error.message
+    let messageContent = {};
+    switch (mtype) {
+      case "imageMessage":
+        messageContent = {
+          image: buffer,
+          caption: match.quoted.text || '',
+          mimetype: match.quoted.mimetype || "image/jpeg"
+        };
+        break;
+      case "videoMessage":
+        messageContent = {
+          video: buffer,
+          caption: match.quoted.text || '',
+          mimetype: match.quoted.mimetype || "video/mp4"
+        };
+        break;
+      case "audioMessage":
+        messageContent = {
+          audio: buffer,
+          mimetype: "audio/mp4",
+          ptt: match.quoted.ptt || false
+        };
+        break;
+      default:
+        return await client.sendMessage(from, {
+          text: "❌ Only image, video, and audio messages are supported"
         }, { quoted: message });
     }
+
+    await client.sendMessage(message.sender, messageContent, options);
+
+  } catch (error) {
+    console.error("Forward Error:", error);
+    await client.sendMessage(from, {
+      text: "❌ Error forwarding message:\n" + error.message
+    }, { quoted: message });
+  }
 });
 
 cmd({
     pattern: "jid",
     alias: ["id", "chatid", "gjid"],
     react: "🆔",
+    category: "owner",
     filename: __filename,
 }, async (conn, mek, m, {
     from, isGroup, reply, sender
@@ -269,38 +275,40 @@ cmd({
 });
 
 cmd({
-    pattern: 'jid2',
-    filename: __filename
+  pattern: 'jid2',
+  category: 'owner',
+  filename: __filename
 }, async (conn, mek, m, { q, quoted, sender, reply }) => {
-    try {
-        let targetJid;
+  try {
+    let targetJid;
 
-        if (m.quoted) {
-            targetJid = m.quoted.sender;
-        }
-
-        else if (q) {
-            let number = q.replace(/[^0-9]/g, '');
-            if (!number) {
-                return reply("❌ Please provide a valid number.");
-            }
-            targetJid = number + '@s.whatsapp.net';
-        }
-
-        else {
-            targetJid = sender;
-        }
-
-        await reply(`User JID: ${targetJid}`);
-    } catch (error) {
-        console.error("Error in getjid command:", error);
-        await reply(`❌ Error: ${error}`);
+    if (m.quoted) {
+      targetJid = m.quoted.sender;
     }
+
+    else if (q) {
+      let number = q.replace(/[^0-9]/g, '');
+      if (!number) {
+        return reply("❌ Please provide a valid number.");
+      }
+      targetJid = number + '@s.whatsapp.net';
+    }
+
+    else {
+      targetJid = sender;
+    }
+
+    await reply(`User JID: ${targetJid}`);
+  } catch (error) {
+    console.error("Error in getjid command:", error);
+    await reply(`❌ Error: ${error}`);
+  }
 });
 
 cmd({
     pattern: 'savecontact',
     alias: ["vcf","scontact","savecontacts"],
+    category: 'owner',
     filename: __filename
 }, async (conn, mek, m, { from, quoted, body, isCmd, command, args, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
     try {
@@ -339,6 +347,7 @@ cmd({
 
 cmd({
     pattern: "block",
+    category: "owner",
     react: "🚫",
     filename: __filename
 },
@@ -376,6 +385,7 @@ async (conn, m, { reply, q, react }) => {
 
 cmd({
     pattern: "unblock",
+    category: "owner",
     react: "🔓",
     filename: __filename
 },
@@ -424,6 +434,7 @@ cmd({
     pattern: "channelreact",
     alias: ["creact"],
     react: "🔤",
+    category: "owner",
     use: '.chr <channel-link> <text>',
     filename: __filename
 },
@@ -439,12 +450,12 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
         if (!inputText) return reply("Please provide text to convert");
 
         const emoji = inputText
-        .split('')
-        .map(char => {
-            if (char === ' ') return '―';
-            return stylizedChars[char] || char;
-        })
-        .join('');
+            .split('')
+            .map(char => {
+                if (char === ' ') return '―';
+                return stylizedChars[char] || char;
+            })
+            .join('');
 
         const channelId = link.split('/')[4];
         const messageId = link.split('/')[5];
@@ -454,12 +465,12 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
         await conn.newsletterReactMessage(channelMeta.id, messageId, emoji);
 
         return reply(`
-        ╭━━〔 *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 〕┈⊷
-        ┃▸ *Success!* Reaction sent
-        ┃▸ *Channel:* ${channelMeta.name}
-        ┃▸ *Reaction:* ${emoji}
-        ╰─────┈⊷
-        > *© Pᴏᴡᴇʀᴇᴅ Bʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`);
+╭━━〔 *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 〕┈⊷
+┃▸ *Success!* Reaction sent
+┃▸ *Channel:* ${channelMeta.name}
+┃▸ *Reaction:* ${emoji}
+╰─────┈⊷
+> *© Pᴏᴡᴇʀᴇᴅ Bʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`);
     } catch (e) {
         console.error(e);
         reply(`❎ Error: ${e.message || "Failed to send reaction"}`);
@@ -468,6 +479,7 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 
 cmd({
     pattern: "getjs",
+    category: "owner",
     react: "📜",
     filename: __filename
 },
@@ -491,12 +503,12 @@ async (conn, mek, m, { from, args, reply, isOwner }) => {
         }
 
         const formattedCode = `⬤───〔 *📜 Command Source* 〕───⬤
-        \`\`\`js
-        ${truncatedCode}
-        \`\`\`
-        ╰──────────⊷
-        ⚡ Full file sent below 📂
-        Powered By *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* ☣️`;
+\`\`\`js
+${truncatedCode}
+\`\`\`
+╰──────────⊷
+⚡ Full file sent below 📂
+Powered By *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* ☣️`;
 
         await conn.sendMessage(from, {
             image: { url: config.ALIVE_IMG },
@@ -535,6 +547,7 @@ cmd({
     pattern: "update",
     alias: ["upgrade", "sync"],
     react: '🆕',
+    category: "owner",
     filename: __filename
 }, async (client, message, args, { reply, isOwner }) => {
     if (!isOwner) return reply("This command is only for the bot owner.");
@@ -606,6 +619,7 @@ function copyFolderSync(source, target) {
 cmd({
     pattern: "ban",
     alias: ["blockuser", "addban"],
+    category: "owner",
     react: "⛔",
     filename: __filename
 }, async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -613,8 +627,8 @@ cmd({
         if (!isCreator) return reply("_❗Only the bot owner can use this command!_");
 
         let target = m.mentionedJid?.[0]
-        || (m.quoted?.sender ?? null)
-        || (args[0]?.replace(/[^0-9]/g, '') + "@s.whatsapp.net");
+            || (m.quoted?.sender ?? null)
+            || (args[0]?.replace(/[^0-9]/g, '') + "@s.whatsapp.net");
 
         if (!target) return reply("❌ Please provide a number or tag/reply a user.");
 
@@ -641,6 +655,7 @@ cmd({
 cmd({
     pattern: "unban",
     alias: ["removeban"],
+    category: "owner",
     react: "✅",
     filename: __filename
 }, async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -648,8 +663,8 @@ cmd({
         if (!isCreator) return reply("_❗Only the bot owner can use this command!_");
 
         let target = m.mentionedJid?.[0]
-        || (m.quoted?.sender ?? null)
-        || (args[0]?.replace(/[^0-9]/g, '') + "@s.whatsapp.net");
+            || (m.quoted?.sender ?? null)
+            || (args[0]?.replace(/[^0-9]/g, '') + "@s.whatsapp.net");
 
         if (!target) return reply("❌ Please provide a number or tag/reply a user.");
 
@@ -676,6 +691,7 @@ cmd({
 cmd({
     pattern: "listban",
     alias: ["banlist", "bannedusers"],
+    category: "owner",
     react: "📋",
     filename: __filename
 }, async (conn, mek, m, { from, isCreator, reply }) => {
@@ -703,124 +719,127 @@ cmd({
 });
 
 cmd({
-    pattern: "vv",
-    react: '☢️',
-    filename: __filename
+  pattern: "vv",
+  react: '☢️',
+  category: "owner",
+  filename: __filename
 }, async (client, message, match, { from, isCreator }) => {
-    try {
-        if (!isCreator) {
-            return await client.sendMessage(from, {
-                text: "*📛 This is an owner command.*"
-            }, { quoted: message });
-        }
+  try {
+    if (!isCreator) {
+      return await client.sendMessage(from, {
+        text: "*📛 This is an owner command.*"
+      }, { quoted: message });
+    }
 
-        if (!match.quoted) {
-            return await client.sendMessage(from, {
-                text: "*🍁 Please reply to a view once message!*"
-            }, { quoted: message });
-        }
+    if (!match.quoted) {
+      return await client.sendMessage(from, {
+        text: "*🍁 Please reply to a view once message!*"
+      }, { quoted: message });
+    }
 
-        const buffer = await match.quoted.download();
-        const mtype = match.quoted.mtype;
-        const options = { quoted: message };
+    const buffer = await match.quoted.download();
+    const mtype = match.quoted.mtype;
+    const options = { quoted: message };
 
-        let messageContent = {};
-        switch (mtype) {
-            case "imageMessage":
-            messageContent = {
-                image: buffer,
-                caption: match.quoted.text || '',
-                mimetype: match.quoted.mimetype || "image/jpeg"
-            };
-            break;
-            case "videoMessage":
-            messageContent = {
-                video: buffer,
-                caption: match.quoted.text || '',
-                mimetype: match.quoted.mimetype || "video/mp4"
-            };
-            break;
-            case "audioMessage":
-            messageContent = {
-                audio: buffer,
-                mimetype: "audio/mp4",
-                ptt: match.quoted.ptt || false
-            };
-            break;
-            default:
-            return await client.sendMessage(from, {
-                text: "❌ Only image, video, and audio messages are supported"
-            }, { quoted: message });
-        }
-
-        await client.sendMessage(from, messageContent, options);
-    } catch (error) {
-        console.error("vv Error:", error);
-        await client.sendMessage(from, {
-            text: "❌ Error fetching vv message:\n" + error.message
+    let messageContent = {};
+    switch (mtype) {
+      case "imageMessage":
+        messageContent = {
+          image: buffer,
+          caption: match.quoted.text || '',
+          mimetype: match.quoted.mimetype || "image/jpeg"
+        };
+        break;
+      case "videoMessage":
+        messageContent = {
+          video: buffer,
+          caption: match.quoted.text || '',
+          mimetype: match.quoted.mimetype || "video/mp4"
+        };
+        break;
+      case "audioMessage":
+        messageContent = {
+          audio: buffer,
+          mimetype: "audio/mp4",
+          ptt: match.quoted.ptt || false
+        };
+        break;
+      default:
+        return await client.sendMessage(from, {
+          text: "❌ Only image, video, and audio messages are supported"
         }, { quoted: message });
     }
+
+    await client.sendMessage(from, messageContent, options);
+  } catch (error) {
+    console.error("vv Error:", error);
+    await client.sendMessage(from, {
+      text: "❌ Error fetching vv message:\n" + error.message
+    }, { quoted: message });
+  }
 });
 
 cmd({
-    pattern: "vv1",
-    filename: __filename
+  pattern: "vv1",
+  category: "owner",
+  filename: __filename
 }, async (client, message, match, { from, isCreator }) => {
-    try {
-        if (!isCreator) {
-            return;
-        }
+  try {
+    if (!isCreator) {
+      return;
+    }
 
-        if (!match.quoted) {
-            return await client.sendMessage(from, {
-                text: "*🍁 Please reply to a view once message!*"
-            }, { quoted: message });
-        }
+    if (!match.quoted) {
+      return await client.sendMessage(from, {
+        text: "*🍁 Please reply to a view once message!*"
+      }, { quoted: message });
+    }
 
-        const buffer = await match.quoted.download();
-        const mtype = match.quoted.mtype;
-        const options = { quoted: message };
+    const buffer = await match.quoted.download();
+    const mtype = match.quoted.mtype;
+    const options = { quoted: message };
 
-        let messageContent = {};
-        switch (mtype) {
-            case "imageMessage":
-            messageContent = {
-                image: buffer,
-                caption: match.quoted.text || '',
-                mimetype: match.quoted.mimetype || "image/jpeg"
-            };
-            break;
-            case "videoMessage":
-            messageContent = {
-                video: buffer,
-                caption: match.quoted.text || '',
-                mimetype: match.quoted.mimetype || "video/mp4"
-            };
-            break;
-            case "audioMessage":
-            messageContent = {
-                audio: buffer,
-                mimetype: "audio/mp4",
-                ptt: match.quoted.ptt || false
-            };
-            break;
-            default:
-            return await client.sendMessage(from, {
-                text: "❌ Only image, video, and audio messages are supported"
-            }, { quoted: message });
-        }
-
-        await client.sendMessage(message.sender, messageContent, options);
-    } catch (error) {
-        console.error("vv Error:", error);
-        await client.sendMessage(from, {
-            text: "❌ Error fetching vv message:\n" + error.message
+    let messageContent = {};
+    switch (mtype) {
+      case "imageMessage":
+        messageContent = {
+          image: buffer,
+          caption: match.quoted.text || '',
+          mimetype: match.quoted.mimetype || "image/jpeg"
+        };
+        break;
+      case "videoMessage":
+        messageContent = {
+          video: buffer,
+          caption: match.quoted.text || '',
+          mimetype: match.quoted.mimetype || "video/mp4"
+        };
+        break;
+      case "audioMessage":
+        messageContent = {
+          audio: buffer,
+          mimetype: "audio/mp4",
+          ptt: match.quoted.ptt || false
+        };
+        break;
+      default:
+        return await client.sendMessage(from, {
+          text: "❌ Only image, video, and audio messages are supported"
         }, { quoted: message });
     }
+
+    await client.sendMessage(message.sender, messageContent, options);
+  } catch (error) {
+    console.error("vv Error:", error);
+    await client.sendMessage(from, {
+      text: "❌ Error fetching vv message:\n" + error.message
+    }, { quoted: message });
+  }
 });
 
 cmd({
     pattern: "anticall",
+    category: "owner",
     react: "📞",
     filename: __filename,
     fromMe: true
@@ -859,14 +878,14 @@ async (conn, mek, m, { isOwner, reply, from, sender, args, prefix }) => {
 
             const statusEmoji = currentStatus ? '✅ ON' : '❌ OFF';
             replyText = `
-            *📞 Anti-Call Feature Manager*
+*📞 Anti-Call Feature Manager*
 
-            Current Status: *${statusEmoji}*
+Current Status: *${statusEmoji}*
 
-            To turn On:
-            \`\`\`${prefix}anticall on\`\`\`
-            To turn Off:
-            \`\`\`${prefix}anticall off\`\`\`
+To turn On:
+  \`\`\`${prefix}anticall on\`\`\`
+To turn Off:
+  \`\`\`${prefix}anticall off\`\`\`
             `.trim();
             finalReactionEmoji = '❓';
         } else {
@@ -901,6 +920,7 @@ async (conn, mek, m, { isOwner, reply, from, sender, args, prefix }) => {
 
 cmd({
     pattern: "shutdown",
+    category: "owner",
     react: "🛑",
     filename: __filename
 },
@@ -911,6 +931,7 @@ async (conn, mek, m, { from, isOwner, reply }) => {
 
 cmd({
     pattern: "broadcast",
+    category: "owner",
     react: "📢",
     filename: __filename
 },
@@ -927,6 +948,7 @@ async (conn, mek, m, { from, isOwner, args, reply }) => {
 
 cmd({
     pattern: "setpp",
+    category: "owner",
     react: "🖼️",
     filename: __filename
 },
@@ -944,6 +966,7 @@ async (conn, mek, m, { from, isOwner, quoted, reply }) => {
 
 cmd({
     pattern: "clearchats",
+    category: "owner",
     react: "🧹",
     filename: __filename
 },
@@ -962,6 +985,7 @@ async (conn, mek, m, { from, isOwner, reply }) => {
 
 cmd({
     pattern: "gjid",
+    category: "owner",
     react: "📝",
     filename: __filename
 },
@@ -973,40 +997,42 @@ async (conn, mek, m, { from, isOwner, reply }) => {
 });
 
 cmd({
-    pattern: "delete",
-    react: "❌",
-    alias: ["del"],
-    use: '.del',
-    filename: __filename
+pattern: "delete",
+react: "❌",
+alias: ["del"],
+category: "owner",
+use: '.del',
+filename: __filename
 },
 async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants,  isItzcp, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    if (!isOwner ||  !isAdmins) return;
-    try{
-        if (!m.quoted) return reply(mg.notextfordel);
-        const key = {
+if (!isOwner ||  !isAdmins) return;
+try{
+if (!m.quoted) return reply(mg.notextfordel);
+const key = {
             remoteJid: m.chat,
             fromMe: false,
             id: m.quoted.id,
             participant: m.quoted.sender
         }
         await conn.sendMessage(m.chat, { delete: key })
-    } catch(e) {
-        console.log(e);
-        reply('successful..👨‍💻✅')
-    }
+} catch(e) {
+console.log(e);
+reply('successful..👨‍💻✅')
+}
 })
 
 const OWNER_PATH = path.join(__dirname, "../lib/sudo.json");
 
 const ensureOwnerFile = () => {
-    if (!fs.existsSync(OWNER_PATH)) {
-        fs.writeFileSync(OWNER_PATH, JSON.stringify([]));
-    }
+  if (!fs.existsSync(OWNER_PATH)) {
+    fs.writeFileSync(OWNER_PATH, JSON.stringify([]));
+  }
 };
 
 cmd({
     pattern: "setsudo",
     alias: ["addsudo", "addowner"],
+    category: "owner",
     react: "😇",
     filename: __filename
 }, async (conn, mek, m, { from, args, q, isCreator, reply }) => {
@@ -1014,8 +1040,8 @@ cmd({
         if (!isCreator) return reply("_❗This Command Can Only Be Used By My Owner!_");
 
         let target = m.mentionedJid?.[0]
-        || (m.quoted?.sender ?? null)
-        || (args[0]?.replace(/[^0-9]/g, '') + "@s.whatsapp.net");
+            || (m.quoted?.sender ?? null)
+            || (args[0]?.replace(/[^0-9]/g, '') + "@s.whatsapp.net");
 
         if (!target) return reply("❌ Please provide a number or tag/reply a user.");
 
@@ -1043,6 +1069,7 @@ cmd({
 cmd({
     pattern: "delsudo",
     alias: ["delowner", "deletesudo"],
+    category: "owner",
     react: "🫩",
     filename: __filename
 }, async (conn, mek, m, { from, args, q, isCreator, reply }) => {
@@ -1050,8 +1077,8 @@ cmd({
         if (!isCreator) return reply("_❗This Command Can Only Be Used By My Owner!_");
 
         let target = m.mentionedJid?.[0]
-        || (m.quoted?.sender ?? null)
-        || (args[0]?.replace(/[^0-9]/g, '') + "@s.whatsapp.net");
+            || (m.quoted?.sender ?? null)
+            || (args[0]?.replace(/[^0-9]/g, '') + "@s.whatsapp.net");
 
         if (!target) return reply("❌ Please provide a number or tag/reply a user.");
 
@@ -1078,6 +1105,7 @@ cmd({
 cmd({
     pattern: "listsudo",
     alias: ["listowner"],
+    category: "owner",
     react: "📋",
     filename: __filename
 }, async (conn, mek, m, { from, isCreator, reply }) => {
@@ -1110,6 +1138,7 @@ cmd({
     pattern: "person",
     react: "👤",
     alias: ["userinfo", "profile"],
+    category: "owner",
     use: '.person [@tag or reply]',
     filename: __filename
 },
@@ -1117,8 +1146,8 @@ async (conn, mek, m, { from, sender, isGroup, reply, quoted, participants }) => 
     try {
 
         let userJid = quoted?.sender ||
-        mek.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0] ||
-        sender;
+                     mek.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0] ||
+                     sender;
 
         const [user] = await conn.onWhatsApp(userJid).catch(() => []);
         if (!user?.exists) return reply("❌ User not found on WhatsApp");
@@ -1183,24 +1212,24 @@ async (conn, mek, m, { from, sender, isGroup, reply, quoted, participants }) => 
         }
 
         const formattedBio = bio.text ?
-        `${bio.text}\n└─ 📌 ${bio.type} Bio${bio.updated ? ` | 🕒 ${bio.updated.toLocaleString()}` : ''}` :
-        "No bio available";
+            `${bio.text}\n└─ 📌 ${bio.type} Bio${bio.updated ? ` | 🕒 ${bio.updated.toLocaleString()}` : ''}` :
+            "No bio available";
 
         const userInfo = `
-        *GC MEMBER INFORMATION 🧊*
+*GC MEMBER INFORMATION 🧊*
 
-        📛 *Name:* ${userName}
-        🔢 *Number:* ${userJid.replace(/@.+/, '')}
-        📌 *Account Type:* ${user.isBusiness ? "💼 Business" : user.isEnterprise ? "🏢 Enterprise" : "👤 Personal"}
+📛 *Name:* ${userName}
+🔢 *Number:* ${userJid.replace(/@.+/, '')}
+📌 *Account Type:* ${user.isBusiness ? "💼 Business" : user.isEnterprise ? "🏢 Enterprise" : "👤 Personal"}
 
-        *📝 About:*
-        ${formattedBio}
+*📝 About:*
+${formattedBio}
 
-        *⚙️ Account Info:*
-        ✅ Registered: ${user.isUser ? "Yes" : "No"}
-        🛡️ Verified: ${user.verifiedName ? "✅ Verified" : "❌ Not verified"}
-        ${isGroup ? `👥 *Group Role:* ${groupRole}` : ''}
-        `.trim();
+*⚙️ Account Info:*
+✅ Registered: ${user.isUser ? "Yes" : "No"}
+🛡️ Verified: ${user.verifiedName ? "✅ Verified" : "❌ Not verified"}
+${isGroup ? `👥 *Group Role:* ${groupRole}` : ''}
+`.trim();
 
         await conn.sendMessage(from, {
             image: { url: ppUrl },
@@ -1215,445 +1244,450 @@ async (conn, mek, m, { from, sender, isGroup, reply, quoted, participants }) => 
 });
 
 cmd({
-    pattern: "getdp",
-    react: "🖼️",
-    filename: __filename
+  pattern: "getdp",
+  category: "owner",
+  react: "🖼️",
+  filename: __filename
 },
 async (conn, mek, m, { from, sender, reply, isGroup, args }) => {
-    try {
-        const mentioned = mek.message?.extendedTextMessage?.contextInfo?.mentionedJid;
-        const quoted = mek.message?.extendedTextMessage?.contextInfo?.participant;
-        let targetJid;
+  try {
+    const mentioned = mek.message?.extendedTextMessage?.contextInfo?.mentionedJid;
+    const quoted = mek.message?.extendedTextMessage?.contextInfo?.participant;
+    let targetJid;
 
-        if (quoted) {
-            targetJid = quoted;
-        }
-
-        else if (mentioned && mentioned.length > 0) {
-            targetJid = mentioned[0];
-        }
-
-        else if (args[0]) {
-            const num = args[0].replace(/[^0-9]/g, "");
-            if (!num) return reply("⚠️ Invalid number format.\nExample: .getpp 94771234567");
-            targetJid = `${num}@s.whatsapp.net`;
-        }
-
-        else if (isGroup) {
-            targetJid = from;
-        }
-
-        else {
-            targetJid = from.endsWith("@s.whatsapp.net") ? from : sender;
-        }
-
-        let imageUrl;
-        try {
-            imageUrl = await conn.profilePictureUrl(targetJid, "image");
-        } catch {
-            imageUrl = "https://files.catbox.moe/a757v6.jpg";
-        }
-
-        const fakeVCard = {
-            key: {
-                fromMe: false,
-                participant: '0@s.whatsapp.net',
-                remoteJid: "status@broadcast"
-            },
-            message: {
-                contactMessage: {
-                    displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-                    vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃\nORG:dark;\nTEL;type=CELL;type=VOICE;waid=254700000000:+254 700 000000\nEND:VCARD",
-                    jpegThumbnail: Buffer.from([])
-                }
-            }
-        };
-
-        let caption;
-        if (isGroup && targetJid === from) caption = "🖼️ Group Profile Picture";
-        else caption = `🖼️ Profile Picture of @${targetJid.split('@')[0]}`;
-
-        await conn.sendMessage(from, {
-            image: { url: imageUrl },
-            caption,
-            contextInfo: {
-                mentionedJid: [targetJid],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterName: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
-                    newsletterJid: "120363400240662312@newsletter"
-                }
-            }
-        }, { quoted: fakeVCard });
-
-    } catch (err) {
-        console.error("Error in getpp:", err);
-        reply("❌ Failed to fetch profile picture.");
+    if (quoted) {
+      targetJid = quoted;
     }
+
+    else if (mentioned && mentioned.length > 0) {
+      targetJid = mentioned[0];
+    }
+
+    else if (args[0]) {
+      const num = args[0].replace(/[^0-9]/g, "");
+      if (!num) return reply("⚠️ Invalid number format.\nExample: .getpp 94771234567");
+      targetJid = `${num}@s.whatsapp.net`;
+    }
+
+    else if (isGroup) {
+      targetJid = from;
+    }
+
+    else {
+      targetJid = from.endsWith("@s.whatsapp.net") ? from : sender;
+    }
+
+    let imageUrl;
+    try {
+      imageUrl = await conn.profilePictureUrl(targetJid, "image");
+    } catch {
+      imageUrl = "https://files.catbox.moe/a757v6.jpg";
+    }
+
+    const fakeVCard = {
+      key: {
+        fromMe: false,
+        participant: '0@s.whatsapp.net',
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃\nORG:dark;\nTEL;type=CELL;type=VOICE;waid=254700000000:+254 700 000000\nEND:VCARD",
+          jpegThumbnail: Buffer.from([])
+        }
+      }
+    };
+
+    let caption;
+    if (isGroup && targetJid === from) caption = "🖼️ Group Profile Picture";
+    else caption = `🖼️ Profile Picture of @${targetJid.split('@')[0]}`;
+
+    await conn.sendMessage(from, {
+      image: { url: imageUrl },
+      caption,
+      contextInfo: {
+        mentionedJid: [targetJid],
+        forwardingScore: 5,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterName: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
+          newsletterJid: "120363400240662312@newsletter"
+        }
+      }
+    }, { quoted: fakeVCard });
+
+  } catch (err) {
+    console.error("Error in getpp:", err);
+    reply("❌ Failed to fetch profile picture.");
+  }
 });
 
 cmd({
-    pattern: "getpp",
-    react: "🖼️",
-    filename: __filename
+  pattern: "getpp",
+  category: "owner",
+  react: "🖼️",
+  filename: __filename
 },
 async (conn, mek, m, { from, sender, reply, isGroup }) => {
-    try {
-        const quotedMsg = mek.message?.extendedTextMessage?.contextInfo?.participant;
-        const quotedKey = mek.message?.extendedTextMessage?.contextInfo?.quotedMessage;
-        let targetJid;
+  try {
+    const quotedMsg = mek.message?.extendedTextMessage?.contextInfo?.participant;
+    const quotedKey = mek.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+    let targetJid;
 
-        if (isGroup) {
-            if (quotedMsg && quotedKey) {
-                targetJid = quotedMsg;
-            } else {
-                return reply("❌ Please reply to someone's message to get their profile picture.");
-            }
-        } else {
-            targetJid = from.endsWith("@s.whatsapp.net") ? from : sender;
-        }
-
-        let imageUrl;
-        try {
-            imageUrl = await conn.profilePictureUrl(targetJid, 'image');
-        } catch {
-            imageUrl = "https://files.catbox.moe/a757v6.jpg";
-        }
-
-        const fakeVCard = {
-            key: {
-                fromMe: false,
-                participant: '0@s.whatsapp.net',
-                remoteJid: "status@broadcast"
-            },
-            message: {
-                contactMessage: {
-                    displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-                    vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃\nORG:dark;\nTEL;type=CELL;type=VOICE;waid=254700000000:+254 700 000000\nEND:VCARD",
-                    jpegThumbnail: Buffer.from([])
-                }
-            }
-        };
-
-        await conn.sendMessage(from, {
-            image: { url: imageUrl },
-            caption: `🖼️ Profile Picture of @${targetJid.split('@')[0]}`,
-            contextInfo: {
-                mentionedJid: [targetJid],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterName: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
-                    newsletterJid: "120363400240662312@newsletter"
-                }
-            }
-        }, { quoted: fakeVCard });
-
-    } catch (err) {
-        console.error("Error in getpp:", err);
-        reply("❌ Failed to fetch profile picture.");
+    if (isGroup) {
+      if (quotedMsg && quotedKey) {
+        targetJid = quotedMsg;
+      } else {
+        return reply("❌ Please reply to someone's message to get their profile picture.");
+      }
+    } else {
+      targetJid = from.endsWith("@s.whatsapp.net") ? from : sender;
     }
+
+    let imageUrl;
+    try {
+      imageUrl = await conn.profilePictureUrl(targetJid, 'image');
+    } catch {
+      imageUrl = "https://files.catbox.moe/a757v6.jpg";
+    }
+
+    const fakeVCard = {
+      key: {
+        fromMe: false,
+        participant: '0@s.whatsapp.net',
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃\nORG:dark;\nTEL;type=CELL;type=VOICE;waid=254700000000:+254 700 000000\nEND:VCARD",
+          jpegThumbnail: Buffer.from([])
+        }
+      }
+    };
+
+    await conn.sendMessage(from, {
+      image: { url: imageUrl },
+      caption: `🖼️ Profile Picture of @${targetJid.split('@')[0]}`,
+      contextInfo: {
+        mentionedJid: [targetJid],
+        forwardingScore: 5,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterName: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
+          newsletterJid: "120363400240662312@newsletter"
+        }
+      }
+    }, { quoted: fakeVCard });
+
+  } catch (err) {
+    console.error("Error in getpp:", err);
+    reply("❌ Failed to fetch profile picture.");
+  }
 });
 
 const SAFETY = {
-    MAX_JIDS: 50,
-    BASE_DELAY: 2000,
-    EXTRA_DELAY: 4000,
+  MAX_JIDS: 50,
+  BASE_DELAY: 2000,
+  EXTRA_DELAY: 4000,
 };
 
 cmd({
-    pattern: "forward",
-    alias: ["fwd"],
-    filename: __filename
+  pattern: "forward",
+  alias: ["fwd"],
+  category: "owner",
+  filename: __filename
 }, async (client, message, match, { isOwner }) => {
-    try {
+  try {
 
-        if (!isOwner) return await message.reply("*📛 Owner Only Command*");
+    if (!isOwner) return await message.reply("*📛 Owner Only Command*");
 
-        if (!message.quoted) return await message.reply("*🍁 Please reply to a message or file to forward*");
+    if (!message.quoted) return await message.reply("*🍁 Please reply to a message or file to forward*");
 
-        let jidInput = "";
-        if (typeof match === "string") {
-            jidInput = match.trim();
-        } else if (Array.isArray(match)) {
-            jidInput = match.join(" ").trim();
-        } else if (match && typeof match === "object") {
-            jidInput = match.text || "";
-        }
-
-        const rawJids = jidInput.split(/[\s,]+/).filter(jid => jid.trim().length > 0);
-
-        const validJids = rawJids
-        .map(jid => {
-            let clean = jid.trim();
-            if (clean.endsWith('@g.us') || clean.endsWith('@s.whatsapp.net')) return clean;
-
-            let numbersOnly = clean.replace(/[^0-9]/g, '');
-            if (numbersOnly.length >= 17) return `${numbersOnly}@g.us`;
-            else if (numbersOnly.length >= 10) return `${numbersOnly}@s.whatsapp.net`;
-            return null;
-        })
-        .filter(jid => jid !== null)
-        .slice(0, SAFETY.MAX_JIDS);
-
-        if (validJids.length === 0) {
-            return await message.reply("❌ *Please provide valid JIDs or Numbers!*");
-        }
-
-        const forwardMessage = message.quoted.fakeObj;
-
-        let successCount = 0;
-        let failedCount = 0;
-
-        await message.reply(`🚀 *Forwarding started to ${validJids.length} chats...*`);
-
-        for (const [index, jid] of validJids.entries()) {
-            try {
-
-                await client.sendMessage(jid, { forward: forwardMessage });
-
-                successCount++;
-
-                if ((index + 1) % 5 === 0 || (index + 1) === validJids.length) {
-                    await client.sendMessage(message.chat, {
-                        text: `🔄 *Forwarding Progress:*\n\n✅ Sent: ${index + 1}/${validJids.length} chats`,
-                        edit: statusMsg.key
-                    });
-                }
-
-                const delayTime = (index + 1) % 10 === 0 ? SAFETY.EXTRA_DELAY : SAFETY.BASE_DELAY;
-                await new Promise(resolve => setTimeout(resolve, delayTime));
-
-            } catch (error) {
-                failedCount++;
-                console.error(`Forward failed for ${jid}:`, error);
-            }
-        }
-
-        let report = `✅ *Forward Complete*\n\n` +
-        `📤 *Success:* ${successCount}\n` +
-        `❌ *Failed:* ${failedCount}`;
-
-        await message.reply(report);
-
-    } catch (error) {
-        console.error("Forward Error:", error);
-        await message.reply(`💢 Error: ${error.message}`);
+    let jidInput = "";
+    if (typeof match === "string") {
+      jidInput = match.trim();
+    } else if (Array.isArray(match)) {
+      jidInput = match.join(" ").trim();
+    } else if (match && typeof match === "object") {
+      jidInput = match.text || "";
     }
+
+    const rawJids = jidInput.split(/[\s,]+/).filter(jid => jid.trim().length > 0);
+
+    const validJids = rawJids
+      .map(jid => {
+        let clean = jid.trim();
+        if (clean.endsWith('@g.us') || clean.endsWith('@s.whatsapp.net')) return clean;
+
+        let numbersOnly = clean.replace(/[^0-9]/g, '');
+        if (numbersOnly.length >= 17) return `${numbersOnly}@g.us`;
+        else if (numbersOnly.length >= 10) return `${numbersOnly}@s.whatsapp.net`;
+        return null;
+      })
+      .filter(jid => jid !== null)
+      .slice(0, SAFETY.MAX_JIDS);
+
+    if (validJids.length === 0) {
+      return await message.reply("❌ *Please provide valid JIDs or Numbers!*");
+    }
+
+    const forwardMessage = message.quoted.fakeObj;
+
+    let successCount = 0;
+    let failedCount = 0;
+
+    await message.reply(`🚀 *Forwarding started to ${validJids.length} chats...*`);
+
+    for (const [index, jid] of validJids.entries()) {
+      try {
+
+        await client.sendMessage(jid, { forward: forwardMessage });
+
+        successCount++;
+
+        if ((index + 1) % 5 === 0 || (index + 1) === validJids.length) {
+          await client.sendMessage(message.chat, {
+            text: `🔄 *Forwarding Progress:*\n\n✅ Sent: ${index + 1}/${validJids.length} chats`,
+            edit: statusMsg.key
+          });
+        }
+
+        const delayTime = (index + 1) % 10 === 0 ? SAFETY.EXTRA_DELAY : SAFETY.BASE_DELAY;
+        await new Promise(resolve => setTimeout(resolve, delayTime));
+
+      } catch (error) {
+        failedCount++;
+        console.error(`Forward failed for ${jid}:`, error);
+      }
+    }
+
+    let report = `✅ *Forward Complete*\n\n` +
+                 `📤 *Success:* ${successCount}\n` +
+                 `❌ *Failed:* ${failedCount}`;
+
+    await message.reply(report);
+
+  } catch (error) {
+    console.error("Forward Error:", error);
+    await message.reply(`💢 Error: ${error.message}`);
+  }
 });
 
 cmd({
-    pattern: "forward2",
-    alias: ["fwd2"],
-    filename: __filename
+  pattern: "forward2",
+  alias: ["fwd2"],
+  category: "owner",
+  filename: __filename
 }, async (client, message, match, { isOwner }) => {
-    try {
+  try {
 
-        if (!isOwner) return await message.reply("*📛 Owner Only Command*");
+    if (!isOwner) return await message.reply("*📛 Owner Only Command*");
 
-        if (!message.quoted) return await message.reply("*🍁 Please reply to a message*");
+    if (!message.quoted) return await message.reply("*🍁 Please reply to a message*");
 
-        let jidInput = "";
+    let jidInput = "";
 
-        if (typeof match === "string") {
-            jidInput = match.trim();
-        } else if (Array.isArray(match)) {
-            jidInput = match.join(" ").trim();
-        } else if (match && typeof match === "object") {
-            jidInput = match.text || "";
-        }
-
-        const rawJids = jidInput.split(/[\s,]+/).filter(jid => jid.trim().length > 0);
-
-        const validJids = rawJids
-        .map(jid => {
-
-            const cleanJid = jid.replace(/@g\.us$/i, "");
-
-            return /^\d+$/.test(cleanJid) ? `${cleanJid}@g.us` : null;
-        })
-        .filter(jid => jid !== null)
-        .slice(0, SAFETY.MAX_JIDS);
-
-        if (validJids.length === 0) {
-            return await message.reply(
-            "❌ No valid group JIDs found\n" +
-            "Examples:\n" +
-            ".fwd 120363411055156472@g.us,120363333939099948@g.us\n" +
-            ".fwd 120363411055156472 120363333939099948"
-            );
-        }
-
-        let messageContent = {};
-        const mtype = message.quoted.mtype;
-
-        if (["imageMessage", "videoMessage", "audioMessage", "stickerMessage", "documentMessage"].includes(mtype)) {
-            const buffer = await message.quoted.download();
-
-            switch (mtype) {
-                case "imageMessage":
-                messageContent = {
-                    image: buffer,
-                    caption: message.quoted.text || '',
-                    mimetype: message.quoted.mimetype || "image/jpeg"
-                };
-                break;
-                case "videoMessage":
-                messageContent = {
-                    video: buffer,
-                    caption: message.quoted.text || '',
-                    mimetype: message.quoted.mimetype || "video/mp4"
-                };
-                break;
-                case "audioMessage":
-                messageContent = {
-                    audio: buffer,
-                    mimetype: message.quoted.mimetype || "audio/mp4",
-                    ptt: message.quoted.ptt || false
-                };
-                break;
-                case "stickerMessage":
-                messageContent = {
-                    sticker: buffer,
-                    mimetype: message.quoted.mimetype || "image/webp"
-                };
-                break;
-                case "documentMessage":
-                messageContent = {
-                    document: buffer,
-                    mimetype: message.quoted.mimetype || "application/octet-stream",
-                    fileName: message.quoted.fileName || "document"
-                };
-                break;
-            }
-        }
-
-        else if (mtype === "extendedTextMessage" || mtype === "conversation") {
-            messageContent = {
-                text: message.quoted.text
-            };
-        }
-
-        else {
-            try {
-
-                messageContent = message.quoted;
-            } catch (e) {
-                return await message.reply("❌ Unsupported message type");
-            }
-        }
-
-        let successCount = 0;
-        const failedJids = [];
-
-        for (const [index, jid] of validJids.entries()) {
-            try {
-                await client.sendMessage(jid, messageContent);
-                successCount++;
-
-                if ((index + 1) % 10 === 0) {
-                    await message.reply(`🔄 Sent to ${index + 1}/${validJids.length} groups...`);
-                }
-
-                const delayTime = (index + 1) % 10 === 0 ? SAFETY.EXTRA_DELAY : SAFETY.BASE_DELAY;
-                await new Promise(resolve => setTimeout(resolve, delayTime));
-
-            } catch (error) {
-                failedJids.push(jid.replace('@g.us', ''));
-                await new Promise(resolve => setTimeout(resolve, SAFETY.BASE_DELAY));
-            }
-        }
-
-        let report = `✅ *Forward Complete*\n\n` +
-        `📤 Success: ${successCount}/${validJids.length}\n` +
-        `📦 Content Type: ${mtype.replace('Message', '') || 'text'}\n`;
-
-        if (failedJids.length > 0) {
-            report += `\n❌ Failed (${failedJids.length}): ${failedJids.slice(0, 5).join(', ')}`;
-            if (failedJids.length > 5) report += ` +${failedJids.length - 5} more`;
-        }
-
-        if (rawJids.length > SAFETY.MAX_JIDS) {
-            report += `\n⚠️ Note: Limited to first ${SAFETY.MAX_JIDS} JIDs`;
-        }
-
-        await message.reply(report);
-
-    } catch (error) {
-        console.error("Forward Error:", error);
-        await message.reply(
-        `💢 Error: ${error.message.substring(0, 100)}\n\n` +
-        `Please try again or check:\n` +
-        `1. JID formatting\n` +
-        `2. Media type support\n` +
-        `3. Bot permissions`
-        );
+    if (typeof match === "string") {
+      jidInput = match.trim();
+    } else if (Array.isArray(match)) {
+      jidInput = match.join(" ").trim();
+    } else if (match && typeof match === "object") {
+      jidInput = match.text || "";
     }
+
+    const rawJids = jidInput.split(/[\s,]+/).filter(jid => jid.trim().length > 0);
+
+    const validJids = rawJids
+      .map(jid => {
+
+        const cleanJid = jid.replace(/@g\.us$/i, "");
+
+        return /^\d+$/.test(cleanJid) ? `${cleanJid}@g.us` : null;
+      })
+      .filter(jid => jid !== null)
+      .slice(0, SAFETY.MAX_JIDS);
+
+    if (validJids.length === 0) {
+      return await message.reply(
+        "❌ No valid group JIDs found\n" +
+        "Examples:\n" +
+        ".fwd 120363411055156472@g.us,120363333939099948@g.us\n" +
+        ".fwd 120363411055156472 120363333939099948"
+      );
+    }
+
+    let messageContent = {};
+    const mtype = message.quoted.mtype;
+
+    if (["imageMessage", "videoMessage", "audioMessage", "stickerMessage", "documentMessage"].includes(mtype)) {
+      const buffer = await message.quoted.download();
+
+      switch (mtype) {
+        case "imageMessage":
+          messageContent = {
+            image: buffer,
+            caption: message.quoted.text || '',
+            mimetype: message.quoted.mimetype || "image/jpeg"
+          };
+          break;
+        case "videoMessage":
+          messageContent = {
+            video: buffer,
+            caption: message.quoted.text || '',
+            mimetype: message.quoted.mimetype || "video/mp4"
+          };
+          break;
+        case "audioMessage":
+          messageContent = {
+            audio: buffer,
+            mimetype: message.quoted.mimetype || "audio/mp4",
+            ptt: message.quoted.ptt || false
+          };
+          break;
+        case "stickerMessage":
+          messageContent = {
+            sticker: buffer,
+            mimetype: message.quoted.mimetype || "image/webp"
+          };
+          break;
+        case "documentMessage":
+          messageContent = {
+            document: buffer,
+            mimetype: message.quoted.mimetype || "application/octet-stream",
+            fileName: message.quoted.fileName || "document"
+          };
+          break;
+      }
+    }
+
+    else if (mtype === "extendedTextMessage" || mtype === "conversation") {
+      messageContent = {
+        text: message.quoted.text
+      };
+    }
+
+    else {
+      try {
+
+        messageContent = message.quoted;
+      } catch (e) {
+        return await message.reply("❌ Unsupported message type");
+      }
+    }
+
+    let successCount = 0;
+    const failedJids = [];
+
+    for (const [index, jid] of validJids.entries()) {
+      try {
+        await client.sendMessage(jid, messageContent);
+        successCount++;
+
+        if ((index + 1) % 10 === 0) {
+          await message.reply(`🔄 Sent to ${index + 1}/${validJids.length} groups...`);
+        }
+
+        const delayTime = (index + 1) % 10 === 0 ? SAFETY.EXTRA_DELAY : SAFETY.BASE_DELAY;
+        await new Promise(resolve => setTimeout(resolve, delayTime));
+
+      } catch (error) {
+        failedJids.push(jid.replace('@g.us', ''));
+        await new Promise(resolve => setTimeout(resolve, SAFETY.BASE_DELAY));
+      }
+    }
+
+    let report = `✅ *Forward Complete*\n\n` +
+                 `📤 Success: ${successCount}/${validJids.length}\n` +
+                 `📦 Content Type: ${mtype.replace('Message', '') || 'text'}\n`;
+
+    if (failedJids.length > 0) {
+      report += `\n❌ Failed (${failedJids.length}): ${failedJids.slice(0, 5).join(', ')}`;
+      if (failedJids.length > 5) report += ` +${failedJids.length - 5} more`;
+    }
+
+    if (rawJids.length > SAFETY.MAX_JIDS) {
+      report += `\n⚠️ Note: Limited to first ${SAFETY.MAX_JIDS} JIDs`;
+    }
+
+    await message.reply(report);
+
+  } catch (error) {
+    console.error("Forward Error:", error);
+    await message.reply(
+      `💢 Error: ${error.message.substring(0, 100)}\n\n` +
+      `Please try again or check:\n` +
+      `1. JID formatting\n` +
+      `2. Media type support\n` +
+      `3. Bot permissions`
+    );
+  }
 });
 
 cmd({
     pattern: "privacy",
     alias: ["privacymenu"],
+    category: "owner",
     react: "🔐",
     filename: __filename
 },
 async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
     try {
         let privacyMenu = `╭━━〔 *Privacy Settings* 〕━━┈⊷
-        ┃◈╭─────────────·๏
-        ┃◈┃• blocklist - View blocked users
-        ┃◈┃• getbio - Get user's bio
-        ┃◈┃• setppall - Set profile pic privacy
-        ┃◈┃• setonline - Set online privacy
-        ┃◈┃• setpp - Change bot's profile pic
-        ┃◈┃• setmyname - Change bot's name
-        ┃◈┃• updatebio - Change bot's bio
-        ┃◈┃• groupsprivacy - Set group add privacy
-        ┃◈┃• getprivacy - View current privacy settings
-        ┃◈┃• getpp - Get user's profile picture
-        ┃◈┃
-        ┃◈┃ *Options for privacy commands:*
-        ┃◈┃• all - Everyone
-        ┃◈┃• contacts - My contacts only
-        ┃◈┃• contact_blacklist - Contacts except blocked
-        ┃◈┃• none - Nobody
-        ┃◈┃• match_last_seen - Match last seen
-        ┃◈└───────────┈⊷
-        ╰──────────────┈⊷
-        *Note:* Most commands are owner-only`;
+┃◈╭─────────────·๏
+┃◈┃• blocklist - View blocked users
+┃◈┃• getbio - Get user's bio
+┃◈┃• setppall - Set profile pic privacy
+┃◈┃• setonline - Set online privacy
+┃◈┃• setpp - Change bot's profile pic
+┃◈┃• setmyname - Change bot's name
+┃◈┃• updatebio - Change bot's bio
+┃◈┃• groupsprivacy - Set group add privacy
+┃◈┃• getprivacy - View current privacy settings
+┃◈┃• getpp - Get user's profile picture
+┃◈┃
+┃◈┃ *Options for privacy commands:*
+┃◈┃• all - Everyone
+┃◈┃• contacts - My contacts only
+┃◈┃• contact_blacklist - Contacts except blocked
+┃◈┃• none - Nobody
+┃◈┃• match_last_seen - Match last seen
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+*Note:* Most commands are owner-only`;
 
         const FakeVCard = {
-            key: {
-                fromMe: false,
-                participant: "0@s.whatsapp.net",
-                remoteJid: "status@broadcast"
-            },
-            message: {
-                contactMessage: {
-                    displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-                    vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
-                }
-            }
-        };
+      key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
+        }
+      }
+    };
 
         await conn.sendMessage(
-        from,
-        {
-            image: { url: config.ALIVE_IMG },
-            caption: privacyMenu,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363400240662312@newsletter',
-                    newsletterName: "Privacy Settings",
-                    serverMessageId: 143
+            from,
+            {
+                image: { url: config.ALIVE_IMG },
+                caption: privacyMenu,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363400240662312@newsletter',
+                        newsletterName: "Privacy Settings",
+                        serverMessageId: 143
+                    }
                 }
-            }
-        },
-        { quoted: FakeVCard }
+            },
+            { quoted: FakeVCard }
         );
 
     } catch (e) {
@@ -1664,6 +1698,7 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 
 cmd({
     pattern: "blocklist",
+    category: "owner",
     react: "📋",
     filename: __filename
 },
@@ -1679,8 +1714,8 @@ async (conn, mek, m, { from, isOwner, reply }) => {
         }
 
         const list = blockedUsers
-        .map((user, i) => `🚧 BLOCKED ${user.split('@')[0]}`)
-        .join('\n');
+            .map((user, i) => `🚧 BLOCKED ${user.split('@')[0]}`)
+            .join('\n');
 
         const count = blockedUsers.length;
         reply(`📋 Blocked Users (${count}):\n\n${list}`);
@@ -1692,6 +1727,7 @@ async (conn, mek, m, { from, isOwner, reply }) => {
 
 cmd({
     pattern: "getbio",
+    category: "owner",
     filename: __filename,
 }, async (conn, mek, m, { args, reply }) => {
     try {
@@ -1707,6 +1743,7 @@ cmd({
 
 cmd({
     pattern: "setppall",
+    category: "owner",
     react: "🔐",
     filename: __filename
 },
@@ -1730,6 +1767,7 @@ async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, 
 
 cmd({
     pattern: "setonline",
+    category: "owner",
     react: "🔐",
     filename: __filename
 },
@@ -1753,6 +1791,7 @@ async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, 
 
 cmd({
     pattern: "setpp",
+    category: "owner",
     react: "🖼️",
     filename: __filename
 },
@@ -1779,6 +1818,7 @@ async (conn, mek, m, { from, isOwner, quoted, reply }) => {
 
 cmd({
     pattern: "setmyname",
+    category: "owner",
     react: "⚙️",
     filename: __filename
 },
@@ -1809,6 +1849,7 @@ async (conn, mek, m, { from, isOwner, reply, args }) => {
 cmd({
     pattern: "updatebio",
     react: "🥏",
+    category: "owner",
     use: '.updatebio',
     filename: __filename
 },
@@ -1827,6 +1868,7 @@ async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, 
 
 cmd({
     pattern: "groupsprivacy",
+    category: "owner",
     react: "🔐",
     filename: __filename
 },
@@ -1850,6 +1892,7 @@ async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, 
 
 cmd({
     pattern: "getprivacy",
+    category: "owner",
     use: '.getprivacy',
     filename: __filename
 },
@@ -1860,15 +1903,15 @@ async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, 
         if (!duka) return reply('🚫 *Failed to fetch privacy settings*');
 
         let puka = `
-        ╭───「 𝙿𝚁𝙸𝚅𝙰𝙲𝚈  」───◆
-        │ ∘ 𝚁𝚎𝚊𝚍 𝚁𝚎𝚌𝚎𝚒𝚙𝚝: ${duka.readreceipts}
-        │ ∘ 𝙿𝚛𝚘𝚏𝚒𝚕𝚎 𝙿𝚒𝚌𝚝𝚞𝚛𝚎: ${duka.profile}
-        │ ∘ 𝚂𝚝𝚊𝚝𝚞𝚜: ${duka.status}
-        │ ∘ 𝙾𝚗𝚕𝚒𝚗𝚎: ${duka.online}
-        │ ∘ 𝙻𝚊𝚜𝚝 𝚂𝚎𝚎𝚗: ${duka.last}
-        │ ∘ 𝙶𝚛𝚘𝚞𝚙 𝙿𝚛𝚒𝚟𝚊𝚌𝚢: ${duka.groupadd}
-        │ ∘ 𝙲𝚊𝚕𝚕 𝙿𝚛𝚒𝚟𝚊𝚌𝚢: ${duka.calladd}
-        ╰────────────────────`;
+╭───「 𝙿𝚁𝙸𝚅𝙰𝙲𝚈  」───◆
+│ ∘ 𝚁𝚎𝚊𝚍 𝚁𝚎𝚌𝚎𝚒𝚙𝚝: ${duka.readreceipts}
+│ ∘ 𝙿𝚛𝚘𝚏𝚒𝚕𝚎 𝙿𝚒𝚌𝚝𝚞𝚛𝚎: ${duka.profile}
+│ ∘ 𝚂𝚝𝚊𝚝𝚞𝚜: ${duka.status}
+│ ∘ 𝙾𝚗𝚕𝚒𝚗𝚎: ${duka.online}
+│ ∘ 𝙻𝚊𝚜𝚝 𝚂𝚎𝚎𝚗: ${duka.last}
+│ ∘ 𝙶𝚛𝚘𝚞𝚙 𝙿𝚛𝚒𝚟𝚊𝚌𝚢: ${duka.groupadd}
+│ ∘ 𝙲𝚊𝚕𝚕 𝙿𝚛𝚒𝚟𝚊𝚌𝚢: ${duka.calladd}
+╰────────────────────`;
         await conn.sendMessage(from, { text: puka }, { quoted: mek });
     } catch (e) {
         reply('🚫 *An error occurred!*\n\n' + e);
@@ -1880,6 +1923,7 @@ cmd({
     pattern: "chatbot",
     alias: ["chatb"],
     react: "🎊",
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -1900,6 +1944,7 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
 cmd({
     pattern: "admin-events",
     alias: ["adminevents"],
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -1920,6 +1965,7 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
 cmd({
     pattern: "welcome",
     alias: ["welcomeset"],
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -1941,6 +1987,7 @@ cmd({
     pattern: "setprefix",
     alias: ["prefix"],
     react: "🔧",
+    category: "owner",
     filename: __filename,
 }, async (conn, mek, m, { from, args, isCreator, reply }) => {
     if (!isCreator) return reply("*📛 Only the owner can use this command!*");
@@ -1957,6 +2004,7 @@ cmd({
     pattern: "mode",
     alias: ["setmode"],
     react: "🫟",
+    category: "owner",
     filename: __filename,
 }, async (conn, mek, m, { from, args, isCreator, reply }) => {
     if (!isCreator) return reply("*📛 Only the owner can use this command!*");
@@ -1981,6 +2029,7 @@ cmd({
 cmd({
     pattern: "auto-typing",
     description: "Enable or disable auto-typing feature.",
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -1999,6 +2048,7 @@ cmd({
     pattern: "mention-reply",
     alias: ["menetionreply", "mee"],
     description: "Set bot status to always online or offline.",
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -2020,6 +2070,7 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
 cmd({
     pattern: "always-online",
     alias: ["alwaysonline"],
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -2041,6 +2092,7 @@ cmd({
     pattern: "auto-recording",
     alias: ["autorecoding"],
     description: "Enable or disable auto-recording feature.",
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -2064,6 +2116,7 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
 cmd({
     pattern: "auto-seen",
     alias: ["autostatusview"],
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -2085,6 +2138,7 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
 cmd({
     pattern: "status-react",
     alias: ["statusreaction"],
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -2106,6 +2160,7 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
 cmd({
     pattern: "read-message",
     alias: ["autoread"],
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -2127,6 +2182,7 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
 cmd({
     pattern: "auto-voice",
     alias: ["autovoice"],
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -2148,6 +2204,7 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
 cmd({
     pattern: "anti-bad",
     alias: ["antibadword"],
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -2169,6 +2226,7 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
 cmd({
     pattern: "auto-sticker",
     alias: ["autosticker"],
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -2190,6 +2248,7 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
 cmd({
     pattern: "auto-reply",
     alias: ["autoreply"],
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -2211,6 +2270,7 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
 cmd({
     pattern: "auto-react",
     alias: ["autoreact"],
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -2232,6 +2292,7 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
 cmd({
     pattern: "status-reply",
     alias: ["autostatusreply"],
+    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { from, args, isCreator, reply }) => {
@@ -2251,84 +2312,88 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
 });
 
 cmd({
-    pattern: "antilink",
-    alias: ["antilinks"],
-    react: "🚫",
-    filename: __filename
+  pattern: "antilink",
+  alias: ["antilinks"],
+  category: "owner",
+  react: "🚫",
+  filename: __filename
 }, async (conn, mek, m, { isGroup, isAdmins, isBotAdmins, args, reply }) => {
-    try {
-        if (!isGroup) return reply('This command can only be used in a group.');
-        if (!isBotAdmins) return reply('Bot must be an admin to use this command.');
-        if (!isAdmins) return reply('You must be an admin to use this command.');
+  try {
+    if (!isGroup) return reply('This command can only be used in a group.');
+    if (!isBotAdmins) return reply('Bot must be an admin to use this command.');
+    if (!isAdmins) return reply('You must be an admin to use this command.');
 
-        if (args[0] === "on") {
-            config.ANTI_LINK = "true";
-            reply("✅ ANTI_LINK has been enabled.");
-        } else if (args[0] === "off") {
-            config.ANTI_LINK = "false";
-            reply("❌ ANTI_LINK has been disabled.");
-        } else {
-            reply("Usage: *.antilink on/off*");
-        }
-    } catch (e) {
-        reply(`Error: ${e.message}`);
+    if (args[0] === "on") {
+      config.ANTI_LINK = "true";
+      reply("✅ ANTI_LINK has been enabled.");
+    } else if (args[0] === "off") {
+      config.ANTI_LINK = "false";
+      reply("❌ ANTI_LINK has been disabled.");
+    } else {
+      reply("Usage: *.antilink on/off*");
     }
+  } catch (e) {
+    reply(`Error: ${e.message}`);
+  }
 });
 
 cmd({
-    pattern: "antilinkkick",
-    alias: ["kicklink"],
-    react: "⚠️",
-    filename: __filename
+  pattern: "antilinkkick",
+  alias: ["kicklink"],
+  category: "owner",
+  react: "⚠️",
+  filename: __filename
 }, async (conn, mek, m, { isGroup, isAdmins, isBotAdmins, args, reply }) => {
-    try {
-        if (!isGroup) return reply('This command can only be used in a group.');
-        if (!isBotAdmins) return reply('Bot must be an admin to use this command.');
-        if (!isAdmins) return reply('You must be an admin to use this command.');
+  try {
+    if (!isGroup) return reply('This command can only be used in a group.');
+    if (!isBotAdmins) return reply('Bot must be an admin to use this command.');
+    if (!isAdmins) return reply('You must be an admin to use this command.');
 
-        if (args[0] === "on") {
-            config.ANTI_LINK_KICK = "true";
-            reply("✅ ANTI_LINK_KICK has been enabled.");
-        } else if (args[0] === "off") {
-            config.ANTI_LINK_KICK = "false";
-            reply("❌ ANTI_LINK_KICK has been disabled.");
-        } else {
-            reply("Usage: *.antilinkkick on/off*");
-        }
-    } catch (e) {
-        reply(`Error: ${e.message}`);
+    if (args[0] === "on") {
+      config.ANTI_LINK_KICK = "true";
+      reply("✅ ANTI_LINK_KICK has been enabled.");
+    } else if (args[0] === "off") {
+      config.ANTI_LINK_KICK = "false";
+      reply("❌ ANTI_LINK_KICK has been disabled.");
+    } else {
+      reply("Usage: *.antilinkkick on/off*");
     }
+  } catch (e) {
+    reply(`Error: ${e.message}`);
+  }
 });
 
 cmd({
-    pattern: "deletelink",
-    alias: ["linksdelete"],
-    react: "❌",
-    filename: __filename
+  pattern: "deletelink",
+  alias: ["linksdelete"],
+  category: "owner",
+  react: "❌",
+  filename: __filename
 }, async (conn, mek, m, { isGroup, isAdmins, isBotAdmins, args, reply }) => {
-    try {
-        if (!isGroup) return reply('This command can only be used in a group.');
-        if (!isBotAdmins) return reply('Bot must be an admin to use this command.');
-        if (!isAdmins) return reply('You must be an admin to use this command.');
+  try {
+    if (!isGroup) return reply('This command can only be used in a group.');
+    if (!isBotAdmins) return reply('Bot must be an admin to use this command.');
+    if (!isAdmins) return reply('You must be an admin to use this command.');
 
-        if (args[0] === "on") {
-            config.DELETE_LINKS = "true";
-            reply("✅ DELETE_LINKS is now enabled.");
-        } else if (args[0] === "off") {
-            config.DELETE_LINKS = "false";
-            reply("❌ DELETE_LINKS is now disabled.");
-        } else {
-            reply("Usage: *.deletelink on/off*");
-        }
-    } catch (e) {
-        reply(`Error: ${e.message}`);
+    if (args[0] === "on") {
+      config.DELETE_LINKS = "true";
+      reply("✅ DELETE_LINKS is now enabled.");
+    } else if (args[0] === "off") {
+      config.DELETE_LINKS = "false";
+      reply("❌ DELETE_LINKS is now disabled.");
+    } else {
+      reply("Usage: *.deletelink on/off*");
     }
+  } catch (e) {
+    reply(`Error: ${e.message}`);
+  }
 });
 
 cmd({
     pattern: "heartreact",
     react: "💖",
     alias: ["heart"],
+    category: "owner",
     filename: __filename,
 }, async (conn, mek, m, { from, args, isOwner, reply }) => {
     if (!isOwner) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
@@ -2350,6 +2415,7 @@ cmd({
     pattern: "customreact",
     react: "💖",
     alias: ["creact"],
+    category: "owner",
     filename: __filename,
 }, async (conn, mek, m, { from, args, isOwner, reply }) => {
     if (!isOwner) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");

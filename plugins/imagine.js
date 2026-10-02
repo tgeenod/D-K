@@ -11,206 +11,212 @@ const config = require('../config');
 const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('../lib/functions');
 
 cmd({
-    pattern: "rw",
-    alias: ["randomwall", "wallpaper"],
-    react: "🌌",
-    use: ".rw <keyword>",
-    filename: __filename
+  pattern: "rw",
+  alias: ["randomwall", "wallpaper"],
+  react: "🌌",
+  category: "imagine",
+  use: ".rw <keyword>",
+  filename: __filename
 }, async (conn, m, store, { from, args, reply }) => {
-    try {
-        const query = args.join(" ") || "random";
-        const apiUrl = `https://pikabotzapi.vercel.app/random/randomwall/?apikey=anya-md&query=${encodeURIComponent(query)}`;
+  try {
+    const query = args.join(" ") || "random";
+    const apiUrl = `https://pikabotzapi.vercel.app/random/randomwall/?apikey=anya-md&query=${encodeURIComponent(query)}`;
 
-        const { data } = await axios.get(apiUrl);
+    const { data } = await axios.get(apiUrl);
 
-        if (data.status && data.imgUrl) {
-            const caption = `🌌 *Random Wallpaper: ${query}*\n\n> *© Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
-            await conn.sendMessage(from, { image: { url: data.imgUrl }, caption }, { quoted: m });
-        } else {
-            reply(`❌ No wallpaper found for *"${query}"*.`);
-        }
-    } catch (error) {
-        console.error("Wallpaper Error:", error);
-        reply("❌ An error occurred while fetching the wallpaper. Please try again.");
+    if (data.status && data.imgUrl) {
+      const caption = `🌌 *Random Wallpaper: ${query}*\n\n> *© Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
+      await conn.sendMessage(from, { image: { url: data.imgUrl }, caption }, { quoted: m });
+    } else {
+      reply(`❌ No wallpaper found for *"${query}"*.`);
     }
+  } catch (error) {
+    console.error("Wallpaper Error:", error);
+    reply("❌ An error occurred while fetching the wallpaper. Please try again.");
+  }
 });
 
 cmd({
-    pattern: "topixel",
-    alias: ["pixel"],
-    use: ".topixel <size>",
-    filename: __filename
+  pattern: "topixel",
+  alias: ["pixel"],
+  category: "imagine",
+  use: ".topixel <size>",
+  filename: __filename
 }, async (conn, mek, m, { from, q, reply }) => {
-    try {
-        const quoted = m.quoted ? m.quoted : m
-        const mime = (quoted.msg || quoted).mimetype || ""
+  try {
+    const quoted = m.quoted ? m.quoted : m
+    const mime = (quoted.msg || quoted).mimetype || ""
 
-        if (!mime.startsWith("image/")) return reply("🖼️ *Reply to an image!*")
+    if (!mime.startsWith("image/")) return reply("🖼️ *Reply to an image!*")
 
-        let pixelSize = parseInt(q) || 32
-        if (pixelSize < 8) pixelSize = 8
-        if (pixelSize > 1024) pixelSize = 1024
+    let pixelSize = parseInt(q) || 32
+    if (pixelSize < 8) pixelSize = 8
+    if (pixelSize > 1024) pixelSize = 1024
 
-        reply(`⏳ Pixelating... (size ${pixelSize})`)
+    reply(`⏳ Pixelating... (size ${pixelSize})`)
 
-        const media = await quoted.download()
-        if (!media) return reply("❌ Failed to download image")
+    const media = await quoted.download()
+    if (!media) return reply("❌ Failed to download image")
 
-        const image = await Jimp.read(media)
-        const small = image.clone().resize(pixelSize, pixelSize, Jimp.RESIZE_NEAREST_NEIGHBOR)
-        const pixelated = small.resize(image.bitmap.width, image.bitmap.height, Jimp.RESIZE_NEAREST_NEIGHBOR)
-        const buffer = await pixelated.getBufferAsync(Jimp.MIME_JPEG)
+    const image = await Jimp.read(media)
+    const small = image.clone().resize(pixelSize, pixelSize, Jimp.RESIZE_NEAREST_NEIGHBOR)
+    const pixelated = small.resize(image.bitmap.width, image.bitmap.height, Jimp.RESIZE_NEAREST_NEIGHBOR)
+    const buffer = await pixelated.getBufferAsync(Jimp.MIME_JPEG)
 
-        await conn.sendMessage(
-        from,
-        { image: buffer, caption: `✅ Pixelated (size: ${pixelSize})` },
-        { quoted: m }
-        )
-    } catch (e) {
-        reply(`❌ Error: ${e.message}`)
-    }
+    await conn.sendMessage(
+      from,
+      { image: buffer, caption: `✅ Pixelated (size: ${pixelSize})` },
+      { quoted: m }
+    )
+  } catch (e) {
+    reply(`❌ Error: ${e.message}`)
+  }
 })
 
 cmd({
-    pattern: "rw2",
-    alias: ["randomwall2", "wallpaper2"],
-    react: "🌌",
-    use: ".rw2 <keyword>",
-    filename: __filename
+  pattern: "rw2",
+  alias: ["randomwall2", "wallpaper2"],
+  react: "🌌",
+  category: "imagine",
+  use: ".rw2 <keyword>",
+  filename: __filename
 }, async (conn, m, store, { from, args, reply }) => {
-    try {
-        const query = args.join(" ") || "random";
-        const apiUrl = `https://lance-frank-asta.onrender.com/api/wallpaperV2?text=${encodeURIComponent(query)}`;
+  try {
+    const query = args.join(" ") || "random";
+    const apiUrl = `https://lance-frank-asta.onrender.com/api/wallpaperV2?text=${encodeURIComponent(query)}`;
 
-        const { data } = await axios.get(apiUrl);
+    const { data } = await axios.get(apiUrl);
 
-        if (!data.status || !data.result || data.result.length === 0) {
-            return reply(`❌ No wallpapers found for *"${query}"*.`);
-        }
-
-        const randomWall = data.result[Math.floor(Math.random() * data.result.length)];
-
-        const caption = `🌌 *Wallpaper for:* ${query}\n🖼️ *Type:* ${randomWall.type || "Unknown"}\n\n> *© Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
-
-        await conn.sendMessage(
-        from,
-        {
-            image: { url: randomWall.image },
-            caption
-        },
-        { quoted: m }
-        );
-
-    } catch (error) {
-        console.error("Wallpaper Error:", error);
-        reply("❌ An error occurred while fetching the wallpaper. Please try again later.");
+    if (!data.status || !data.result || data.result.length === 0) {
+      return reply(`❌ No wallpapers found for *"${query}"*.`);
     }
+
+    const randomWall = data.result[Math.floor(Math.random() * data.result.length)];
+
+    const caption = `🌌 *Wallpaper for:* ${query}\n🖼️ *Type:* ${randomWall.type || "Unknown"}\n\n> *© Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
+
+    await conn.sendMessage(
+      from,
+      {
+        image: { url: randomWall.image },
+        caption
+      },
+      { quoted: m }
+    );
+
+  } catch (error) {
+    console.error("Wallpaper Error:", error);
+    reply("❌ An error occurred while fetching the wallpaper. Please try again later.");
+  }
 });
 
 cmd({
-    pattern: "marige",
-    react: "💍",
-    filename: __filename
+  pattern: "marige",
+  react: "💍",
+  category: "imagine",
+  filename: __filename
 }, async (conn, mek, store, { isGroup, groupMetadata, reply, sender }) => {
-    try {
-        if (!isGroup) return reply("❌ This command can only be used in groups!");
+  try {
+    if (!isGroup) return reply("❌ This command can only be used in groups!");
 
-        const participants = groupMetadata.participants.map(user => user.id);
+    const participants = groupMetadata.participants.map(user => user.id);
 
-        const eligibleParticipants = participants.filter(id => id !== sender && !id.includes(conn.user.id.split('@')[0]));
+    const eligibleParticipants = participants.filter(id => id !== sender && !id.includes(conn.user.id.split('@')[0]));
 
-        if (eligibleParticipants.length < 1) {
-            return reply("❌ Not enough participants to perform a marriage!");
-        }
-
-        const randomIndex = Math.floor(Math.random() * eligibleParticipants.length);
-        const randomPair = eligibleParticipants[randomIndex];
-
-        const apiUrl = "https://api.waifu.pics/sfw/hug";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        const message = `💍 *Happy Marriage!* 💒\n\n👰 @${sender.split("@")[0]} + 🤵 @${randomPair.split("@")[0]}\n\nMay you both live happily ever after! 💖`;
-
-        await conn.sendMessage(
-        mek.chat,
-        {
-            video: videoBuffer,
-            caption: message,
-            gifPlayback: true,
-            mentions: [sender, randomPair]
-        },
-        { quoted: mek }
-        );
-
-    } catch (error) {
-        console.error("❌ Error in .marige command:", error);
-        reply(`❌ *Error in .marige command:*\n\`\`\`${error.message}\`\`\``);
+    if (eligibleParticipants.length < 1) {
+      return reply("❌ Not enough participants to perform a marriage!");
     }
+
+    const randomIndex = Math.floor(Math.random() * eligibleParticipants.length);
+    const randomPair = eligibleParticipants[randomIndex];
+
+    const apiUrl = "https://api.waifu.pics/sfw/hug";
+    let res = await axios.get(apiUrl);
+    let gifUrl = res.data.url;
+
+    let gifBuffer = await fetchGif(gifUrl);
+    let videoBuffer = await gifToVideo(gifBuffer);
+
+    const message = `💍 *Happy Marriage!* 💒\n\n👰 @${sender.split("@")[0]} + 🤵 @${randomPair.split("@")[0]}\n\nMay you both live happily ever after! 💖`;
+
+    await conn.sendMessage(
+      mek.chat,
+      {
+        video: videoBuffer,
+        caption: message,
+        gifPlayback: true,
+        mentions: [sender, randomPair]
+      },
+      { quoted: mek }
+    );
+
+  } catch (error) {
+    console.error("❌ Error in .marige command:", error);
+    reply(`❌ *Error in .marige command:*\n\`\`\`${error.message}\`\`\``);
+  }
 });
 
 async function uploadToCatbox(fileBuffer) {
-    const form = new FormData();
-    form.append("reqtype", "fileupload");
-    form.append("fileToUpload", fileBuffer, "image.jpg");
+  const form = new FormData();
+  form.append("reqtype", "fileupload");
+  form.append("fileToUpload", fileBuffer, "image.jpg");
 
-    const res = await axios.post("https://catbox.moe/user/api.php", form, {
-        headers: form.getHeaders(),
-    });
-    return res.data;
+  const res = await axios.post("https://catbox.moe/user/api.php", form, {
+    headers: form.getHeaders(),
+  });
+  return res.data;
 }
 
 cmd(
-{
+  {
     pattern: "editimg",
     alias: ["imgedit"],
+    category: "imagine",
     react: "🎨",
     use: ".imgedit <prompt> (reply to an image)",
     filename: __filename,
-},
-async (client, message, args, { q: prompt }) => {
+  },
+  async (client, message, args, { q: prompt }) => {
     try {
 
-        if (!prompt) {
-            return message.reply("⚠️ Please provide a prompt.\nExample: `.imgedit make it look like a cartoon`");
-        }
+      if (!prompt) {
+        return message.reply("⚠️ Please provide a prompt.\nExample: `.imgedit make it look like a cartoon`");
+      }
 
-        if (!message.quoted || message.quoted.mtype !== "imageMessage") {
-            return message.reply("❌ Reply to an image with your prompt to edit it.");
-        }
+      if (!message.quoted || message.quoted.mtype !== "imageMessage") {
+        return message.reply("❌ Reply to an image with your prompt to edit it.");
+      }
 
-        const imageBuffer = await message.quoted.download();
+      const imageBuffer = await message.quoted.download();
 
-        const uploadedUrl = await uploadToCatbox(imageBuffer);
+      const uploadedUrl = await uploadToCatbox(imageBuffer);
 
-        const apiUrl = `https://api.zenzxz.my.id/maker/imagedit?url=${encodeURIComponent(
+      const apiUrl = `https://api.zenzxz.my.id/maker/imagedit?url=${encodeURIComponent(
         uploadedUrl
-        )}&prompt=${encodeURIComponent(prompt)}`;
+      )}&prompt=${encodeURIComponent(prompt)}`;
 
-    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+      const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
 
-    await client.sendMessage(
-    message.chat,
-    {
-        image: response.data,
-        caption: `✨ Image edited with prompt: *${prompt}*`,
-    },
-    { quoted: message }
-    );
-} catch (err) {
-    console.error(err);
-    message.reply("❌ Error while editing image. Please try again later.");
-}
-}
+      await client.sendMessage(
+        message.chat,
+        {
+          image: response.data,
+          caption: `✨ Image edited with prompt: *${prompt}*`,
+        },
+        { quoted: message }
+      );
+    } catch (err) {
+      console.error(err);
+      message.reply("❌ Error while editing image. Please try again later.");
+    }
+  }
 );
 
 cmd({
     pattern: "remini",
     alias: ["enhance"],
     react: "🪄",
+    category: "imagine",
     use: ".hdimg (reply to image)",
     filename: __filename,
 },
@@ -224,8 +230,8 @@ async (conn, mek, m, { from, quoted, reply }) => {
         await reply("⏳ Processing image, please wait...");
 
         const stream = await downloadContentFromMessage(
-        quoted.imageMessage,
-        'image'
+            quoted.imageMessage,
+            'image'
         );
 
         let buffer = Buffer.from([]);
@@ -240,18 +246,18 @@ async (conn, mek, m, { from, quoted, reply }) => {
         });
 
         const uploadRes = await axios.post(
-        'https://tmpfiles.org/api/v1/upload',
-        form,
-        { headers: form.getHeaders() }
+            'https://tmpfiles.org/api/v1/upload',
+            form,
+            { headers: form.getHeaders() }
         );
 
         const imageUrl = uploadRes.data.data.url.replace(
-        'tmpfiles.org/',
-        'tmpfiles.org/dl/'
+            'tmpfiles.org/',
+            'tmpfiles.org/dl/'
         );
 
         const apiUrl =
-        `https://anabot.my.id/api/ai/remini?imageUrl=${encodeURIComponent(imageUrl)}&apikey=freeApikey`;
+            `https://anabot.my.id/api/ai/remini?imageUrl=${encodeURIComponent(imageUrl)}&apikey=freeApikey`;
 
         const apiRes = await axios.get(apiUrl, { timeout: 60000 });
         const apiData = apiRes.data;
@@ -261,12 +267,12 @@ async (conn, mek, m, { from, quoted, reply }) => {
         }
 
         await conn.sendMessage(
-        from,
-        {
-            image: { url: apiData.data.result },
-            caption: "> ✨ Image Enhanced Successfully by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 "
-        },
-        { quoted: m }
+            from,
+            {
+                image: { url: apiData.data.result },
+                caption: "> ✨ Image Enhanced Successfully by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 "
+            },
+            { quoted: m }
         );
 
     } catch (err) {
@@ -278,6 +284,7 @@ async (conn, mek, m, { from, quoted, reply }) => {
 cmd({
     pattern: "getimage",
     alias: ["imagefromurl", "fetchimage"],
+    category: "imagine",
     react: "🖼️",
     filename: __filename
 }, async (conn, mek, m, { from, reply, text }) => {
@@ -313,6 +320,7 @@ cmd({
 cmd({
     pattern: "getvideo",
     alias: ["videoget", "getvid"],
+    category: "imagine",
     react: "🎥",
     filename: __filename
 }, async (conn, mek, m, { from, reply, text }) => {
@@ -346,47 +354,48 @@ cmd({
 });
 
 function formatBytes(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
 cmd({
-    pattern: "rmbg",
-    alias: ["removebg"],
-    react: '📸',
-    use: ".rmbg [reply to image]",
-    filename: __filename
+  pattern: "rmbg",
+  alias: ["removebg"],
+  react: '📸',
+  category: "imagine",
+  use: ".rmbg [reply to image]",
+  filename: __filename
 }, async (conn, message, m,  { reply, mek }) => {
-    try {
+  try {
 
-        const quotedMsg = message.quoted ? message.quoted : message;
-        const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
+    const quotedMsg = message.quoted ? message.quoted : message;
+    const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
 
-        if (!mimeType || !mimeType.startsWith('image/')) {
-            return reply("Please reply to an image file (JPEG/PNG)");
-        }
+    if (!mimeType || !mimeType.startsWith('image/')) {
+      return reply("Please reply to an image file (JPEG/PNG)");
+    }
 
-        const mediaBuffer = await quotedMsg.download();
-        const fileSize = formatBytes(mediaBuffer.length);
+    const mediaBuffer = await quotedMsg.download();
+    const fileSize = formatBytes(mediaBuffer.length);
 
-        let extension = '';
-        if (mimeType.includes('image/jpeg')) extension = '.jpg';
-        else if (mimeType.includes('image/png')) extension = '.png';
-        else {
-            return reply("Unsupported image format. Please use JPEG or PNG");
-        }
+    let extension = '';
+    if (mimeType.includes('image/jpeg')) extension = '.jpg';
+    else if (mimeType.includes('image/png')) extension = '.png';
+    else {
+      return reply("Unsupported image format. Please use JPEG or PNG");
+    }
 
-        const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
-        fs.writeFileSync(tempFilePath, mediaBuffer);
+    const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
+    fs.writeFileSync(tempFilePath, mediaBuffer);
 
-        const form = new FormData();
-        form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
-        form.append('reqtype', 'fileupload');
+    const form = new FormData();
+    form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
+    form.append('reqtype', 'fileupload');
 
-        const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
+    const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
             headers: {
                 ...form.getHeaders(),
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -396,69 +405,70 @@ cmd({
                 "Origin": "https://catbox.moe",
                 "Referer": "https://catbox.moe/",
             }
-        });
+    });
 
-        const imageUrl = uploadResponse.data;
-        fs.unlinkSync(tempFilePath);
+    const imageUrl = uploadResponse.data;
+    fs.unlinkSync(tempFilePath);
 
-        if (!imageUrl) {
-            throw "Failed to upload image to Catbox";
-        }
-
-        const apiUrl = `https://apis.davidcyril.name.ng/removebg?url=${encodeURIComponent(imageUrl)}`;
-        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
-
-        if (!response || !response.data) {
-            return reply("Error: The API did not return a valid image. Try again later.");
-        }
-
-        const imageBuffer = Buffer.from(response.data, "binary");
-
-        await conn.sendMessage(m.chat, {
-            image: imageBuffer,
-            caption: `Background removed\n\n> *this is 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 say it beiby🎭*`
-        });
-
-    } catch (error) {
-        console.error("Rmbg Error:", error);
-        reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+    if (!imageUrl) {
+      throw "Failed to upload image to Catbox";
     }
+
+    const apiUrl = `https://apis.davidcyril.name.ng/removebg?url=${encodeURIComponent(imageUrl)}`;
+    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+
+    if (!response || !response.data) {
+      return reply("Error: The API did not return a valid image. Try again later.");
+    }
+
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    await conn.sendMessage(m.chat, {
+      image: imageBuffer,
+      caption: `Background removed\n\n> *this is 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 say it beiby🎭*`
+    });
+
+  } catch (error) {
+    console.error("Rmbg Error:", error);
+    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+  }
 });
 
 cmd({
-    pattern: "imgscan",
-    alias: ["scanimg", "imagescan", "analyzeimg"],
-    react: '🔍',
-    use: ".imgscan [reply to image]",
-    filename: __filename
+  pattern: "imgscan",
+  alias: ["scanimg", "imagescan", "analyzeimg"],
+  react: '🔍',
+  category: "imagine",
+  use: ".imgscan [reply to image]",
+  filename: __filename
 }, async (client, message, { reply, quoted }) => {
-    try {
+  try {
 
-        const quotedMsg = quoted || message;
-        const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
+    const quotedMsg = quoted || message;
+    const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
 
-        if (!mimeType || !mimeType.startsWith('image/')) {
-            return reply("Please reply to an image file (JPEG/PNG)");
-        }
+    if (!mimeType || !mimeType.startsWith('image/')) {
+      return reply("Please reply to an image file (JPEG/PNG)");
+    }
 
-        const mediaBuffer = await quotedMsg.download();
-        const fileSize = formatBytes(mediaBuffer.length);
+    const mediaBuffer = await quotedMsg.download();
+    const fileSize = formatBytes(mediaBuffer.length);
 
-        let extension = '';
-        if (mimeType.includes('image/jpeg')) extension = '.jpg';
-        else if (mimeType.includes('image/png')) extension = '.png';
-        else {
-            return reply("Unsupported image format. Please use JPEG or PNG");
-        }
+    let extension = '';
+    if (mimeType.includes('image/jpeg')) extension = '.jpg';
+    else if (mimeType.includes('image/png')) extension = '.png';
+    else {
+      return reply("Unsupported image format. Please use JPEG or PNG");
+    }
 
-        const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
-        fs.writeFileSync(tempFilePath, mediaBuffer);
+    const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
+    fs.writeFileSync(tempFilePath, mediaBuffer);
 
-        const form = new FormData();
-        form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
-        form.append('reqtype', 'fileupload');
+    const form = new FormData();
+    form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
+    form.append('reqtype', 'fileupload');
 
-        const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
+    const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
             headers: {
                 ...form.getHeaders(),
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -468,32 +478,32 @@ cmd({
                 "Origin": "https://catbox.moe",
                 "Referer": "https://catbox.moe/",
             }
-        });
+    });
 
-        const imageUrl = uploadResponse.data;
-        fs.unlinkSync(tempFilePath);
+    const imageUrl = uploadResponse.data;
+    fs.unlinkSync(tempFilePath);
 
-        if (!imageUrl) {
-            throw "Failed to upload image to Catbox";
-        }
-
-        const scanUrl = `https://apis.davidcyril.name.ng/imgscan?url=${encodeURIComponent(imageUrl)}`;
-        const scanResponse = await axios.get(scanUrl);
-
-        if (!scanResponse.data.success) {
-            throw scanResponse.data.message || "Failed to analyze image";
-        }
-
-        await reply(
-        `🔍 *Image Analysis Results*\n\n` +
-        `${scanResponse.data.result}\n\n` +
-        `> © Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ✅`
-        );
-
-    } catch (error) {
-        console.error('Image Scan Error:', error);
-        await reply(`❌ Error: ${error.message || error}`);
+    if (!imageUrl) {
+      throw "Failed to upload image to Catbox";
     }
+
+    const scanUrl = `https://apis.davidcyril.name.ng/imgscan?url=${encodeURIComponent(imageUrl)}`;
+    const scanResponse = await axios.get(scanUrl);
+
+    if (!scanResponse.data.success) {
+      throw scanResponse.data.message || "Failed to analyze image";
+    }
+
+    await reply(
+      `🔍 *Image Analysis Results*\n\n` +
+      `${scanResponse.data.result}\n\n` +
+      `> © Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ✅`
+    );
+
+  } catch (error) {
+    console.error('Image Scan Error:', error);
+    await reply(`❌ Error: ${error.message || error}`);
+  }
 });
 
 var imgmsg = "*Give me a anime name !*"
@@ -504,125 +514,132 @@ cmd({
     pattern: "garl",
     alias: ["imgloli"],
     react: '😎',
+    category: "imagine",
     use: '.loli',
     filename: __filename
 },
 async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
+try{
 
-        let res = await axios.get('https://api.lolicon.app/setu/v2?num=1&r18=0&tag=lolicon')
-        let wm = `😎 Random Garl image
+let res = await axios.get('https://api.lolicon.app/setu/v2?num=1&r18=0&tag=lolicon')
+let wm = `😎 Random Garl image
 
-        ©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
-        await conn.sendMessage(from, { image: { url: res.data.data[0].urls.original }, caption: wm}, { quoted: mek })
-    } catch (e) {
-        reply(cants)
-        console.log(e)
-    }
+©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+await conn.sendMessage(from, { image: { url: res.data.data[0].urls.original }, caption: wm}, { quoted: mek })
+} catch (e) {
+reply(cants)
+console.log(e)
+}
 })
 
 cmd({
     pattern: "waifu",
     alias: ["imgwaifu"],
     react: '💫',
+    category: "imagine",
     use: '.waifu',
     filename: __filename
 },
 async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
-        let res = await axios.get('https://api.waifu.pics/sfw/waifu')
-        let wm = `🩵 Random Waifu image
+try{
+let res = await axios.get('https://api.waifu.pics/sfw/waifu')
+let wm = `🩵 Random Waifu image
 
-        ©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
-        await conn.sendMessage(from, { image: { url: res.data.url }, caption: wm}, { quoted: mek })
-    } catch (e) {
-        reply(cants)
-        console.log(e)
-    }
+©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+await conn.sendMessage(from, { image: { url: res.data.url }, caption: wm}, { quoted: mek })
+} catch (e) {
+reply(cants)
+console.log(e)
+}
 })
 
 cmd({
     pattern: "neko",
     alias: ["imgneko"],
     react: '💫',
+    category: "imagine",
     use: '.neko',
     filename: __filename
 },
 async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
-        let res = await axios.get('https://api.waifu.pics/sfw/neko')
-        let wm = `🩷 Random neko image
+try{
+let res = await axios.get('https://api.waifu.pics/sfw/neko')
+let wm = `🩷 Random neko image
 
-        ©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
-        await conn.sendMessage(from, { image: { url: res.data.url  }, caption: wm}, { quoted: mek })
-    } catch (e) {
-        reply(cants)
-        console.log(e)
-    }
+©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+await conn.sendMessage(from, { image: { url: res.data.url  }, caption: wm}, { quoted: mek })
+} catch (e) {
+reply(cants)
+console.log(e)
+}
 })
 
 cmd({
     pattern: "megumin",
     alias: ["imgmegumin"],
     react: '💕',
+    category: "imagine",
     use: '.megumin',
     filename: __filename
 },
 async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
-        let res = await axios.get('https://api.waifu.pics/sfw/megumin')
-        let wm = `❤️‍🔥Random megumin image
+try{
+let res = await axios.get('https://api.waifu.pics/sfw/megumin')
+let wm = `❤️‍🔥Random megumin image
 
-        ©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
-        await conn.sendMessage(from, { image: { url: res.data.url }, caption: wm}, { quoted: mek })
-    } catch (e) {
-        reply(cants)
-        console.log(e)
-    }
+©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+await conn.sendMessage(from, { image: { url: res.data.url }, caption: wm}, { quoted: mek })
+} catch (e) {
+reply(cants)
+console.log(e)
+}
 })
 
 cmd({
     pattern: "maid",
     alias: ["imgmaid"],
     react: '💫',
+    category: "imagine",
     use: '.maid',
     filename: __filename
 },
 async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
-        let res = await axios.get('https://api.waifu.im/search/?included_tags=maid')
-        let wm = `😎 Random maid image
+try{
+let res = await axios.get('https://api.waifu.im/search/?included_tags=maid')
+let wm = `😎 Random maid image
 
-        ©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
-        await conn.sendMessage(from, { image: { url: res.data.images[0].url  }, caption: wm}, { quoted: mek })
-    } catch (e) {
-        reply(cants)
-        console.log(e)
-    }
+©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+await conn.sendMessage(from, { image: { url: res.data.images[0].url  }, caption: wm}, { quoted: mek })
+} catch (e) {
+reply(cants)
+console.log(e)
+}
 })
 
 cmd({
     pattern: "awoo",
     alias: ["imgawoo"],
     react: '😎',
+    category: "imagine",
     use: '.awoo',
     filename: __filename
 },
 async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
-        let res = await axios.get('https://api.waifu.pics/sfw/awoo')
-        let wm = `😎 Random awoo image
+try{
+let res = await axios.get('https://api.waifu.pics/sfw/awoo')
+let wm = `😎 Random awoo image
 
-        ©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
-        await conn.sendMessage(from, { image: { url: res.data.url }, caption: wm}, { quoted: mek })
-    } catch (e) {
-        reply(cants)
-        console.log(e)
-    }
+©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+await conn.sendMessage(from, { image: { url: res.data.url }, caption: wm}, { quoted: mek })
+} catch (e) {
+reply(cants)
+console.log(e)
+}
 })
 
 cmd({
     pattern: "animegirl",
+    category: "imagine",
     react: "🧚🏻",
     filename: __filename
 },
@@ -641,6 +658,7 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 
 cmd({
     pattern: "animegirl1",
+    category: "imagine",
     react: "🧚🏻",
     filename: __filename
 },
@@ -659,6 +677,7 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 
 cmd({
     pattern: "animegirl2",
+    category: "imagine",
     react: "🧚🏻",
     filename: __filename
 },
@@ -677,6 +696,7 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 
 cmd({
     pattern: "animegirl3",
+    category: "imagine",
     react: "🧚🏻",
     filename: __filename
 },
@@ -695,6 +715,7 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 
 cmd({
     pattern: "animegirl4",
+    category: "imagine",
     react: "🧚🏻",
     filename: __filename
 },
@@ -713,6 +734,7 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 
 cmd({
     pattern: "animegirl5",
+    category: "imagine",
     react: "🧚🏻",
     filename: __filename
 },
@@ -731,150 +753,157 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 
 cmd({
     pattern: "anime",
+    category: "imagine",
     react: "⛱️",
     filename: __filename
 },
 
 async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
+try{
 
-        let dec = `> 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ANIME IMGS*`
-        await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/b26f27aa5daaada031b90.jpg`},caption:dec},{quoted:mek});
-        await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/51b44e4b086667361061b.jpg`},caption:dec},{quoted:mek});
-        await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/7d165d73f914985542537.jpg`},caption:dec},{quoted:mek});
-        await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/3d9732d2657d2d72dc102.jpg`},caption:dec},{quoted:mek});
-        await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/8daf7e432a646f3ebe7eb.jpg`},caption:dec},{quoted:mek});
-        await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/7514b18ea89da924e7496.jpg`},caption:dec},{quoted:mek});
-        await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/ce9cb5acd2cec7693d76b.jpg`},caption:dec},{quoted:mek});
+let dec = `> 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ANIME IMGS*`
+await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/b26f27aa5daaada031b90.jpg`},caption:dec},{quoted:mek});
+await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/51b44e4b086667361061b.jpg`},caption:dec},{quoted:mek});
+await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/7d165d73f914985542537.jpg`},caption:dec},{quoted:mek});
+await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/3d9732d2657d2d72dc102.jpg`},caption:dec},{quoted:mek});
+await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/8daf7e432a646f3ebe7eb.jpg`},caption:dec},{quoted:mek});
+await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/7514b18ea89da924e7496.jpg`},caption:dec},{quoted:mek});
+await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/ce9cb5acd2cec7693d76b.jpg`},caption:dec},{quoted:mek});
 
-    }catch(e){
-        console.log(e)
-        reply(`${e}`)
-    }
+}catch(e){
+console.log(e)
+reply(`${e}`)
+}
 });
 
 cmd({
     pattern: "anime1",
     react: "🧚‍♀️",
+    category: "imagine",
     filename: __filename
 },
 async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
+try{
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/aD7t0Bc.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/aD7t0Bc.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/PQO5wPN.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/PQO5wPN.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/5At1P4A.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/5At1P4A.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/MjtH3Ha.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/MjtH3Ha.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/QQW7VKy.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/QQW7VKy.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-    }catch(e){
-        console.log(e)
-        reply(`${e}`)
-    }
+}catch(e){
+console.log(e)
+reply(`${e}`)
+}
 })
 
 cmd({
     pattern: "anime2",
     react: "🧚‍♀️",
+    category: "imagine",
     filename: __filename
 },
 async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
+try{
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/0r1Bn88.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/0r1Bn88.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/2Xdpuov.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/2Xdpuov.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/0hx-3AP.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/0hx-3AP.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/q054x0_.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/q054x0_.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/4lyqRvd.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/4lyqRvd.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-    }catch(e){
-        console.log(e)
-        reply(`${e}`)
-    }
+}catch(e){
+console.log(e)
+reply(`${e}`)
+}
 })
 
 cmd({
     pattern: "anime3",
     react: "🧚‍♀️",
+    category: "imagine",
     filename: __filename
 },
 async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
+try{
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/gnpc_Lr.jpeg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/gnpc_Lr.jpeg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/P6X-ph6.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/P6X-ph6.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/~p5W9~k.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/~p5W9~k.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/7Apu5C9.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/7Apu5C9.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/OTRfON6.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/OTRfON6.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-    }catch(e){
-        console.log(e)
-        reply(`${e}`)
-    }
+}catch(e){
+console.log(e)
+reply(`${e}`)
+}
 })
 
 cmd({
     pattern: "anime4",
     react: "🧚‍♀️",
+    category: "imagine",
     filename: __filename
 },
 async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
+try{
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/aGgUm80.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/aGgUm80.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/i~RQhRD.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/i~RQhRD.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/94LH-aU.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/94LH-aU.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/V8hvqfK.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/V8hvqfK.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/lMiXE7j.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/lMiXE7j.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-    }catch(e){
-        console.log(e)
-        reply(`${e}`)
-    }
+}catch(e){
+console.log(e)
+reply(`${e}`)
+}
 })
 
 cmd({
     pattern: "anime5",
     react: "🧚‍♀️",
+    category: "imagine",
     filename: __filename
 },
 async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
+try{
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/-ABlAvr.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ ' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/-ABlAvr.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ ' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/HNEg0-Q.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/HNEg0-Q.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/3x~ovC6.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/3x~ovC6.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/brv-GJu.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/brv-GJu.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-        await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/FWE8ggD.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/FWE8ggD.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
 
-    }catch(e){
-        console.log(e)
-        reply(`${e}`)
-    }
+}catch(e){
+console.log(e)
+reply(`${e}`)
+}
 })
 
 cmd({
     pattern: "dog",
+    category: "imagine",
     react: "🐶",
     filename: __filename
 },
@@ -892,47 +921,48 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 });
 
 function formatBytes(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
 cmd({
-    pattern: "ad",
-    alias: ["adedit"],
-    react: '📸',
-    use: ".ad [reply to image]",
-    filename: __filename
+  pattern: "ad",
+  alias: ["adedit"],
+  react: '📸',
+  category: "imagine",
+  use: ".ad [reply to image]",
+  filename: __filename
 }, async (conn, message, m,  { reply, mek }) => {
-    try {
+  try {
 
-        const quotedMsg = message.quoted ? message.quoted : message;
-        const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
+    const quotedMsg = message.quoted ? message.quoted : message;
+    const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
 
-        if (!mimeType || !mimeType.startsWith('image/')) {
-            return reply("Please reply to an image file (JPEG/PNG)");
-        }
+    if (!mimeType || !mimeType.startsWith('image/')) {
+      return reply("Please reply to an image file (JPEG/PNG)");
+    }
 
-        const mediaBuffer = await quotedMsg.download();
-        const fileSize = formatBytes(mediaBuffer.length);
+    const mediaBuffer = await quotedMsg.download();
+    const fileSize = formatBytes(mediaBuffer.length);
 
-        let extension = '';
-        if (mimeType.includes('image/jpeg')) extension = '.jpg';
-        else if (mimeType.includes('image/png')) extension = '.png';
-        else {
-            return reply("Unsupported image format. Please use JPEG or PNG");
-        }
+    let extension = '';
+    if (mimeType.includes('image/jpeg')) extension = '.jpg';
+    else if (mimeType.includes('image/png')) extension = '.png';
+    else {
+      return reply("Unsupported image format. Please use JPEG or PNG");
+    }
 
-        const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
-        fs.writeFileSync(tempFilePath, mediaBuffer);
+    const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
+    fs.writeFileSync(tempFilePath, mediaBuffer);
 
-        const form = new FormData();
-        form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
-        form.append('reqtype', 'fileupload');
+    const form = new FormData();
+    form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
+    form.append('reqtype', 'fileupload');
 
-        const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
+    const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
             headers: {
                 ...form.getHeaders(),
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -942,69 +972,70 @@ cmd({
                 "Origin": "https://catbox.moe",
                 "Referer": "https://catbox.moe/",
             }
-        });
+    });
 
-        const imageUrl = uploadResponse.data;
-        fs.unlinkSync(tempFilePath);
+    const imageUrl = uploadResponse.data;
+    fs.unlinkSync(tempFilePath);
 
-        if (!imageUrl) {
-            throw "Failed to upload image to Catbox";
-        }
-
-        const apiUrl = `https://api.popcat.xyz/v2/ad?image=${encodeURIComponent(imageUrl)}`;
-        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
-
-        if (!response || !response.data) {
-            return reply("Error: The API did not return a valid image. Try again later.");
-        }
-
-        const imageBuffer = Buffer.from(response.data, "binary");
-
-        await conn.sendMessage(m.chat, {
-            image: imageBuffer,
-            caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
-        });
-
-    } catch (error) {
-        console.error("Ad Error:", error);
-        reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+    if (!imageUrl) {
+      throw "Failed to upload image to Catbox";
     }
+
+    const apiUrl = `https://api.popcat.xyz/v2/ad?image=${encodeURIComponent(imageUrl)}`;
+    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+
+    if (!response || !response.data) {
+      return reply("Error: The API did not return a valid image. Try again later.");
+    }
+
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    await conn.sendMessage(m.chat, {
+      image: imageBuffer,
+      caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
+    });
+
+  } catch (error) {
+    console.error("Ad Error:", error);
+    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+  }
 });
 
 cmd({
-    pattern: "blur",
-    alias: ["bluredit"],
-    react: '📸',
-    use: ".blur [reply to image]",
-    filename: __filename
+  pattern: "blur",
+  alias: ["bluredit"],
+  react: '📸',
+  category: "imagine",
+  use: ".blur [reply to image]",
+  filename: __filename
 }, async (conn, message, m,  { reply, mek }) => {
-    try {
+  try {
 
-        const quotedMsg = message.quoted ? message.quoted : message;
-        const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
+    const quotedMsg = message.quoted ? message.quoted : message;
+    const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
 
-        if (!mimeType || !mimeType.startsWith('image/')) {
-            return reply("Please reply to an image file (JPEG/PNG)");
-        }
+    if (!mimeType || !mimeType.startsWith('image/')) {
+      return reply("Please reply to an image file (JPEG/PNG)");
+    }
 
-        const mediaBuffer = await quotedMsg.download();
-        const fileSize = formatBytes(mediaBuffer.length);
+    const mediaBuffer = await quotedMsg.download();
+    const fileSize = formatBytes(mediaBuffer.length);
 
-        let extension = '';
-        if (mimeType.includes('image/jpeg')) extension = '.jpg';
-        else if (mimeType.includes('image/png')) extension = '.png';
-        else {
-            return reply("Unsupported image format. Please use JPEG or PNG");
-        }
+    let extension = '';
+    if (mimeType.includes('image/jpeg')) extension = '.jpg';
+    else if (mimeType.includes('image/png')) extension = '.png';
+    else {
+      return reply("Unsupported image format. Please use JPEG or PNG");
+    }
 
-        const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
-        fs.writeFileSync(tempFilePath, mediaBuffer);
+    const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
+    fs.writeFileSync(tempFilePath, mediaBuffer);
 
-        const form = new FormData();
-        form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
-        form.append('reqtype', 'fileupload');
+    const form = new FormData();
+    form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
+    form.append('reqtype', 'fileupload');
 
-        const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
+    const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
             headers: {
                 ...form.getHeaders(),
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -1014,69 +1045,70 @@ cmd({
                 "Origin": "https://catbox.moe",
                 "Referer": "https://catbox.moe/",
             }
-        });
+    });
 
-        const imageUrl = uploadResponse.data;
-        fs.unlinkSync(tempFilePath);
+    const imageUrl = uploadResponse.data;
+    fs.unlinkSync(tempFilePath);
 
-        if (!imageUrl) {
-            throw "Failed to upload image to Catbox";
-        }
-
-        const apiUrl = `https://api.popcat.xyz/v2/blur?image=${encodeURIComponent(imageUrl)}`;
-        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
-
-        if (!response || !response.data) {
-            return reply("Error: The API did not return a valid image. Try again later.");
-        }
-
-        const imageBuffer = Buffer.from(response.data, "binary");
-
-        await conn.sendMessage(m.chat, {
-            image: imageBuffer,
-            caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
-        });
-
-    } catch (error) {
-        console.error("Blur Error:", error);
-        reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+    if (!imageUrl) {
+      throw "Failed to upload image to Catbox";
     }
+
+    const apiUrl = `https://api.popcat.xyz/v2/blur?image=${encodeURIComponent(imageUrl)}`;
+    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+
+    if (!response || !response.data) {
+      return reply("Error: The API did not return a valid image. Try again later.");
+    }
+
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    await conn.sendMessage(m.chat, {
+      image: imageBuffer,
+      caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
+    });
+
+  } catch (error) {
+    console.error("Blur Error:", error);
+    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+  }
 });
 
 cmd({
-    pattern: "grey",
-    alias: ["greyedit"],
-    react: '📸',
-    use: ".grey [reply to image]",
-    filename: __filename
+  pattern: "grey",
+  alias: ["greyedit"],
+  react: '📸',
+  category: "imagine",
+  use: ".grey [reply to image]",
+  filename: __filename
 }, async (conn, message, m,  { reply, mek }) => {
-    try {
+  try {
 
-        const quotedMsg = message.quoted ? message.quoted : message;
-        const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
+    const quotedMsg = message.quoted ? message.quoted : message;
+    const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
 
-        if (!mimeType || !mimeType.startsWith('image/')) {
-            return reply("Please reply to an image file (JPEG/PNG)");
-        }
+    if (!mimeType || !mimeType.startsWith('image/')) {
+      return reply("Please reply to an image file (JPEG/PNG)");
+    }
 
-        const mediaBuffer = await quotedMsg.download();
-        const fileSize = formatBytes(mediaBuffer.length);
+    const mediaBuffer = await quotedMsg.download();
+    const fileSize = formatBytes(mediaBuffer.length);
 
-        let extension = '';
-        if (mimeType.includes('image/jpeg')) extension = '.jpg';
-        else if (mimeType.includes('image/png')) extension = '.png';
-        else {
-            return reply("Unsupported image format. Please use JPEG or PNG");
-        }
+    let extension = '';
+    if (mimeType.includes('image/jpeg')) extension = '.jpg';
+    else if (mimeType.includes('image/png')) extension = '.png';
+    else {
+      return reply("Unsupported image format. Please use JPEG or PNG");
+    }
 
-        const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
-        fs.writeFileSync(tempFilePath, mediaBuffer);
+    const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
+    fs.writeFileSync(tempFilePath, mediaBuffer);
 
-        const form = new FormData();
-        form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
-        form.append('reqtype', 'fileupload');
+    const form = new FormData();
+    form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
+    form.append('reqtype', 'fileupload');
 
-        const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
+    const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
             headers: {
                 ...form.getHeaders(),
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -1086,69 +1118,70 @@ cmd({
                 "Origin": "https://catbox.moe",
                 "Referer": "https://catbox.moe/",
             }
-        });
+    });
 
-        const imageUrl = uploadResponse.data;
-        fs.unlinkSync(tempFilePath);
+    const imageUrl = uploadResponse.data;
+    fs.unlinkSync(tempFilePath);
 
-        if (!imageUrl) {
-            throw "Failed to upload image to Catbox";
-        }
-
-        const apiUrl = `https://api.popcat.xyz/v2/greyscale?image=${encodeURIComponent(imageUrl)}`;
-        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
-
-        if (!response || !response.data) {
-            return reply("Error: The API did not return a valid image. Try again later.");
-        }
-
-        const imageBuffer = Buffer.from(response.data, "binary");
-
-        await conn.sendMessage(m.chat, {
-            image: imageBuffer,
-            caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
-        });
-
-    } catch (error) {
-        console.error("Grey Error:", error);
-        reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+    if (!imageUrl) {
+      throw "Failed to upload image to Catbox";
     }
+
+    const apiUrl = `https://api.popcat.xyz/v2/greyscale?image=${encodeURIComponent(imageUrl)}`;
+    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+
+    if (!response || !response.data) {
+      return reply("Error: The API did not return a valid image. Try again later.");
+    }
+
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    await conn.sendMessage(m.chat, {
+      image: imageBuffer,
+      caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
+    });
+
+  } catch (error) {
+    console.error("Grey Error:", error);
+    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+  }
 });
 
 cmd({
-    pattern: "invert",
-    alias: ["invertedit"],
-    react: '📸',
-    use: ".invert [reply to image]",
-    filename: __filename
+  pattern: "invert",
+  alias: ["invertedit"],
+  react: '📸',
+  category: "imagine",
+  use: ".invert [reply to image]",
+  filename: __filename
 }, async (conn, message, m,  { reply, mek }) => {
-    try {
+  try {
 
-        const quotedMsg = message.quoted ? message.quoted : message;
-        const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
+    const quotedMsg = message.quoted ? message.quoted : message;
+    const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
 
-        if (!mimeType || !mimeType.startsWith('image/')) {
-            return reply("Please reply to an image file (JPEG/PNG)");
-        }
+    if (!mimeType || !mimeType.startsWith('image/')) {
+      return reply("Please reply to an image file (JPEG/PNG)");
+    }
 
-        const mediaBuffer = await quotedMsg.download();
-        const fileSize = formatBytes(mediaBuffer.length);
+    const mediaBuffer = await quotedMsg.download();
+    const fileSize = formatBytes(mediaBuffer.length);
 
-        let extension = '';
-        if (mimeType.includes('image/jpeg')) extension = '.jpg';
-        else if (mimeType.includes('image/png')) extension = '.png';
-        else {
-            return reply("Unsupported image format. Please use JPEG or PNG");
-        }
+    let extension = '';
+    if (mimeType.includes('image/jpeg')) extension = '.jpg';
+    else if (mimeType.includes('image/png')) extension = '.png';
+    else {
+      return reply("Unsupported image format. Please use JPEG or PNG");
+    }
 
-        const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
-        fs.writeFileSync(tempFilePath, mediaBuffer);
+    const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
+    fs.writeFileSync(tempFilePath, mediaBuffer);
 
-        const form = new FormData();
-        form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
-        form.append('reqtype', 'fileupload');
+    const form = new FormData();
+    form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
+    form.append('reqtype', 'fileupload');
 
-        const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
+    const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
             headers: {
                 ...form.getHeaders(),
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -1158,69 +1191,70 @@ cmd({
                 "Origin": "https://catbox.moe",
                 "Referer": "https://catbox.moe/",
             }
-        });
+    });
 
-        const imageUrl = uploadResponse.data;
-        fs.unlinkSync(tempFilePath);
+    const imageUrl = uploadResponse.data;
+    fs.unlinkSync(tempFilePath);
 
-        if (!imageUrl) {
-            throw "Failed to upload image to Catbox";
-        }
-
-        const apiUrl = `https://api.popcat.xyz/v2/invert?image=${encodeURIComponent(imageUrl)}`;
-        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
-
-        if (!response || !response.data) {
-            return reply("Error: The API did not return a valid image. Try again later.");
-        }
-
-        const imageBuffer = Buffer.from(response.data, "binary");
-
-        await conn.sendMessage(m.chat, {
-            image: imageBuffer,
-            caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
-        });
-
-    } catch (error) {
-        console.error("Invert Error:", error);
-        reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+    if (!imageUrl) {
+      throw "Failed to upload image to Catbox";
     }
+
+    const apiUrl = `https://api.popcat.xyz/v2/invert?image=${encodeURIComponent(imageUrl)}`;
+    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+
+    if (!response || !response.data) {
+      return reply("Error: The API did not return a valid image. Try again later.");
+    }
+
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    await conn.sendMessage(m.chat, {
+      image: imageBuffer,
+      caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
+    });
+
+  } catch (error) {
+    console.error("Invert Error:", error);
+    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+  }
 });
 
 cmd({
-    pattern: "jail",
-    alias: ["jailedit"],
-    react: '📸',
-    use: ".jail [reply to image]",
-    filename: __filename
+  pattern: "jail",
+  alias: ["jailedit"],
+  react: '📸',
+  category: "imagine",
+  use: ".jail [reply to image]",
+  filename: __filename
 }, async (conn, message, m,  { reply, mek }) => {
-    try {
+  try {
 
-        const quotedMsg = message.quoted ? message.quoted : message;
-        const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
+    const quotedMsg = message.quoted ? message.quoted : message;
+    const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
 
-        if (!mimeType || !mimeType.startsWith('image/')) {
-            return reply("Please reply to an image file (JPEG/PNG)");
-        }
+    if (!mimeType || !mimeType.startsWith('image/')) {
+      return reply("Please reply to an image file (JPEG/PNG)");
+    }
 
-        const mediaBuffer = await quotedMsg.download();
-        const fileSize = formatBytes(mediaBuffer.length);
+    const mediaBuffer = await quotedMsg.download();
+    const fileSize = formatBytes(mediaBuffer.length);
 
-        let extension = '';
-        if (mimeType.includes('image/jpeg')) extension = '.jpg';
-        else if (mimeType.includes('image/png')) extension = '.png';
-        else {
-            return reply("Unsupported image format. Please use JPEG or PNG");
-        }
+    let extension = '';
+    if (mimeType.includes('image/jpeg')) extension = '.jpg';
+    else if (mimeType.includes('image/png')) extension = '.png';
+    else {
+      return reply("Unsupported image format. Please use JPEG or PNG");
+    }
 
-        const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
-        fs.writeFileSync(tempFilePath, mediaBuffer);
+    const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
+    fs.writeFileSync(tempFilePath, mediaBuffer);
 
-        const form = new FormData();
-        form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
-        form.append('reqtype', 'fileupload');
+    const form = new FormData();
+    form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
+    form.append('reqtype', 'fileupload');
 
-        const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
+    const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
             headers: {
                 ...form.getHeaders(),
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -1230,69 +1264,70 @@ cmd({
                 "Origin": "https://catbox.moe",
                 "Referer": "https://catbox.moe/",
             }
-        });
+    });
 
-        const imageUrl = uploadResponse.data;
-        fs.unlinkSync(tempFilePath);
+    const imageUrl = uploadResponse.data;
+    fs.unlinkSync(tempFilePath);
 
-        if (!imageUrl) {
-            throw "Failed to upload image to Catbox";
-        }
-
-        const apiUrl = `https://api.popcat.xyz/v2/jail?image=${encodeURIComponent(imageUrl)}`;
-        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
-
-        if (!response || !response.data) {
-            return reply("Error: The API did not return a valid image. Try again later.");
-        }
-
-        const imageBuffer = Buffer.from(response.data, "binary");
-
-        await conn.sendMessage(m.chat, {
-            image: imageBuffer,
-            caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
-        });
-
-    } catch (error) {
-        console.error("Jail Error:", error);
-        reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+    if (!imageUrl) {
+      throw "Failed to upload image to Catbox";
     }
+
+    const apiUrl = `https://api.popcat.xyz/v2/jail?image=${encodeURIComponent(imageUrl)}`;
+    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+
+    if (!response || !response.data) {
+      return reply("Error: The API did not return a valid image. Try again later.");
+    }
+
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    await conn.sendMessage(m.chat, {
+      image: imageBuffer,
+      caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
+    });
+
+  } catch (error) {
+    console.error("Jail Error:", error);
+    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+  }
 });
 
 cmd({
-    pattern: "imgjoke",
-    alias: ["jokedit"],
-    react: '📸',
-    use: ".imgjoke [reply to image]",
-    filename: __filename
+  pattern: "imgjoke",
+  alias: ["jokedit"],
+  react: '📸',
+  category: "imagine",
+  use: ".imgjoke [reply to image]",
+  filename: __filename
 }, async (conn, message, m,  { reply, mek }) => {
-    try {
+  try {
 
-        const quotedMsg = message.quoted ? message.quoted : message;
-        const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
+    const quotedMsg = message.quoted ? message.quoted : message;
+    const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
 
-        if (!mimeType || !mimeType.startsWith('image/')) {
-            return reply("Please reply to an image file (JPEG/PNG)");
-        }
+    if (!mimeType || !mimeType.startsWith('image/')) {
+      return reply("Please reply to an image file (JPEG/PNG)");
+    }
 
-        const mediaBuffer = await quotedMsg.download();
-        const fileSize = formatBytes(mediaBuffer.length);
+    const mediaBuffer = await quotedMsg.download();
+    const fileSize = formatBytes(mediaBuffer.length);
 
-        let extension = '';
-        if (mimeType.includes('image/jpeg')) extension = '.jpg';
-        else if (mimeType.includes('image/png')) extension = '.png';
-        else {
-            return reply("Unsupported image format. Please use JPEG or PNG");
-        }
+    let extension = '';
+    if (mimeType.includes('image/jpeg')) extension = '.jpg';
+    else if (mimeType.includes('image/png')) extension = '.png';
+    else {
+      return reply("Unsupported image format. Please use JPEG or PNG");
+    }
 
-        const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
-        fs.writeFileSync(tempFilePath, mediaBuffer);
+    const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
+    fs.writeFileSync(tempFilePath, mediaBuffer);
 
-        const form = new FormData();
-        form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
-        form.append('reqtype', 'fileupload');
+    const form = new FormData();
+    form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
+    form.append('reqtype', 'fileupload');
 
-        const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
+    const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
             headers: {
                 ...form.getHeaders(),
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -1302,69 +1337,70 @@ cmd({
                 "Origin": "https://catbox.moe",
                 "Referer": "https://catbox.moe/",
             }
-        });
+    });
 
-        const imageUrl = uploadResponse.data;
-        fs.unlinkSync(tempFilePath);
+    const imageUrl = uploadResponse.data;
+    fs.unlinkSync(tempFilePath);
 
-        if (!imageUrl) {
-            throw "Failed to upload image to Catbox";
-        }
-
-        const apiUrl = `https://api.popcat.xyz/v2/jokeoverhead?image=${encodeURIComponent(imageUrl)}`;
-        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
-
-        if (!response || !response.data) {
-            return reply("Error: The API did not return a valid image. Try again later.");
-        }
-
-        const imageBuffer = Buffer.from(response.data, "binary");
-
-        await conn.sendMessage(m.chat, {
-            image: imageBuffer,
-            caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
-        });
-
-    } catch (error) {
-        console.error("Joke Error:", error);
-        reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+    if (!imageUrl) {
+      throw "Failed to upload image to Catbox";
     }
+
+    const apiUrl = `https://api.popcat.xyz/v2/jokeoverhead?image=${encodeURIComponent(imageUrl)}`;
+    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+
+    if (!response || !response.data) {
+      return reply("Error: The API did not return a valid image. Try again later.");
+    }
+
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    await conn.sendMessage(m.chat, {
+      image: imageBuffer,
+      caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
+    });
+
+  } catch (error) {
+    console.error("Joke Error:", error);
+    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+  }
 });
 
 cmd({
-    pattern: "nokia",
-    alias: ["nokiaedit"],
-    react: '📸',
-    use: ".nokia [reply to image]",
-    filename: __filename
+  pattern: "nokia",
+  alias: ["nokiaedit"],
+  react: '📸',
+  category: "imagine",
+  use: ".nokia [reply to image]",
+  filename: __filename
 }, async (conn, message, m,  { reply, mek }) => {
-    try {
+  try {
 
-        const quotedMsg = message.quoted ? message.quoted : message;
-        const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
+    const quotedMsg = message.quoted ? message.quoted : message;
+    const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
 
-        if (!mimeType || !mimeType.startsWith('image/')) {
-            return reply("Please reply to an image file (JPEG/PNG)");
-        }
+    if (!mimeType || !mimeType.startsWith('image/')) {
+      return reply("Please reply to an image file (JPEG/PNG)");
+    }
 
-        const mediaBuffer = await quotedMsg.download();
-        const fileSize = formatBytes(mediaBuffer.length);
+    const mediaBuffer = await quotedMsg.download();
+    const fileSize = formatBytes(mediaBuffer.length);
 
-        let extension = '';
-        if (mimeType.includes('image/jpeg')) extension = '.jpg';
-        else if (mimeType.includes('image/png')) extension = '.png';
-        else {
-            return reply("Unsupported image format. Please use JPEG or PNG");
-        }
+    let extension = '';
+    if (mimeType.includes('image/jpeg')) extension = '.jpg';
+    else if (mimeType.includes('image/png')) extension = '.png';
+    else {
+      return reply("Unsupported image format. Please use JPEG or PNG");
+    }
 
-        const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
-        fs.writeFileSync(tempFilePath, mediaBuffer);
+    const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
+    fs.writeFileSync(tempFilePath, mediaBuffer);
 
-        const form = new FormData();
-        form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
-        form.append('reqtype', 'fileupload');
+    const form = new FormData();
+    form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
+    form.append('reqtype', 'fileupload');
 
-        const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
+    const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
             headers: {
                 ...form.getHeaders(),
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -1374,69 +1410,70 @@ cmd({
                 "Origin": "https://catbox.moe",
                 "Referer": "https://catbox.moe/",
             }
-        });
+    });
 
-        const imageUrl = uploadResponse.data;
-        fs.unlinkSync(tempFilePath);
+    const imageUrl = uploadResponse.data;
+    fs.unlinkSync(tempFilePath);
 
-        if (!imageUrl) {
-            throw "Failed to upload image to Catbox";
-        }
-
-        const apiUrl = `https://api.popcat.xyz/v2/nokia?image=${encodeURIComponent(imageUrl)}`;
-        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
-
-        if (!response || !response.data) {
-            return reply("Error: The API did not return a valid image. Try again later.");
-        }
-
-        const imageBuffer = Buffer.from(response.data, "binary");
-
-        await conn.sendMessage(m.chat, {
-            image: imageBuffer,
-            caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
-        });
-
-    } catch (error) {
-        console.error("Nokia Error:", error);
-        reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+    if (!imageUrl) {
+      throw "Failed to upload image to Catbox";
     }
+
+    const apiUrl = `https://api.popcat.xyz/v2/nokia?image=${encodeURIComponent(imageUrl)}`;
+    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+
+    if (!response || !response.data) {
+      return reply("Error: The API did not return a valid image. Try again later.");
+    }
+
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    await conn.sendMessage(m.chat, {
+      image: imageBuffer,
+      caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
+    });
+
+  } catch (error) {
+    console.error("Nokia Error:", error);
+    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+  }
 });
 
 cmd({
-    pattern: "wanted",
-    alias: ["wantededit"],
-    react: '📸',
-    use: ".wanted [reply to image]",
-    filename: __filename
+  pattern: "wanted",
+  alias: ["wantededit"],
+  react: '📸',
+  category: "imagine",
+  use: ".wanted [reply to image]",
+  filename: __filename
 }, async (conn, message, m,  { reply, mek }) => {
-    try {
+  try {
 
-        const quotedMsg = message.quoted ? message.quoted : message;
-        const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
+    const quotedMsg = message.quoted ? message.quoted : message;
+    const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
 
-        if (!mimeType || !mimeType.startsWith('image/')) {
-            return reply("Please reply to an image file (JPEG/PNG)");
-        }
+    if (!mimeType || !mimeType.startsWith('image/')) {
+      return reply("Please reply to an image file (JPEG/PNG)");
+    }
 
-        const mediaBuffer = await quotedMsg.download();
-        const fileSize = formatBytes(mediaBuffer.length);
+    const mediaBuffer = await quotedMsg.download();
+    const fileSize = formatBytes(mediaBuffer.length);
 
-        let extension = '';
-        if (mimeType.includes('image/jpeg')) extension = '.jpg';
-        else if (mimeType.includes('image/png')) extension = '.png';
-        else {
-            return reply("Unsupported image format. Please use JPEG or PNG");
-        }
+    let extension = '';
+    if (mimeType.includes('image/jpeg')) extension = '.jpg';
+    else if (mimeType.includes('image/png')) extension = '.png';
+    else {
+      return reply("Unsupported image format. Please use JPEG or PNG");
+    }
 
-        const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
-        fs.writeFileSync(tempFilePath, mediaBuffer);
+    const tempFilePath = path.join(os.tmpdir(), `imgscan_${Date.now()}${extension}`);
+    fs.writeFileSync(tempFilePath, mediaBuffer);
 
-        const form = new FormData();
-        form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
-        form.append('reqtype', 'fileupload');
+    const form = new FormData();
+    form.append('fileToUpload', fs.createReadStream(tempFilePath), `image${extension}`);
+    form.append('reqtype', 'fileupload');
 
-        const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
+    const uploadResponse = await axios.post("https://catbox.moe/user/api.php", form, {
             headers: {
                 ...form.getHeaders(),
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -1446,1032 +1483,1059 @@ cmd({
                 "Origin": "https://catbox.moe",
                 "Referer": "https://catbox.moe/",
             }
-        });
+    });
 
-        const imageUrl = uploadResponse.data;
-        fs.unlinkSync(tempFilePath);
+    const imageUrl = uploadResponse.data;
+    fs.unlinkSync(tempFilePath);
 
-        if (!imageUrl) {
-            throw "Failed to upload image to Catbox";
-        }
-
-        const apiUrl = `https://api.popcat.xyz/v2/wanted?image=${encodeURIComponent(imageUrl)}`;
-        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
-
-        if (!response || !response.data) {
-            return reply("Error: The API did not return a valid image. Try again later.");
-        }
-
-        const imageBuffer = Buffer.from(response.data, "binary");
-
-        await conn.sendMessage(m.chat, {
-            image: imageBuffer,
-            caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
-        });
-
-    } catch (error) {
-        console.error("Wanted Error:", error);
-        reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+    if (!imageUrl) {
+      throw "Failed to upload image to Catbox";
     }
+
+    const apiUrl = `https://api.popcat.xyz/v2/wanted?image=${encodeURIComponent(imageUrl)}`;
+    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+
+    if (!response || !response.data) {
+      return reply("Error: The API did not return a valid image. Try again later.");
+    }
+
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    await conn.sendMessage(m.chat, {
+      image: imageBuffer,
+      caption: `> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
+    });
+
+  } catch (error) {
+    console.error("Wanted Error:", error);
+    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
+  }
 });
 
 cmd(
-{
-    pattern: "cry",
-    react: "😢",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} is crying over @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is crying!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/cry";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .cry command:", error);
-        reply(`❌ *Error in .cry command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "cuddle",
-    react: "🤗",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} cuddled @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is cuddling everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/cuddle";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .cuddle command:", error);
-        reply(`❌ *Error in .cuddle command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "bully",
-    react: "😈",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} is bullying @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is bullying everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/bully";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .bully command:", error);
-        reply(`❌ *Error in .bully command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "hug",
-    react: "🤗",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} hugged @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is hugging everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/hug";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .hug command:", error);
-        reply(`❌ *Error in .hug command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "awoo",
-    react: "🐺",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} awoos at @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is awooing everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/awoo";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .awoo command:", error);
-        reply(`❌ *Error in .awoo command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "lick",
-    react: "👅",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-
-        let message = mentionedUser ? `${sender} licked @${mentionedUser.split("@")[0]}` : `${sender} licked themselves!`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/lick";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .lick command:", error);
-        reply(`❌ *Error in .lick command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "pat",
-    react: "🫂",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} patted @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is patting everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/pat";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .pat command:", error);
-        reply(`❌ *Error in .pat command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "smug",
-    react: "😏",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} is smug at @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is feeling smug!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/smug";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .smug command:", error);
-        reply(`❌ *Error in .smug command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "bonk",
-    react: "🔨",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} bonked @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is bonking everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/bonk";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .bonk command:", error);
-        reply(`❌ *Error in .bonk command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "yeet",
-    react: "💨",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} yeeted @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is yeeting everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/yeet";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .yeet command:", error);
-        reply(`❌ *Error in .yeet command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "blush",
-    react: "😊",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} is blushing at @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is blushing!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/blush";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .blush command:", error);
-        reply(`❌ *Error in .blush command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "handhold",
-    react: "🤝",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} is holding hands with @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} wants to hold hands with everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/handhold";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .handhold command:", error);
-        reply(`❌ *Error in .handhold command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "highfive",
-    react: "✋",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} gave a high-five to @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is high-fiving everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/highfive";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .highfive command:", error);
-        reply(`❌ *Error in .highfive command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "nom",
-    react: "🍽️",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} is nomming @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is nomming everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/nom";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .nom command:", error);
-        reply(`❌ *Error in .nom command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "wave",
-    react: "👋",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} waved at @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is waving at everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/wave";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .wave command:", error);
-        reply(`❌ *Error in .wave command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "smile",
-    react: "😁",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} smiled at @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is smiling at everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/smile";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .smile command:", error);
-        reply(`❌ *Error in .smile command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "wink",
-    react: "😉",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} winked at @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is winking at everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/wink";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .wink command:", error);
-        reply(`❌ *Error in .wink command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "happy",
-    react: "😊",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} is happy with @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is happy with everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/happy";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .happy command:", error);
-        reply(`❌ *Error in .happy command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "glomp",
-    react: "🤗",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} glomped @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is glomping everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/glomp";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .glomp command:", error);
-        reply(`❌ *Error in .glomp command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "bite",
-    react: "🦷",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} bit @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is biting everyone!`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/bite";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .bite command:", error);
-        reply(`❌ *Error in .bite command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "poke",
-    react: "👉",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} poked @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} poked everyone`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/poke";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .poke command:", error);
-        reply(`❌ *Error in .poke command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "cringe",
-    react: "😬",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} thinks @${mentionedUser.split("@")[0]} is cringe`
-        : isGroup
-        ? `${sender} finds everyone cringe`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/cringe";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .cringe command:", error);
-        reply(`❌ *Error in .cringe command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "dance",
-    react: "💃",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message = mentionedUser
-        ? `${sender} danced with @${mentionedUser.split("@")[0]}`
-        : isGroup
-        ? `${sender} is dancing with everyone`
-        : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
-
-        const apiUrl = "https://api.waifu.pics/sfw/dance";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .dance command:", error);
-        reply(`❌ *Error in .dance command:*\n\`\`\`${error.message}\`\`\``);
-    }
-}
-);
-
-cmd(
-{
-    pattern: "kill",
-    react: "🔪",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
-
-        let message;
-        if (mentionedUser) {
-            let target = `@${mentionedUser.split("@")[0]}`;
-            message = `${sender} killed ${target}`;
-        } else if (isGroup) {
-            message = `${sender} killed everyone`;
-        } else {
-            message = `> © Powered 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+    {
+        pattern: "cry",
+        category: "imagine",
+        react: "😢",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} is crying over @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is crying!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/cry";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .cry command:", error);
+            reply(`❌ *Error in .cry command:*\n\`\`\`${error.message}\`\`\``);
         }
-
-        const apiUrl = "https://api.waifu.pics/sfw/kill";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .kill command:", error);
-        reply(`❌ *Error in .kill command:*\n\`\`\`${error.message}\`\`\``);
     }
-}
 );
 
 cmd(
-{
-    pattern: "slap",
-    react: "✊",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
+    {
+        pattern: "cuddle",
+        category: "imagine",
+        react: "🤗",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
 
-        let message;
-        if (mentionedUser) {
-            let target = `@${mentionedUser.split("@")[0]}`;
-            message = `${sender} slapped ${target}`;
-        } else if (isGroup) {
-            message = `${sender} slapped everyone`;
-        } else {
-            message = `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 🖤`;
+            let message = mentionedUser
+                ? `${sender} cuddled @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is cuddling everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/cuddle";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .cuddle command:", error);
+            reply(`❌ *Error in .cuddle command:*\n\`\`\`${error.message}\`\`\``);
         }
-
-        const apiUrl = "https://api.waifu.pics/sfw/slap";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .slap command:", error);
-        reply(`❌ *Error in .slap command:*\n\`\`\`${error.message}\`\`\``);
     }
-}
 );
 
 cmd(
-{
-    pattern: "kiss",
-    react: "💋",
-    filename: __filename,
-    use: "@tag (optional)",
-},
-async (conn, mek, m, { args, q, reply }) => {
-    try {
-        let sender = `@${mek.sender.split("@")[0]}`;
-        let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-        let isGroup = m.isGroup;
+    {
+        pattern: "bully",
+        category: "imagine",
+        react: "😈",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
 
-        let message;
-        if (mentionedUser) {
-            let target = `@${mentionedUser.split("@")[0]}`;
-            message = `${sender} kissed ${target}`;
-        } else if (isGroup) {
-            message = `${sender} kissed everyone`;
-        } else {
-            message = `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+            let message = mentionedUser
+                ? `${sender} is bullying @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is bullying everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/bully";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .bully command:", error);
+            reply(`❌ *Error in .bully command:*\n\`\`\`${error.message}\`\`\``);
         }
-
-        const apiUrl = "https://api.waifu.pics/sfw/kiss";
-        let res = await axios.get(apiUrl);
-        let gifUrl = res.data.url;
-
-        let gifBuffer = await fetchGif(gifUrl);
-        let videoBuffer = await gifToVideo(gifBuffer);
-
-        await conn.sendMessage(
-        mek.chat,
-        { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
-        { quoted: mek }
-        );
-    } catch (error) {
-        console.error("❌ Error in .kiss command:", error);
-        reply(`❌ *Error in .kiss command:*\n\`\`\`${error.message}\`\`\``);
     }
-}
+);
+
+cmd(
+    {
+        pattern: "hug",
+        category: "imagine",
+        react: "🤗",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} hugged @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is hugging everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/hug";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .hug command:", error);
+            reply(`❌ *Error in .hug command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "awoo",
+        category: "imagine",
+        react: "🐺",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} awoos at @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is awooing everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/awoo";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .awoo command:", error);
+            reply(`❌ *Error in .awoo command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "lick",
+        category: "imagine",
+        react: "👅",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+
+            let message = mentionedUser ? `${sender} licked @${mentionedUser.split("@")[0]}` : `${sender} licked themselves!`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/lick";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .lick command:", error);
+            reply(`❌ *Error in .lick command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "pat",
+        category: "imagine",
+        react: "🫂",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} patted @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is patting everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/pat";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .pat command:", error);
+            reply(`❌ *Error in .pat command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "smug",
+        category: "imagine",
+        react: "😏",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} is smug at @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is feeling smug!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/smug";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .smug command:", error);
+            reply(`❌ *Error in .smug command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "bonk",
+        category: "imagine",
+        react: "🔨",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} bonked @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is bonking everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/bonk";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .bonk command:", error);
+            reply(`❌ *Error in .bonk command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "yeet",
+        category: "imagine",
+        react: "💨",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} yeeted @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is yeeting everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/yeet";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .yeet command:", error);
+            reply(`❌ *Error in .yeet command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "blush",
+        category: "imagine",
+        react: "😊",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} is blushing at @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is blushing!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/blush";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .blush command:", error);
+            reply(`❌ *Error in .blush command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "handhold",
+        category: "imagine",
+        react: "🤝",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} is holding hands with @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} wants to hold hands with everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/handhold";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .handhold command:", error);
+            reply(`❌ *Error in .handhold command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "highfive",
+        category: "imagine",
+        react: "✋",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} gave a high-five to @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is high-fiving everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/highfive";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .highfive command:", error);
+            reply(`❌ *Error in .highfive command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "nom",
+        category: "imagine",
+        react: "🍽️",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} is nomming @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is nomming everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/nom";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .nom command:", error);
+            reply(`❌ *Error in .nom command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "wave",
+        category: "imagine",
+        react: "👋",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} waved at @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is waving at everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/wave";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .wave command:", error);
+            reply(`❌ *Error in .wave command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "smile",
+        category: "imagine",
+        react: "😁",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} smiled at @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is smiling at everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/smile";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .smile command:", error);
+            reply(`❌ *Error in .smile command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "wink",
+        category: "imagine",
+        react: "😉",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} winked at @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is winking at everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/wink";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .wink command:", error);
+            reply(`❌ *Error in .wink command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "happy",
+        category: "imagine",
+        react: "😊",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} is happy with @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is happy with everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/happy";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .happy command:", error);
+            reply(`❌ *Error in .happy command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "glomp",
+        category: "imagine",
+        react: "🤗",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} glomped @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is glomping everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/glomp";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .glomp command:", error);
+            reply(`❌ *Error in .glomp command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "bite",
+        category: "imagine",
+        react: "🦷",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} bit @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is biting everyone!`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/bite";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .bite command:", error);
+            reply(`❌ *Error in .bite command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "poke",
+        category: "imagine",
+        react: "👉",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} poked @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} poked everyone`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/poke";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .poke command:", error);
+            reply(`❌ *Error in .poke command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "cringe",
+        category: "imagine",
+        react: "😬",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} thinks @${mentionedUser.split("@")[0]} is cringe`
+                : isGroup
+                ? `${sender} finds everyone cringe`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/cringe";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .cringe command:", error);
+            reply(`❌ *Error in .cringe command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "dance",
+        category: "imagine",
+        react: "💃",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message = mentionedUser
+                ? `${sender} danced with @${mentionedUser.split("@")[0]}`
+                : isGroup
+                ? `${sender} is dancing with everyone`
+                : `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+
+            const apiUrl = "https://api.waifu.pics/sfw/dance";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .dance command:", error);
+            reply(`❌ *Error in .dance command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "kill",
+        category: "imagine",
+        react: "🔪",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message;
+            if (mentionedUser) {
+                let target = `@${mentionedUser.split("@")[0]}`;
+                message = `${sender} killed ${target}`;
+            } else if (isGroup) {
+                message = `${sender} killed everyone`;
+            } else {
+                message = `> © Powered 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+            }
+
+            const apiUrl = "https://api.waifu.pics/sfw/kill";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .kill command:", error);
+            reply(`❌ *Error in .kill command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "slap",
+        category: "imagine",
+        react: "✊",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message;
+            if (mentionedUser) {
+                let target = `@${mentionedUser.split("@")[0]}`;
+                message = `${sender} slapped ${target}`;
+            } else if (isGroup) {
+                message = `${sender} slapped everyone`;
+            } else {
+                message = `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 🖤`;
+            }
+
+            const apiUrl = "https://api.waifu.pics/sfw/slap";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .slap command:", error);
+            reply(`❌ *Error in .slap command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
+);
+
+cmd(
+    {
+        pattern: "kiss",
+        category: "imagine",
+        react: "💋",
+        filename: __filename,
+        use: "@tag (optional)",
+    },
+    async (conn, mek, m, { args, q, reply }) => {
+        try {
+            let sender = `@${mek.sender.split("@")[0]}`;
+            let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+            let isGroup = m.isGroup;
+
+            let message;
+            if (mentionedUser) {
+                let target = `@${mentionedUser.split("@")[0]}`;
+                message = `${sender} kissed ${target}`;
+            } else if (isGroup) {
+                message = `${sender} kissed everyone`;
+            } else {
+                message = `> © Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`;
+            }
+
+            const apiUrl = "https://api.waifu.pics/sfw/kiss";
+            let res = await axios.get(apiUrl);
+            let gifUrl = res.data.url;
+
+            let gifBuffer = await fetchGif(gifUrl);
+            let videoBuffer = await gifToVideo(gifBuffer);
+
+            await conn.sendMessage(
+                mek.chat,
+                { video: videoBuffer, caption: message, gifPlayback: true, mentions: [mek.sender, mentionedUser].filter(Boolean) },
+                { quoted: mek }
+            );
+        } catch (error) {
+            console.error("❌ Error in .kiss command:", error);
+            reply(`❌ *Error in .kiss command:*\n\`\`\`${error.message}\`\`\``);
+        }
+    }
 );
 
 cmd({
     pattern: "3dcomic",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2503,6 +2567,7 @@ cmd({
 
 cmd({
     pattern: "dragonball",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2534,6 +2599,7 @@ cmd({
 
 cmd({
     pattern: "deadpool",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2565,6 +2631,7 @@ cmd({
 
 cmd({
     pattern: "blackpink",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2596,6 +2663,7 @@ cmd({
 
 cmd({
     pattern: "neonlight",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2627,6 +2695,7 @@ cmd({
 
 cmd({
     pattern: "cat",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2658,6 +2727,7 @@ cmd({
 
 cmd({
     pattern: "sadgirl",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2689,6 +2759,7 @@ cmd({
 
 cmd({
     pattern: "pornhub",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2720,6 +2791,7 @@ cmd({
 
 cmd({
     pattern: "naruto",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2751,6 +2823,7 @@ cmd({
 
 cmd({
     pattern: "thor",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2782,6 +2855,7 @@ cmd({
 
 cmd({
     pattern: "america",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2813,6 +2887,7 @@ cmd({
 
 cmd({
     pattern: "eraser",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2844,6 +2919,7 @@ cmd({
 
 cmd({
     pattern: "3dpaper",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2875,6 +2951,7 @@ cmd({
 
 cmd({
     pattern: "futuristic",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2906,6 +2983,7 @@ cmd({
 
 cmd({
     pattern: "clouds",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2937,6 +3015,7 @@ cmd({
 
 cmd({
     pattern: "sans",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2968,6 +3047,7 @@ cmd({
 
 cmd({
     pattern: "galaxy",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -2999,6 +3079,7 @@ cmd({
 
 cmd({
     pattern: "leaf",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3030,6 +3111,7 @@ cmd({
 
 cmd({
     pattern: "sunset",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3061,6 +3143,7 @@ cmd({
 
 cmd({
     pattern: "nigeria",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3092,6 +3175,7 @@ cmd({
 
 cmd({
     pattern: "devilwings",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3123,6 +3207,7 @@ cmd({
 
 cmd({
     pattern: "hacker",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3154,6 +3239,7 @@ cmd({
 
 cmd({
     pattern: "boom",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3185,6 +3271,7 @@ cmd({
 
 cmd({
     pattern: "luxury",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3216,6 +3303,7 @@ cmd({
 
 cmd({
     pattern: "zodiac",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3247,6 +3335,7 @@ cmd({
 
 cmd({
     pattern: "angelwings",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3278,6 +3367,7 @@ cmd({
 
 cmd({
     pattern: "bulb",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3309,6 +3399,7 @@ cmd({
 
 cmd({
     pattern: "tatoo",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3340,6 +3431,7 @@ cmd({
 
 cmd({
     pattern: "castle",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3371,6 +3463,7 @@ cmd({
 
 cmd({
     pattern: "frozen",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3402,6 +3495,7 @@ cmd({
 
 cmd({
     pattern: "paint",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3433,6 +3527,7 @@ cmd({
 
 cmd({
     pattern: "birthday",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3464,6 +3559,7 @@ cmd({
 
 cmd({
     pattern: "typography",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3495,6 +3591,7 @@ cmd({
 
 cmd({
     pattern: "bear",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, args, reply }) => {
@@ -3526,6 +3623,7 @@ cmd({
 
 cmd({
     pattern: "valorant",
+    category: "imagine",
     react: "🎨",
     filename: __filename
 }, async (conn, mek, m, { from, quoted, prefix, args, reply }) => {
