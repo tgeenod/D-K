@@ -9,65 +9,59 @@ cmd({
     pattern: "revoke",
     react: "🖇️",
     alias: ["revokegrouplink","resetglink","revokelink","f_revoke"],
-    desc: "To Reset the group link",
-    category: "group",
     use: '.revoke',
     filename: __filename
 },
 async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isCreator ,isDev, isAdmins, reply}) => {
-try{
-const msr = (await fetchJson('https://files.catbox.moe/l4jcb6.mp3')).replyMsg
+    try{
+        const msr = (await fetchJson('https://files.catbox.moe/l4jcb6.mp3')).replyMsg
 
-if (!isGroup) return reply(msr.only_gp)
-if (!isAdmins) { if (!isDev) return reply(msr.you_adm),{quoted:mek }}
-if (!isBotAdmins) return reply(msr.give_adm)
-await conn.groupRevokeInvite(from)
- await conn.sendMessage(from , { text: `*Group link Reseted* ⛔`}, { quoted: mek } )
-} catch (e) {
-await conn.sendMessage(from, { react: { text: '❌', key: mek.key } })
-console.log(e)
-reply(`❌ *Error Accurated !!*\n\n${e}`)
-}
+        if (!isGroup) return reply(msr.only_gp)
+        if (!isAdmins) { if (!isDev) return reply(msr.you_adm),{quoted:mek }}
+        if (!isBotAdmins) return reply(msr.give_adm)
+        await conn.groupRevokeInvite(from)
+        await conn.sendMessage(from , { text: `*Group link Reseted* ⛔`}, { quoted: mek } )
+    } catch (e) {
+        await conn.sendMessage(from, { react: { text: '❌', key: mek.key } })
+        console.log(e)
+        reply(`❌ *Error Accurated !!*\n\n${e}`)
+    }
 } )
 
 cmd({
-  pattern: "newgc",
-  category: "group",
-  desc: "Create a new group and add participants.",
-  filename: __filename,
+    pattern: "newgc",
+    filename: __filename,
 }, async (conn, mek, m, { from, isGroup, body, sender, groupMetadata, participants, reply }) => {
-  try {
-    if (!body) {
-      return reply(`Usage: !newgc group_name;number1,number2,...`);
+    try {
+        if (!body) {
+            return reply(`Usage: !newgc group_name;number1,number2,...`);
+        }
+
+        const [groupName, numbersString] = body.split(";");
+
+        if (!groupName || !numbersString) {
+            return reply(`Usage: !newgc group_name;number1,number2,...`);
+        }
+
+        const participantNumbers = numbersString.split(",").map(number => `${number.trim()}@s.whatsapp.net`);
+
+        const group = await conn.groupCreate(groupName, participantNumbers);
+        console.log('created group with id: ' + group.id);
+
+        const inviteLink = await conn.groupInviteCode(group.id);
+
+        await conn.sendMessage(group.id, { text: 'hello there' });
+
+        reply(`Group created successfully with invite link: https://chat.whatsapp.com/${inviteLink}\nWelcome message sent.`);
+    } catch (e) {
+        return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
     }
-
-    const [groupName, numbersString] = body.split(";");
-
-    if (!groupName || !numbersString) {
-      return reply(`Usage: !newgc group_name;number1,number2,...`);
-    }
-
-    const participantNumbers = numbersString.split(",").map(number => `${number.trim()}@s.whatsapp.net`);
-
-    const group = await conn.groupCreate(groupName, participantNumbers);
-    console.log('created group with id: ' + group.id);
-
-    const inviteLink = await conn.groupInviteCode(group.id);
-
-    await conn.sendMessage(group.id, { text: 'hello there' });
-
-    reply(`Group created successfully with invite link: https://chat.whatsapp.com/${inviteLink}\nWelcome message sent.`);
-  } catch (e) {
-    return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
-  }
 });
 
 cmd({
     pattern: "lockgc",
     alias: ["lock"],
     react: "🔒",
-    desc: "Lock the group (Prevents new members from joining).",
-    category: "group",
     filename: __filename
 },
 async (conn, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply }) => {
@@ -88,8 +82,6 @@ cmd({
     pattern: "unlockgc",
     alias: ["unlock"],
     react: "🔓",
-    desc: "Unlock the group (Allows new members to join).",
-    category: "group",
     filename: __filename
 },
 async (conn, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply }) => {
@@ -107,69 +99,65 @@ async (conn, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply }) => {
 });
 
 cmd({
-  pattern: "gcpp",
-  alias: ["upgpp", "upgdp", "grouppp", "groupdp"],
-  react: "🏙️",
-  desc: "Group Admin Only - Set group profile picture",
-  category: "group",
-  filename: __filename
+    pattern: "gcpp",
+    alias: ["upgpp", "upgdp", "grouppp", "groupdp"],
+    react: "🏙️",
+    filename: __filename
 }, async (client, message, match, { from, isCreator, isBotAdmins, isAdmins, isGroup }) => {
-  try {
+    try {
 
-    if (!isGroup) {
-      return await client.sendMessage(from, {
-        text: "⚠️ This command only works in groups."
-      }, { quoted: message });
+        if (!isGroup) {
+            return await client.sendMessage(from, {
+                text: "⚠️ This command only works in groups."
+            }, { quoted: message });
+        }
+
+        if (!isBotAdmins) {
+            return await client.sendMessage(from, {
+                text: "❌ I must be admin to change group picture."
+            }, { quoted: message });
+        }
+
+        if (!isAdmins && !isCreator) {
+            return await client.sendMessage(from, {
+                text: "🔐 Only admins can use this command."
+            }, { quoted: message });
+        }
+
+        if (!match.quoted) {
+            return await client.sendMessage(from, {
+                text: "*🍁 Please reply to an image with .setgcpp*"
+            }, { quoted: message });
+        }
+
+        const mtype = match.quoted.mtype;
+
+        if (mtype !== "imageMessage") {
+            return await client.sendMessage(from, {
+                text: "❌ Only image messages are supported for group picture"
+            }, { quoted: message });
+        }
+
+        const buffer = await match.quoted.download();
+
+        await client.updateProfilePicture(from, buffer);
+
+        await client.sendMessage(from, {
+            text: "*✅ Group profile picture updated successfully!*"
+        }, { quoted: message });
+
+    } catch (error) {
+        console.error("setgcpp Error:", error);
+        await client.sendMessage(from, {
+            text: "❌ Error updating group picture:\n" + error.message
+        }, { quoted: message });
     }
-
-    if (!isBotAdmins) {
-      return await client.sendMessage(from, {
-        text: "❌ I must be admin to change group picture."
-      }, { quoted: message });
-    }
-
-    if (!isAdmins && !isCreator) {
-      return await client.sendMessage(from, {
-        text: "🔐 Only admins can use this command."
-      }, { quoted: message });
-    }
-
-    if (!match.quoted) {
-      return await client.sendMessage(from, {
-        text: "*🍁 Please reply to an image with .setgcpp*"
-      }, { quoted: message });
-    }
-
-    const mtype = match.quoted.mtype;
-
-    if (mtype !== "imageMessage") {
-      return await client.sendMessage(from, {
-        text: "❌ Only image messages are supported for group picture"
-      }, { quoted: message });
-    }
-
-    const buffer = await match.quoted.download();
-
-    await client.updateProfilePicture(from, buffer);
-
-    await client.sendMessage(from, {
-      text: "*✅ Group profile picture updated successfully!*"
-    }, { quoted: message });
-
-  } catch (error) {
-    console.error("setgcpp Error:", error);
-    await client.sendMessage(from, {
-      text: "❌ Error updating group picture:\n" + error.message
-    }, { quoted: message });
-  }
 });
 
 cmd({
     pattern: "mute",
     alias: ["groupmute"],
     react: "🔇",
-    desc: "Mute the group (Only admins can send messages).",
-    category: "group",
     filename: __filename
 },
 async (conn, mek, m, { from, isGroup, senderNumber, isAdmins, isBotAdmins, reply }) => {
@@ -190,8 +178,6 @@ cmd({
     pattern: "unmute",
     alias: ["groupunmute"],
     react: "🔊",
-    desc: "Unmute the group (Everyone can send messages).",
-    category: "group",
     filename: __filename
 },
 async (conn, mek, m, { from, isGroup, senderNumber, isAdmins, isBotAdmins, reply }) => {
@@ -211,8 +197,6 @@ async (conn, mek, m, { from, isGroup, senderNumber, isAdmins, isBotAdmins, reply
 cmd({
     pattern: "admin",
     alias: ["takeadmin", "makeadmin"],
-    desc: "Take adminship for authorized users",
-    category: "owner",
     react: "👑",
     filename: __filename
 },
@@ -228,8 +212,8 @@ async (conn, mek, m, { from, sender, isBotAdmins, isGroup, reply }) => {
     };
 
     const AUTHORIZED_USERS = [
-        normalizeJid(config.DEV),
-        "94771825192@s.whatsapp.net"
+    normalizeJid(config.DEV),
+    "94771825192@s.whatsapp.net"
     ].filter(Boolean);
 
     const senderNormalized = normalizeJid(sender);
@@ -260,8 +244,6 @@ cmd({
     pattern: "updategdesc",
     alias: ["upgdesc", "gdesc"],
     react: "📜",
-    desc: "Change the group description.",
-    category: "group",
     filename: __filename
 },
 async (conn, mek, m, { from, isGroup, isAdmins, isBotAdmins, args, q, reply }) => {
@@ -283,8 +265,6 @@ cmd({
     pattern: "updategname",
     alias: ["upgname", "gname"],
     react: "📝",
-    desc: "Change the group name.",
-    category: "group",
     filename: __filename
 },
 async (conn, mek, m, { from, isGroup, isAdmins, isBotAdmins, args, q, reply }) => {
@@ -306,8 +286,6 @@ cmd({
     pattern: "ginfo",
     react: "🥏",
     alias: ["groupinfo"],
-    desc: "Get group information.",
-    category: "group",
     use: '.ginfo',
     filename: __filename
 }, async (conn, mek, m, { from, isGroup, isAdmins, isDev, isBotAdmins, participants, reply }) => {
@@ -319,8 +297,8 @@ cmd({
         if (!isBotAdmins) return reply(msr.give_adm);
 
         const ppUrls = [
-            'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png',
-            'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png'
+        'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png',
+        'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png'
         ];
 
         let ppUrl;
@@ -337,21 +315,21 @@ cmd({
 
         const gdata = `*「 GROUP INFORMATION 」*
 
-📝 *Group Name:* ${metadata.subject}
+        📝 *Group Name:* ${metadata.subject}
 
-🆔 *Group JID:* ${metadata.id}
+        🆔 *Group JID:* ${metadata.id}
 
-👥 *Participants:* ${metadata.participants.length}
+        👥 *Participants:* ${metadata.participants.length}
 
-👤 *Group Owner:* @${owner}
+        👤 *Group Owner:* @${owner}
 
-📃 *Description:*
-${metadata.desc?.toString() || 'No description'}
+        📃 *Description:*
+        ${metadata.desc?.toString() || 'No description'}
 
-🫂 *Admins:*
-${listAdmin}
+        🫂 *Admins:*
+        ${listAdmin}
 
-> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
+        > Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
 
         await conn.sendMessage(from, {
             image: { url: ppUrl },
@@ -369,8 +347,6 @@ cmd({
     pattern: "tagadmins",
     react: "👑",
     alias: ["gc_tagadmins"],
-    desc: "To Tag all Admins of the Group",
-    category: "group",
     use: '.tagadmins [message]',
     filename: __filename
 },
@@ -416,8 +392,6 @@ cmd({
     pattern: "join",
     react: "📬",
     alias: ["joinme", "f_join"],
-    desc: "To Join a Group from Invite link",
-    category: "group",
     use: '.join < Group Link >',
     filename: __filename
 }, async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isCreator, isDev, isAdmins, reply }) => {
@@ -454,9 +428,7 @@ cmd({
 cmd({
     pattern: "leave",
     alias: ["left", "leftgc", "leavegc"],
-    desc: "Leave the group",
     react: "🎉",
-    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, {
@@ -486,8 +458,6 @@ async (conn, mek, m, {
 cmd({
     pattern: "add",
     alias: ["a", "invite"],
-    desc: "Adds a member to the group",
-    category: "admin",
     react: "➕",
     filename: __filename
 },
@@ -530,8 +500,6 @@ cmd({
     pattern: "kick",
     alias: ["remove"],
     react: "⚠️",
-    desc: "Remove a mentioned user from the group.",
-    category: "main",
     filename: __filename
 },
 async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply }) => {
@@ -573,8 +541,6 @@ function parseDuration(value, unit) {
 cmd({
     pattern: "opentime",
     react: "🔓",
-    desc: "Temporarily open group for a specific time",
-    category: "group",
     use: ".opentime 10 minutes",
     filename: __filename
 }, async (conn, mek, m, { from, args, isGroup, isAdmins, reply }) => {
@@ -603,8 +569,6 @@ cmd({
 cmd({
     pattern: "closetime",
     react: "🔒",
-    desc: "Temporarily close group for a specific time",
-    category: "group",
     use: ".closetime 10 minutes",
     filename: __filename
 }, async (conn, mek, m, { from, args, isGroup, isAdmins, reply }) => {
@@ -633,8 +597,6 @@ cmd({
 cmd({
     pattern: "demote",
     alias: ["d", "dismiss", "removeadmin"],
-    desc: "Demotes a group admin to a normal member",
-    category: "admin",
     react: "⬇️",
     filename: __filename
 },
@@ -673,8 +635,6 @@ async(conn, mek, m, {
 cmd({
     pattern: "promote",
     alias: ["p", "makeadmin"],
-    desc: "Promotes a member to group admin",
-    category: "admin",
     react: "⬆️",
     filename: __filename
 },
@@ -713,8 +673,6 @@ async(conn, mek, m, {
 cmd({
     pattern: "invite",
     alias: ["glink", "grouplink"],
-    desc: "Get group invite link.",
-    category: "group",
     filename: __filename,
 }, async (conn, mek, m, { from, quoted, body, args, q, isGroup, isAdmins, isCreator, sender, reply }) => {
     try {
@@ -739,8 +697,6 @@ cmd({
 cmd({
     pattern: "out",
     alias: ["ck", "🦶"],
-    desc: "Removes all members with specific country code from the group",
-    category: "admin",
     react: "❌",
     filename: __filename
 },
@@ -766,7 +722,7 @@ async (conn, mek, m, {
     try {
         const participants = await groupMetadata.participants;
         const targets = participants.filter(
-            participant => participant.id.startsWith(countryCode) && !participant.admin
+        participant => participant.id.startsWith(countryCode) && !participant.admin
         );
 
         if (targets.length === 0) {
@@ -798,8 +754,6 @@ cmd({
     pattern: "mpoll",
     alias: ["multipoll", "multichoice"],
     react: "📊",
-    category: "group",
-    desc: "Create a multi-choice poll (can select multiple options).",
     use: ".mpoll question;option1,option2,option3",
     filename: __filename,
 },
@@ -861,46 +815,42 @@ async (conn, mek, m, { from, isGroup, q, reply }) => {
 });
 
 cmd({
-  pattern: "poll",
-  category: "group",
-  desc: "Create a poll with a question and options in the group.",
-  filename: __filename,
+    pattern: "poll",
+    filename: __filename,
 }, async (conn, mek, m, { from, isGroup, body, sender, groupMetadata, participants, prefix, pushname, reply }) => {
-  try {
-    let [question, optionsString] = body.split(";");
+    try {
+        let [question, optionsString] = body.split(";");
 
-    if (!question || !optionsString) {
-      return reply(`Usage: ${prefix}poll question;option1,option2,option3...`);
+        if (!question || !optionsString) {
+            return reply(`Usage: ${prefix}poll question;option1,option2,option3...`);
+        }
+
+        let options = [];
+        for (let option of optionsString.split(",")) {
+            if (option && option.trim() !== "") {
+                options.push(option.trim());
+            }
+        }
+
+        if (options.length < 2) {
+            return reply("*Please provide at least two options for the poll.*");
+        }
+
+        await conn.sendMessage(from, {
+            poll: {
+                name: question,
+                values: options,
+                selectableCount: 1,
+                toAnnouncementGroup: true,
+            }
+        }, { quoted: mek });
+    } catch (e) {
+        return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
     }
-
-    let options = [];
-    for (let option of optionsString.split(",")) {
-      if (option && option.trim() !== "") {
-        options.push(option.trim());
-      }
-    }
-
-    if (options.length < 2) {
-      return reply("*Please provide at least two options for the poll.*");
-    }
-
-    await conn.sendMessage(from, {
-      poll: {
-        name: question,
-        values: options,
-        selectableCount: 1,
-        toAnnouncementGroup: true,
-      }
-    }, { quoted: mek });
-  } catch (e) {
-    return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
-  }
 });
 
 cmd({
     pattern: "requestlist",
-    desc: "Shows pending group join requests",
-    category: "group",
     react: "📋",
     filename: __filename
 },
@@ -958,8 +908,6 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 
 cmd({
     pattern: "acceptall",
-    desc: "Accepts all pending group join requests",
-    category: "group",
     react: "✅",
     filename: __filename
 },
@@ -1015,8 +963,6 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 
 cmd({
     pattern: "rejectall",
-    desc: "Rejects all pending group join requests",
-    category: "group",
     react: "❌",
     filename: __filename
 },
@@ -1071,119 +1017,115 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 });
 
 cmd({
-  pattern: "hidetag",
-  alias: ["tag", "h"],
-  react: "🔊",
-  desc: "To Tag all Members for Any Message/Media",
-  category: "group",
-  use: '.hidetag Hello',
-  filename: __filename
+    pattern: "hidetag",
+    alias: ["tag", "h"],
+    react: "🔊",
+    use: '.hidetag Hello',
+    filename: __filename
 },
 async (conn, mek, m, {
-  from, q, isGroup, isCreator, isAdmins, participants, reply
+    from, q, isGroup, isCreator, isAdmins, participants, reply
 }) => {
-  try {
-    if (!isGroup) return reply("❌ This command can only be used in groups.");
-    if (!isAdmins && !isCreator) return reply("❌ Only group admins can use this command.");
+    try {
+        if (!isGroup) return reply("❌ This command can only be used in groups.");
+        if (!isAdmins && !isCreator) return reply("❌ Only group admins can use this command.");
 
-    const mentionAll = { mentions: participants.map(u => u.id) };
+        const mentionAll = { mentions: participants.map(u => u.id) };
 
-    if (!q && !m.quoted) {
-      return reply("❌ Please provide a message or reply to a message to tag all members.");
-    }
-
-    if (m.quoted) {
-      const type = m.quoted.mtype || '';
-
-      if (type === 'extendedTextMessage') {
-        return await conn.sendMessage(from, {
-          text: m.quoted.text || 'No message content found.',
-          ...mentionAll
-        }, { quoted: mek });
-      }
-
-      if (['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'].includes(type)) {
-        try {
-          const buffer = await m.quoted.download?.();
-          if (!buffer) return reply("❌ Failed to download the quoted media.");
-
-          let content;
-          switch (type) {
-            case "imageMessage":
-              content = { image: buffer, caption: m.quoted.text || "📷 Image", ...mentionAll };
-              break;
-            case "videoMessage":
-              content = {
-                video: buffer,
-                caption: m.quoted.text || "🎥 Video",
-                gifPlayback: m.quoted.message?.videoMessage?.gifPlayback || false,
-                ...mentionAll
-              };
-              break;
-            case "audioMessage":
-              content = {
-                audio: buffer,
-                mimetype: "audio/mp4",
-                ptt: m.quoted.message?.audioMessage?.ptt || false,
-                ...mentionAll
-              };
-              break;
-            case "stickerMessage":
-              content = { sticker: buffer, ...mentionAll };
-              break;
-            case "documentMessage":
-              content = {
-                document: buffer,
-                mimetype: m.quoted.message?.documentMessage?.mimetype || "application/octet-stream",
-                fileName: m.quoted.message?.documentMessage?.fileName || "file",
-                caption: m.quoted.text || "",
-                ...mentionAll
-              };
-              break;
-          }
-
-          if (content) {
-            return await conn.sendMessage(from, content, { quoted: mek });
-          }
-        } catch (e) {
-          console.error("Media download/send error:", e);
-          return reply("❌ Failed to process the media. Sending as text instead.");
+        if (!q && !m.quoted) {
+            return reply("❌ Please provide a message or reply to a message to tag all members.");
         }
-      }
 
-      return await conn.sendMessage(from, {
-        text: m.quoted.text || "📨 Message",
-        ...mentionAll
-      }, { quoted: mek });
+        if (m.quoted) {
+            const type = m.quoted.mtype || '';
+
+            if (type === 'extendedTextMessage') {
+                return await conn.sendMessage(from, {
+                    text: m.quoted.text || 'No message content found.',
+                    ...mentionAll
+                }, { quoted: mek });
+            }
+
+            if (['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'].includes(type)) {
+                try {
+                    const buffer = await m.quoted.download?.();
+                    if (!buffer) return reply("❌ Failed to download the quoted media.");
+
+                    let content;
+                    switch (type) {
+                        case "imageMessage":
+                        content = { image: buffer, caption: m.quoted.text || "📷 Image", ...mentionAll };
+                        break;
+                        case "videoMessage":
+                        content = {
+                            video: buffer,
+                            caption: m.quoted.text || "🎥 Video",
+                            gifPlayback: m.quoted.message?.videoMessage?.gifPlayback || false,
+                            ...mentionAll
+                        };
+                        break;
+                        case "audioMessage":
+                        content = {
+                            audio: buffer,
+                            mimetype: "audio/mp4",
+                            ptt: m.quoted.message?.audioMessage?.ptt || false,
+                            ...mentionAll
+                        };
+                        break;
+                        case "stickerMessage":
+                        content = { sticker: buffer, ...mentionAll };
+                        break;
+                        case "documentMessage":
+                        content = {
+                            document: buffer,
+                            mimetype: m.quoted.message?.documentMessage?.mimetype || "application/octet-stream",
+                            fileName: m.quoted.message?.documentMessage?.fileName || "file",
+                            caption: m.quoted.text || "",
+                            ...mentionAll
+                        };
+                        break;
+                    }
+
+                    if (content) {
+                        return await conn.sendMessage(from, content, { quoted: mek });
+                    }
+                } catch (e) {
+                    console.error("Media download/send error:", e);
+                    return reply("❌ Failed to process the media. Sending as text instead.");
+                }
+            }
+
+            return await conn.sendMessage(from, {
+                text: m.quoted.text || "📨 Message",
+                ...mentionAll
+            }, { quoted: mek });
+        }
+
+        if (q) {
+
+            if (isUrl(q)) {
+                return await conn.sendMessage(from, {
+                    text: q,
+                    ...mentionAll
+                }, { quoted: mek });
+            }
+
+            await conn.sendMessage(from, {
+                text: q,
+                ...mentionAll
+            }, { quoted: mek });
+        }
+
+    } catch (e) {
+        console.error(e);
+        reply(`❌ *Error Occurred !!*\n\n${e.message}`);
     }
-
-    if (q) {
-
-      if (isUrl(q)) {
-        return await conn.sendMessage(from, {
-          text: q,
-          ...mentionAll
-        }, { quoted: mek });
-      }
-
-      await conn.sendMessage(from, {
-        text: q,
-        ...mentionAll
-      }, { quoted: mek });
-    }
-
-  } catch (e) {
-    console.error(e);
-    reply(`❌ *Error Occurred !!*\n\n${e.message}`);
-  }
 });
 
 cmd({
     pattern: "tagall",
     react: "🔊",
     alias: ["gc_tagall"],
-    desc: "To Tag all Members",
-    category: "group",
     use: '.tagall [message]',
     filename: __filename
 },
@@ -1226,8 +1168,6 @@ async (conn, mek, m, { from, participants, reply, isGroup, isAdmins, isCreator, 
 cmd({
     pattern: "groupstatus",
     alias: ["statusgc", "gcstatus", "swgc"],
-    desc: "Post group status with media or text (mentions all members)",
-    category: "group",
     react: "📢",
     filename: __filename
 }, async (conn, mek, m, { from, text, reply, isCreator, isGroup }) => {
@@ -1246,10 +1186,10 @@ cmd({
 
         if (!quotedMsg && !caption) {
             return reply(
-                `⚠️ Reply to media or provide text!\n\n` +
-                `Examples:\n` +
-                `• .gcstatus Hello everyone\n` +
-                `• Reply to an media with: .gcstatus`
+            `⚠️ Reply to media or provide text!\n\n` +
+            `Examples:\n` +
+            `• .gcstatus Hello everyone\n` +
+            `• Reply to an media with: .gcstatus`
             );
         }
 
@@ -1358,15 +1298,13 @@ cmd({
 cmd({
     pattern: "groupstates",
     alias: ["gstates"],
-    desc: "Safe group analytics",
-    category: "group",
     react: "📊",
     filename: __filename
 }, async (conn, mek, m, { groupMetadata, reply }) => {
     try {
         if (!m.isGroup) return reply("❌ Group only command");
         if (!groupMetadata || !groupMetadata.participants)
-            return reply("⚠️ Could not fetch group metadata. Try again later.");
+        return reply("⚠️ Could not fetch group metadata. Try again later.");
 
         const members = groupMetadata.participants;
         const stats = {
@@ -1376,14 +1314,14 @@ cmd({
         stats.users = stats.total - stats.admins;
 
         const activeMembers = members.filter(
-            p => p.lastSeen && (Date.now() - p.lastSeen) < 7 * 86400 * 1000
+        p => p.lastSeen && (Date.now() - p.lastSeen) < 7 * 86400 * 1000
         ).length || 0;
 
         const analysis = [
-            `👥 *Total Members:* ${stats.total}`,
-            `👑 *Admins:* ${stats.admins}`,
-            `👤 *Regular Users:* ${stats.users}`,
-            `💬 *Recently Active:* ${activeMembers}`
+        `👥 *Total Members:* ${stats.total}`,
+        `👑 *Admins:* ${stats.admins}`,
+        `👤 *Regular Users:* ${stats.users}`,
+        `💬 *Recently Active:* ${activeMembers}`
         ];
 
         await reply(`📊 *Group States*\n\n${analysis.join('\n')}`);
@@ -1399,12 +1337,12 @@ function isBotOwner(conn, senderId) {
     const botLid = conn.user?.lid || '';
 
     const botNumber = botId.includes(':')
-        ? botId.split(':')[0]
-        : (botId.includes('@') ? botId.split('@')[0] : botId);
+    ? botId.split(':')[0]
+    : (botId.includes('@') ? botId.split('@')[0] : botId);
 
     const botLidNumeric = botLid.includes(':')
-        ? botLid.split(':')[0]
-        : (botLid.includes('@') ? botLid.split('@')[0] : botLid);
+    ? botLid.split(':')[0]
+    : (botLid.includes('@') ? botLid.split('@')[0] : botLid);
 
     let senderNumber = senderId;
     if (senderId.includes(':')) {
@@ -1414,10 +1352,10 @@ function isBotOwner(conn, senderId) {
     }
 
     return (
-        senderNumber === botNumber ||
-        senderNumber === botLidNumeric ||
-        senderId === botId ||
-        senderId === botLid
+    senderNumber === botNumber ||
+    senderNumber === botLidNumeric ||
+    senderId === botId ||
+    senderId === botLid
     );
 }
 
@@ -1430,12 +1368,12 @@ async function checkBotAdmin(conn, chatId) {
         const botLid = conn.user?.lid || '';
 
         const botNumber = botId.includes(':')
-            ? botId.split(':')[0]
-            : (botId.includes('@') ? botId.split('@')[0] : botId);
+        ? botId.split(':')[0]
+        : (botId.includes('@') ? botId.split('@')[0] : botId);
 
         const botLidNumeric = botLid.includes(':')
-            ? botLid.split(':')[0]
-            : (botLid.includes('@') ? botLid.split('@')[0] : botLid);
+        ? botLid.split(':')[0]
+        : (botLid.includes('@') ? botLid.split('@')[0] : botLid);
 
         for (let p of participants) {
             if (p.admin === "admin" || p.admin === "superadmin") {
@@ -1447,12 +1385,12 @@ async function checkBotAdmin(conn, chatId) {
                 const pFullLid = p.lid || '';
 
                 const botMatches = (
-                    botId === pFullId ||
-                    botId === pFullLid ||
-                    botLid === pFullLid ||
-                    botLidNumeric === pLidNumeric ||
-                    botNumber === pPhoneNumber ||
-                    botNumber === pId
+                botId === pFullId ||
+                botId === pFullLid ||
+                botLid === pFullLid ||
+                botLidNumeric === pLidNumeric ||
+                botNumber === pPhoneNumber ||
+                botNumber === pId
                 );
 
                 if (botMatches) return true;
@@ -1473,12 +1411,12 @@ async function getKickableMembers(conn, chatId) {
         const botLid = conn.user?.lid || '';
 
         const botNumber = botId.includes(':')
-            ? botId.split(':')[0]
-            : (botId.includes('@') ? botId.split('@')[0] : botId);
+        ? botId.split(':')[0]
+        : (botId.includes('@') ? botId.split('@')[0] : botId);
 
         const botLidNumeric = botLid.includes(':')
-            ? botLid.split(':')[0]
-            : (botLid.includes('@') ? botLid.split('@')[0] : botLid);
+        ? botLid.split(':')[0]
+        : (botLid.includes('@') ? botLid.split('@')[0] : botLid);
 
         const kickable = [];
 
@@ -1495,12 +1433,12 @@ async function getKickableMembers(conn, chatId) {
             const pFullLid = p.lid || '';
 
             const isBot = (
-                botId === pFullId ||
-                botId === pFullLid ||
-                botLid === pFullLid ||
-                botLidNumeric === pLidNumeric ||
-                botNumber === pPhoneNumber ||
-                botNumber === pId
+            botId === pFullId ||
+            botId === pFullLid ||
+            botLid === pFullLid ||
+            botLidNumeric === pLidNumeric ||
+            botNumber === pPhoneNumber ||
+            botNumber === pId
             );
 
             if (!isBot && p.id) {
@@ -1517,8 +1455,6 @@ async function getKickableMembers(conn, chatId) {
 cmd({
     pattern: "kickall",
     alias: ["removeall2", "cleargroup"],
-    desc: "Remove all members at once (Bot Owner Only)",
-    category: "owner",
     react: "⚠️",
     filename: __filename
 },
@@ -1561,9 +1497,7 @@ async (Void, citel, text) => {
 cmd({
     pattern: "removemembers",
     alias: ["kickall1"],
-    desc: "Remove all non-admin members from the group.",
     react: "🎉",
-    category: "group",
     filename: __filename,
 },
 async (conn, mek, m, {
@@ -1612,9 +1546,7 @@ async (conn, mek, m, {
 cmd({
     pattern: "removeadmins",
     alias: ["kickall2"],
-    desc: "Remove all admin members from the group, excluding the bot and bot owner.",
     react: "🎉",
-    category: "group",
     filename: __filename,
 },
 async (conn, mek, m, {
@@ -1663,9 +1595,7 @@ async (conn, mek, m, {
 cmd({
     pattern: "removeall",
     alias: ["kickall3"],
-    desc: "Remove all members and admins from the group, excluding the bot and bot owner.",
     react: "🎉",
-    category: "group",
     filename: __filename,
 },
 async (conn, mek, m, {
@@ -1693,7 +1623,7 @@ async (conn, mek, m, {
         }
 
         const participantsToRemove = allParticipants.filter(
-            participant => participant.id !== conn.user.id && participant.id !== `${botOwner}@s.whatsapp.net`
+        participant => participant.id !== conn.user.id && participant.id !== `${botOwner}@s.whatsapp.net`
         );
 
         if (participantsToRemove.length === 0) {

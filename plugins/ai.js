@@ -4,44 +4,42 @@ const { cmd, commands } = require('../command');
 const config = require('../config');
 
 cmd({
-  pattern: 'topromt',
-  alias: ['imagetoprompt'],
-  desc: 'Generate a text prompt from an image',
-  category: 'ai',
-  react: '🖼️',
-  filename: __filename
+    pattern: 'topromt',
+    alias: ['imagetoprompt'],
+    react: '🖼️',
+    filename: __filename
 }, async (conn, mek, m, { reply }) => {
-  try {
-    const q = m.quoted ? m.quoted : m;
-    const mime = (q.msg || q).mimetype || '';
+    try {
+        const q = m.quoted ? m.quoted : m;
+        const mime = (q.msg || q).mimetype || '';
 
-    if (!mime.startsWith('image/')) return reply('❌ Please provide an image!');
+        if (!mime.startsWith('image/')) return reply('❌ Please provide an image!');
 
-    reply('⏳ Generating prompt from your image...');
+        reply('⏳ Generating prompt from your image...');
 
-    const buffer = await q.download();
-    const form = new FormData();
-    form.append('file', buffer, { filename: 'image.jpg' });
+        const buffer = await q.download();
+        const form = new FormData();
+        form.append('file', buffer, { filename: 'image.jpg' });
 
-    const { data } = await axios.post(
-      'https://be.neuralframes.com/clip_interrogate/',
-      form,
-      {
-        headers: {
-          ...form.getHeaders(),
-          'Accept': 'application/json, text/plain, */*',
-          'Authorization': 'Bearer uvcKfXuj6Ygncs6tiSJ6VXLxoapJdjQ3EEsSIt45Zm+vsl8qcLAAOrnnGWYBccx4sbEaQtCr416jxvc/zJNAlcDjLYjfHfHzPpfJ00l05h0oy7twPKzZrO4xSB+YGrmCyb/zOduHh1l9ogFPg/3aeSsz+wZYL9nlXfXdvCqDIP9bLcQMHiUKB0UCGuew2oRt',
-          'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36',
-          'Referer': 'https://www.neuralframes.com/tools/image-to-prompt'
+        const { data } = await axios.post(
+        'https://be.neuralframes.com/clip_interrogate/',
+        form,
+        {
+            headers: {
+                ...form.getHeaders(),
+                'Accept': 'application/json, text/plain, */*',
+                'Authorization': 'Bearer uvcKfXuj6Ygncs6tiSJ6VXLxoapJdjQ3EEsSIt45Zm+vsl8qcLAAOrnnGWYBccx4sbEaQtCr416jxvc/zJNAlcDjLYjfHfHzPpfJ00l05h0oy7twPKzZrO4xSB+YGrmCyb/zOduHh1l9ogFPg/3aeSsz+wZYL9nlXfXdvCqDIP9bLcQMHiUKB0UCGuew2oRt',
+                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36',
+                'Referer': 'https://www.neuralframes.com/tools/image-to-prompt'
+            }
         }
-      }
-    );
+        );
 
-    await reply(`📝 Generated prompt:\n${data.prompt}`);
-  } catch (e) {
-    console.error(e);
-    reply(`❌ Failed: ${e.message}`);
-  }
+        await reply(`📝 Generated prompt:\n${data.prompt}`);
+    } catch (e) {
+        console.error(e);
+        reply(`❌ Failed: ${e.message}`);
+    }
 });
 
 async function getAIResponse(userInput) {
@@ -64,8 +62,6 @@ async function getAIResponse(userInput) {
 cmd({
     pattern: "gemini",
     react: "🤖",
-    desc: "Talk to AI in Sinhala",
-    category: "ai",
     filename: __filename
 },
 async (conn, mek, m, { from, args, reply }) => {
@@ -87,204 +83,192 @@ async (conn, mek, m, { from, args, reply }) => {
 });
 
 cmd({
-  'on': "body"
+    'on': "body"
 }, async (conn, m, store, {
-  from,
-  body,
-  isCmd,
-  reply
+    from,
+    body,
+    isCmd,
+    reply
 }) => {
-  try {
-    if (m.fromMe || !body || isCmd) return;
+    try {
+        if (m.fromMe || !body || isCmd) return;
 
-    if (config.CHAT_BOT === "true") {
-      const aiResult = await getAIResponse(body);
+        if (config.CHAT_BOT === "true") {
+            const aiResult = await getAIResponse(body);
 
-      if (aiResult) {
-        await conn.sendMessage(from, { react: { text: "🤖", key: m.key } });
-        await conn.sendMessage(from, { text: aiResult }, { quoted: m });
-      }
+            if (aiResult) {
+                await conn.sendMessage(from, { react: { text: "🤖", key: m.key } });
+                await conn.sendMessage(from, { text: aiResult }, { quoted: m });
+            }
+        }
+    } catch (error) {
+        console.error("Chatbot Error:", error);
     }
-  } catch (error) {
-    console.error("Chatbot Error:", error);
-  }
 });
 
 cmd({
-  pattern: "aiimg",
-  react: "🚀",
-  desc: "Generate an image using AI.",
-  category: "main",
-  filename: __filename
+    pattern: "aiimg",
+    react: "🚀",
+    filename: __filename
 }, async (conn, mek, m, { q, reply }) => {
-  try {
-    if (!q) return reply("Please provide a prompt for the image.");
+    try {
+        if (!q) return reply("Please provide a prompt for the image.");
 
-    await reply("> *CREATING IMAGE ...🔥*");
+        await reply("> *CREATING IMAGE ...🔥*");
 
-    const apiUrl = `https://lance-frank-asta.onrender.com/api/art?prompt=${encodeURIComponent(q)}`;
+        const apiUrl = `https://lance-frank-asta.onrender.com/api/art?prompt=${encodeURIComponent(q)}`;
 
-    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
 
-    if (!response || !response.data) {
-      return reply("Error: The API did not return a valid image. Try again later.");
+        if (!response || !response.data) {
+            return reply("Error: The API did not return a valid image. Try again later.");
+        }
+
+        const imageBuffer = Buffer.from(response.data, "binary");
+
+        await conn.sendMessage(m.chat, {
+            image: imageBuffer,
+            caption: `💸 *Imagine Generated By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n✨ Prompt: *${q}*`
+        });
+
+    } catch (error) {
+        console.error("AiImgage Error:", error);
+        reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
     }
-
-    const imageBuffer = Buffer.from(response.data, "binary");
-
-    await conn.sendMessage(m.chat, {
-      image: imageBuffer,
-      caption: `💸 *Imagine Generated By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n✨ Prompt: *${q}*`
-    });
-
-  } catch (error) {
-    console.error("AiImgage Error:", error);
-    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
-  }
 });
 
 cmd({
-  pattern: "aiimg1",
-  react: "🚀",
-  desc: "Generate an image using AI (Direct Image API - Malvin CreArt).",
-  category: "main",
-  filename: __filename
+    pattern: "aiimg1",
+    react: "🚀",
+    filename: __filename
 }, async (conn, mek, m, { q, reply }) => {
-  try {
-    if (!q) {
-      return reply("⚠️ Please provide a prompt for the image.\n\nExample: *.aiimg Dog wearing sunglasses*");
+    try {
+        if (!q) {
+            return reply("⚠️ Please provide a prompt for the image.\n\nExample: *.aiimg Dog wearing sunglasses*");
+        }
+
+        await reply("> 🧠 *Creating AI Image... Please wait!* 🔥");
+
+        const apiUrl = `https://api.malvin.gleeze.com/ai/creart/image?prompt=${encodeURIComponent(q)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
+
+        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+
+        if (!response || !response.data) {
+            return reply("❌ The API did not return an image. Try again later.");
+        }
+
+        const imageBuffer = Buffer.from(response.data, "binary");
+
+        await conn.sendMessage(m.chat, {
+            image: imageBuffer,
+            caption: `💫 *AI Image Generated by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n\n🎨 *Prompt:* ${q}`
+        });
+
+    } catch (error) {
+        console.error("AiImage Error:", error);
+        reply(`❌ Error: ${error.response?.statusText || error.message || "Unknown error occurred"}`);
     }
-
-    await reply("> 🧠 *Creating AI Image... Please wait!* 🔥");
-
-    const apiUrl = `https://api.malvin.gleeze.com/ai/creart/image?prompt=${encodeURIComponent(q)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
-
-    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
-
-    if (!response || !response.data) {
-      return reply("❌ The API did not return an image. Try again later.");
-    }
-
-    const imageBuffer = Buffer.from(response.data, "binary");
-
-    await conn.sendMessage(m.chat, {
-      image: imageBuffer,
-      caption: `💫 *AI Image Generated by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n\n🎨 *Prompt:* ${q}`
-    });
-
-  } catch (error) {
-    console.error("AiImage Error:", error);
-    reply(`❌ Error: ${error.response?.statusText || error.message || "Unknown error occurred"}`);
-  }
 });
 
 cmd({
-  pattern: "aiimg2",
-  react: "🚀",
-  desc: "Generate AI image using DeepIMG (Malvin API).",
-  category: "main",
-  filename: __filename
+    pattern: "aiimg2",
+    react: "🚀",
+    filename: __filename
 }, async (conn, mek, m, { q, reply }) => {
-  try {
-    if (!q) {
-      return reply("⚠️ Please provide a prompt for the image.\n\nExample: *.aiimg3 query in space*");
+    try {
+        if (!q) {
+            return reply("⚠️ Please provide a prompt for the image.\n\nExample: *.aiimg3 query in space*");
+        }
+
+        await reply("> 🧠 *Generating image with DeepIMG... please wait!* 🔥");
+
+        const style = "img";
+
+        const apiUrl = `https://api.malvin.gleeze.com/ai/deepimg?prompt=${encodeURIComponent(q)}&style=${encodeURIComponent(style)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
+
+        const response = await axios.get(apiUrl);
+
+        if (!response.data || !response.data.status || !response.data.image_url) {
+            return reply("❌ The API did not return a valid image. Try again later.");
+        }
+
+        const { image_url, model, dimensions } = response.data;
+
+        await conn.sendMessage(m.chat, {
+            image: { url: image_url },
+            caption: `💫 *Image Generated by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n\n🎨 *Prompt:* ${q}\n🧩 *Style:* ${style}\n📸 *Model:* ${model}\n📏 *Size:* ${dimensions}`
+        });
+
+    } catch (error) {
+        console.error("AiImage Error:", error);
+        reply(`❌ An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
     }
-
-    await reply("> 🧠 *Generating image with DeepIMG... please wait!* 🔥");
-
-    const style = "img";
-
-    const apiUrl = `https://api.malvin.gleeze.com/ai/deepimg?prompt=${encodeURIComponent(q)}&style=${encodeURIComponent(style)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
-
-    const response = await axios.get(apiUrl);
-
-    if (!response.data || !response.data.status || !response.data.image_url) {
-      return reply("❌ The API did not return a valid image. Try again later.");
-    }
-
-    const { image_url, model, dimensions } = response.data;
-
-    await conn.sendMessage(m.chat, {
-      image: { url: image_url },
-      caption: `💫 *Image Generated by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n\n🎨 *Prompt:* ${q}\n🧩 *Style:* ${style}\n📸 *Model:* ${model}\n📏 *Size:* ${dimensions}`
-    });
-
-  } catch (error) {
-    console.error("AiImage Error:", error);
-    reply(`❌ An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
-  }
 });
 
 cmd({
-  pattern: "aiimg3",
-  react: "🚀",
-  desc: "Generate multiple images using AI.",
-  category: "main",
-  filename: __filename
+    pattern: "aiimg3",
+    react: "🚀",
+    filename: __filename
 }, async (conn, mek, m, { q, reply }) => {
-  try {
-    if (!q) return reply("Please provide a prompt for the image.");
+    try {
+        if (!q) return reply("Please provide a prompt for the image.");
 
-    await reply("> *CREATING IMAGES ...🔥*");
+        await reply("> *CREATING IMAGES ...🔥*");
 
-    const apiUrl = `https://api-aswin-sparky.koyeb.app/api/search/imageai?search=${encodeURIComponent(q)}`;
+        const apiUrl = `https://api-aswin-sparky.koyeb.app/api/search/imageai?search=${encodeURIComponent(q)}`;
 
-    const response = await axios.get(apiUrl);
+        const response = await axios.get(apiUrl);
 
-    if (!response || !response.data || !response.data.data || !response.data.data.length) {
-      return reply("Error: The API did not return any images. Try again later.");
+        if (!response || !response.data || !response.data.data || !response.data.data.length) {
+            return reply("Error: The API did not return any images. Try again later.");
+        }
+
+        const images = response.data.data;
+
+        for (const imageUrl of images) {
+            await conn.sendMessage(m.chat, {
+                image: { url: imageUrl },
+                caption: `💸 *Imagine Generated By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n✨ Prompt: *${q}*`
+            });
+        }
+
+    } catch (error) {
+        console.error("AiImage Error:", error);
+        reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
     }
-
-    const images = response.data.data;
-
-    for (const imageUrl of images) {
-      await conn.sendMessage(m.chat, {
-        image: { url: imageUrl },
-        caption: `💸 *Imagine Generated By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n✨ Prompt: *${q}*`
-      });
-    }
-
-  } catch (error) {
-    console.error("AiImage Error:", error);
-    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
-  }
 });
 
 cmd({
-  pattern: "aianime",
-  react: "🎨",
-  desc: "Get a random anime image.",
-  category: "main",
-  filename: __filename
+    pattern: "aianime",
+    react: "🎨",
+    filename: __filename
 }, async (conn, mek, m, { reply }) => {
-  try {
-    await reply("> *FETCHING RANDOM ANIME IMAGE...✨*");
+    try {
+        await reply("> *FETCHING RANDOM ANIME IMAGE...✨*");
 
-    const apiUrl = "https://lance-frank-asta.onrender.com/api/anime-random";
+        const apiUrl = "https://lance-frank-asta.onrender.com/api/anime-random";
 
-    const response = await axios.get(apiUrl);
+        const response = await axios.get(apiUrl);
 
-    if (!response.data?.status || !response.data.random?.imgAnime) {
-      return reply("Error: Could not fetch an anime image. Try again later.");
+        if (!response.data?.status || !response.data.random?.imgAnime) {
+            return reply("Error: Could not fetch an anime image. Try again later.");
+        }
+
+        const anime = response.data.random;
+
+        await conn.sendMessage(m.chat, {
+            image: { url: anime.imgAnime },
+            caption: `💫 *Random Anime Image*\n👤 Name: ${anime.name}\n🎬 Movie/Anime: ${anime.movie}\n🎨 Color: ${anime.colorBg}`
+        });
+
+    } catch (error) {
+        console.error("AnimeImage Error:", error);
+        reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
     }
-
-    const anime = response.data.random;
-
-    await conn.sendMessage(m.chat, {
-      image: { url: anime.imgAnime },
-      caption: `💫 *Random Anime Image*\n👤 Name: ${anime.name}\n🎬 Movie/Anime: ${anime.movie}\n🎨 Color: ${anime.colorBg}`
-    });
-
-  } catch (error) {
-    console.error("AnimeImage Error:", error);
-    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
-  }
 });
 
 cmd({
     pattern: "ai",
-    desc: "Chat with an AI model",
-    category: "ai",
     react: "🤖",
     filename: __filename
 },
@@ -311,8 +295,6 @@ async (conn, mek, m, { from, args, q, reply, react }) => {
 
 cmd({
     pattern: "openai",
-    desc: "Chat with OpenAI",
-    category: "ai",
     react: "🧠",
     filename: __filename
 },
@@ -339,8 +321,6 @@ async (conn, mek, m, { from, args, q, reply, react }) => {
 
 cmd({
     pattern: "openai2",
-    desc: "Chat with OpenAI",
-    category: "ai",
     react: "🧠",
     filename: __filename
 },
@@ -367,8 +347,6 @@ async (conn, mek, m, { from, args, q, reply, react }) => {
 
 cmd({
     pattern: "venice",
-    desc: "Chat with Microsoft Copilot - GPT-5",
-    category: "ai",
     react: "🤖",
     filename: __filename
 },
@@ -388,9 +366,9 @@ async (conn, mek, m, { from, args, q, reply, react }) => {
         }
 
         const responseMsg = `
-Venice AI - Dolphin 3.0 Mistral 24B
-━━━━━━━━━━━━━━━
-${data.result}
+        Venice AI - Dolphin 3.0 Mistral 24B
+        ━━━━━━━━━━━━━━━
+        ${data.result}
         `.trim();
 
         await reply(responseMsg);
@@ -404,8 +382,6 @@ ${data.result}
 
 cmd({
     pattern: "copilot",
-    desc: "Chat with an AI model",
-    category: "ai",
     react: "🤖",
     filename: __filename
 },
@@ -423,11 +399,11 @@ async (conn, mek, m, { from, args, q, reply, react }) => {
         }
 
         const responseMsg = `
-🤖 *Microsoft Copilot AI Response*
-━━━━━━━━━━━━━━━
-${data.result}
+        🤖 *Microsoft Copilot AI Response*
+        ━━━━━━━━━━━━━━━
+        ${data.result}
 
-🕒 *Response Time:* ${data.response_time}
+        🕒 *Response Time:* ${data.response_time}
         `.trim();
 
         await reply(responseMsg);
@@ -441,8 +417,6 @@ ${data.result}
 
 cmd({
     pattern: "copilot2",
-    desc: "Chat with Microsoft Copilot (Deep Thinking)",
-    category: "ai",
     react: "🤖",
     filename: __filename
 },
@@ -460,11 +434,11 @@ async (conn, mek, m, { from, args, q, reply, react }) => {
         }
 
         const responseMsg = `
-🤖 *Microsoft Copilot - Deep Thinking*
-━━━━━━━━━━━━━━━
-${data.result}
+        🤖 *Microsoft Copilot - Deep Thinking*
+        ━━━━━━━━━━━━━━━
+        ${data.result}
 
-🕒 *Response Time:* ${data.response_time}
+        🕒 *Response Time:* ${data.response_time}
         `.trim();
 
         await reply(responseMsg);
@@ -478,8 +452,6 @@ ${data.result}
 
 cmd({
     pattern: "gpt",
-    desc: "Chat with Microsoft Copilot - GPT-5",
-    category: "ai",
     react: "🤖",
     filename: __filename
 },
@@ -499,11 +471,11 @@ async (conn, mek, m, { from, args, q, reply, react }) => {
         }
 
         const responseMsg = `
-🤖 *Microsoft Copilot GPT-5 AI Response*
-━━━━━━━━━━━━━━━
-${data.result}
+        🤖 *Microsoft Copilot GPT-5 AI Response*
+        ━━━━━━━━━━━━━━━
+        ${data.result}
 
-🕒 *Response Time:* ${data.response_time}
+        🕒 *Response Time:* ${data.response_time}
         `.trim();
 
         await reply(responseMsg);

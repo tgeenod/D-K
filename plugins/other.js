@@ -19,31 +19,31 @@ async (conn, mek, m, { from, body, isOwner }) => {
 });
 
 cmd({
-  on: "body"
+    on: "body"
 },
 async (conn, mek, m, { from, body, isOwner }) => {
- if (config.AUTO_RECORDING === 'true') {
-                await conn.sendPresenceUpdate('recording', from);
-            }
-         }
-   );
+    if (config.AUTO_RECORDING === 'true') {
+        await conn.sendPresenceUpdate('recording', from);
+    }
+}
+);
 
 cmd({
-  on: "body"
+    on: "body"
 }, async (conn, mek, m, { from }) => {
-  try {
+    try {
 
-    if (config.ALWAYS_ONLINE === "true") {
-      await conn.sendPresenceUpdate("available", from);
+        if (config.ALWAYS_ONLINE === "true") {
+            await conn.sendPresenceUpdate("available", from);
+        }
+
+    } catch (e) {
+        console.error("[Presence Error]", e);
     }
-
-  } catch (e) {
-    console.error("[Presence Error]", e);
-  }
 });
 
 cmd({
-  on: "body"
+    on: "body"
 },
 async (conn, mek, m, { from, body, isOwner }) => {
     const filePath = path.join(__dirname, '../lib/autoreply.json');
@@ -61,212 +61,206 @@ async (conn, mek, m, { from, body, isOwner }) => {
 });
 
 cmd({
-  'on': "body"
+    'on': "body"
 }, async (conn, m, store, {
-  from,
-  body,
-  isGroup,
-  isAdmins,
-  isBotAdmins,
-  reply,
-  sender
+    from,
+    body,
+    isGroup,
+    isAdmins,
+    isBotAdmins,
+    reply,
+    sender
 }) => {
-  try {
-    const badWords = ["wtf", "mia", "xxx", "fuck", 'sex', "huththa", "pakaya", 'ponnaya', "hutto"];
+    try {
+        const badWords = ["wtf", "mia", "xxx", "fuck", 'sex', "huththa", "pakaya", 'ponnaya', "hutto"];
 
-    if (!isGroup || isAdmins || !isBotAdmins) {
-      return;
+        if (!isGroup || isAdmins || !isBotAdmins) {
+            return;
+        }
+
+        const messageText = body.toLowerCase();
+        const containsBadWord = badWords.some(word => messageText.includes(word));
+
+        if (containsBadWord && config.ANTI_BAD_WORD === "true") {
+            await conn.sendMessage(from, { 'delete': m.key }, { 'quoted': m });
+            await conn.sendMessage(from, { 'text': "🚫 ⚠️ BAD WORDS NOT ALLOWED ⚠️ 🚫" }, { 'quoted': m });
+        }
+    } catch (error) {
+        console.error(error);
+        reply("An error occurred while processing the message.");
     }
-
-    const messageText = body.toLowerCase();
-    const containsBadWord = badWords.some(word => messageText.includes(word));
-
-    if (containsBadWord && config.ANTI_BAD_WORD === "true") {
-      await conn.sendMessage(from, { 'delete': m.key }, { 'quoted': m });
-      await conn.sendMessage(from, { 'text': "🚫 ⚠️ BAD WORDS NOT ALLOWED ⚠️ 🚫" }, { 'quoted': m });
-    }
-  } catch (error) {
-    console.error(error);
-    reply("An error occurred while processing the message.");
-  }
 });
 
 cmd({
-  'pattern': "couplepp",
-  'react': '💑',
-  'desc': "Get a male and female couple profile picture.",
-  'category': "image",
-  'use': ".couplepp",
-  'filename': __filename
+    'pattern': "couplepp",
+    'react': '💑',
+    'desc': "Get a male and female couple profile picture.",
+    'category': "image",
+    'use': ".couplepp",
+    'filename': __filename
 }, async (conn, m, store, {
-  from,
-  args,
-  reply
+    from,
+    args,
+    reply
 }) => {
-  try {
-    reply("*💑 Fetching couple profile pictures...*");
+    try {
+        reply("*💑 Fetching couple profile pictures...*");
 
-    const response = await axios.get("https://apis.davidcyril.name.ng/couplepp");
+        const response = await axios.get("https://apis.davidcyril.name.ng/couplepp");
 
-    if (!response.data || !response.data.success) {
-      return reply("❌ Failed to fetch couple profile pictures. Please try again later.");
+        if (!response.data || !response.data.success) {
+            return reply("❌ Failed to fetch couple profile pictures. Please try again later.");
+        }
+
+        const malePp = response.data.male;
+        const femalePp = response.data.female;
+
+        if (malePp) {
+            await conn.sendMessage(from, {
+                'image': { 'url': malePp },
+                'caption': "👨 Male Couple Profile Picture"
+            }, { 'quoted': m });
+        }
+
+        if (femalePp) {
+            await conn.sendMessage(from, {
+                'image': { 'url': femalePp },
+                'caption': "👩 Female Couple Profile Picture"
+            }, { 'quoted': m });
+        }
+
+    } catch (error) {
+        console.error(error);
+        reply("❌ An error occurred while fetching the couple profile pictures.");
     }
-
-    const malePp = response.data.male;
-    const femalePp = response.data.female;
-
-    if (malePp) {
-      await conn.sendMessage(from, {
-        'image': { 'url': malePp },
-        'caption': "👨 Male Couple Profile Picture"
-      }, { 'quoted': m });
-    }
-
-    if (femalePp) {
-      await conn.sendMessage(from, {
-        'image': { 'url': femalePp },
-        'caption': "👩 Female Couple Profile Picture"
-      }, { 'quoted': m });
-    }
-
-  } catch (error) {
-    console.error(error);
-    reply("❌ An error occurred while fetching the couple profile pictures.");
-  }
 });
 
 cmd({
-  pattern: "timezone",
-  desc: "Get the current time for a specific country.",
-  react: "🕰️",
-  category: "utility",
-  use: ".timezone <country>",
-  filename: __filename,
+    pattern: "timezone",
+    react: "🕰️",
+    use: ".timezone <country>",
+    filename: __filename,
 }, async (conn, mek, m, { args, reply }) => {
-  try {
-    if (args.length === 0) {
-      return reply("❌ Please provide a country. Example: `.timezone Pakistan`");
+    try {
+        if (args.length === 0) {
+            return reply("❌ Please provide a country. Example: `.timezone Pakistan`");
+        }
+
+        const country = args.join(" ");
+        const apiKey = process.env.IPGEO_API_KEY || "d6ca7264dd77441cbee974717ded084d";
+        const url = `https://api.ipgeolocation.io/timezone?apiKey=${apiKey}&country=${encodeURIComponent(country)}`;
+
+        const response = await axios.get(url);
+        const data = response.data;
+
+        if (!data || !data.date_time) {
+            return reply("❌ Unable to fetch time for the specified country. Please check your input.");
+        }
+
+        const message = `🕰️ *Current Time in ${data.country_name}*\n\n` +
+        `📅 Date & Time: ${data.date_time}\n` +
+        `⌚ Time Zone: ${data.timezone}`;
+
+        reply(message);
+
+    } catch (error) {
+        console.error("Error fetching time:", error.message);
+        reply("❌ Sorry, I couldn't fetch the time. Please check your input and try again.");
     }
-
-    const country = args.join(" ");
-    const apiKey = process.env.IPGEO_API_KEY || "d6ca7264dd77441cbee974717ded084d";
-    const url = `https://api.ipgeolocation.io/timezone?apiKey=${apiKey}&country=${encodeURIComponent(country)}`;
-
-    const response = await axios.get(url);
-    const data = response.data;
-
-    if (!data || !data.date_time) {
-      return reply("❌ Unable to fetch time for the specified country. Please check your input.");
-    }
-
-    const message = `🕰️ *Current Time in ${data.country_name}*\n\n` +
-                    `📅 Date & Time: ${data.date_time}\n` +
-                    `⌚ Time Zone: ${data.timezone}`;
-
-    reply(message);
-
-  } catch (error) {
-    console.error("Error fetching time:", error.message);
-    reply("❌ Sorry, I couldn't fetch the time. Please check your input and try again.");
-  }
 });
 
 cmd({
-  pattern: "wikipedia",
-  alias: ["wiki"],
-  react: "📖",
-  desc: "Fetch Wikipedia information and translate to English.",
-  category: "information",
-  filename: __filename
+    pattern: "wikipedia",
+    alias: ["wiki"],
+    react: "📖",
+    filename: __filename
 }, async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, reply }) => {
-  try {
-    if (!q) {
-      return reply("Please provide a search query for Wikipedia.");
+    try {
+        if (!q) {
+            return reply("Please provide a search query for Wikipedia.");
+        }
+
+        await reply("Searching Wikipedia...");
+
+        const response = await fetchJson(`https://api.siputzx.my.id/api/s/wikipedia?query=${encodeURIComponent(q)}`);
+
+        if (!response.status || !response.data) {
+            return reply("No results found for your query.");
+        }
+
+        const { wiki, thumb } = response.data;
+
+        const translated = await translate(wiki, { to: "en" });
+
+        let message = `📖 *Wikipedia Result*\n\n📝 *Query:* ${q}\n\n${translated.text}`;
+
+        if (thumb) {
+            await conn.sendMessage(m.chat, {
+                image: { url: thumb },
+                caption: message
+            });
+        } else {
+            await reply(message);
+        }
+
+    } catch (error) {
+        console.error(error);
+        reply("An error occurred: " + error.message);
     }
-
-    await reply("Searching Wikipedia...");
-
-    const response = await fetchJson(`https://api.siputzx.my.id/api/s/wikipedia?query=${encodeURIComponent(q)}`);
-
-    if (!response.status || !response.data) {
-      return reply("No results found for your query.");
-    }
-
-    const { wiki, thumb } = response.data;
-
-    const translated = await translate(wiki, { to: "en" });
-
-    let message = `📖 *Wikipedia Result*\n\n📝 *Query:* ${q}\n\n${translated.text}`;
-
-    if (thumb) {
-      await conn.sendMessage(m.chat, {
-        image: { url: thumb },
-        caption: message
-      });
-    } else {
-      await reply(message);
-    }
-
-  } catch (error) {
-    console.error(error);
-    reply("An error occurred: " + error.message);
-  }
 });
 
 const linkPatterns = [
-  /https?:\/\/(?:chat\.whatsapp\.com|wa\.me)\/\S+/gi,
-  /^https?:\/\/(www\.)?whatsapp\.com\/channel\/([a-zA-Z0-9_-]+)$/,
-  /wa\.me\/\S+/gi,
-  /https?:\/\/(?:t\.me|telegram\.me)\/\S+/gi,
-  /https?:\/\/(?:www\.)?youtube\.com\/\S+/gi,
-  /https?:\/\/youtu\.be\/\S+/gi,
-  /https?:\/\/(?:www\.)?facebook\.com\/\S+/gi,
-  /https?:\/\/fb\.me\/\S+/gi,
-  /https?:\/\/(?:www\.)?instagram\.com\/\S+/gi,
-  /https?:\/\/(?:www\.)?twitter\.com\/\S+/gi,
-  /https?:\/\/(?:www\.)?tiktok\.com\/\S+/gi,
-  /https?:\/\/(?:www\.)?linkedin\.com\/\S+/gi,
-  /https?:\/\/(?:www\.)?snapchat\.com\/\S+/gi,
-  /https?:\/\/(?:www\.)?pinterest\.com\/\S+/gi,
-  /https?:\/\/(?:www\.)?reddit\.com\/\S+/gi,
-  /https?:\/\/ngl\/\S+/gi,
-  /https?:\/\/(?:www\.)?discord\.com\/\S+/gi,
-  /https?:\/\/(?:www\.)?twitch\.tv\/\S+/gi,
-  /https?:\/\/(?:www\.)?vimeo\.com\/\S+/gi,
-  /https?:\/\/(?:www\.)?dailymotion\.com\/\S+/gi,
-  /https?:\/\/(?:www\.)?medium\.com\/\S+/gi
+/https?:\/\/(?:chat\.whatsapp\.com|wa\.me)\/\S+/gi,
+/^https?:\/\/(www\.)?whatsapp\.com\/channel\/([a-zA-Z0-9_-]+)$/,
+/wa\.me\/\S+/gi,
+/https?:\/\/(?:t\.me|telegram\.me)\/\S+/gi,
+/https?:\/\/(?:www\.)?youtube\.com\/\S+/gi,
+/https?:\/\/youtu\.be\/\S+/gi,
+/https?:\/\/(?:www\.)?facebook\.com\/\S+/gi,
+/https?:\/\/fb\.me\/\S+/gi,
+/https?:\/\/(?:www\.)?instagram\.com\/\S+/gi,
+/https?:\/\/(?:www\.)?twitter\.com\/\S+/gi,
+/https?:\/\/(?:www\.)?tiktok\.com\/\S+/gi,
+/https?:\/\/(?:www\.)?linkedin\.com\/\S+/gi,
+/https?:\/\/(?:www\.)?snapchat\.com\/\S+/gi,
+/https?:\/\/(?:www\.)?pinterest\.com\/\S+/gi,
+/https?:\/\/(?:www\.)?reddit\.com\/\S+/gi,
+/https?:\/\/ngl\/\S+/gi,
+/https?:\/\/(?:www\.)?discord\.com\/\S+/gi,
+/https?:\/\/(?:www\.)?twitch\.tv\/\S+/gi,
+/https?:\/\/(?:www\.)?vimeo\.com\/\S+/gi,
+/https?:\/\/(?:www\.)?dailymotion\.com\/\S+/gi,
+/https?:\/\/(?:www\.)?medium\.com\/\S+/gi
 ];
 
 cmd({
-  on: 'body'
+    on: 'body'
 }, async (conn, m, store, {
-  from,
-  body,
-  sender,
-  isGroup,
-  isAdmins,
-  isBotAdmins
+    from,
+    body,
+    sender,
+    isGroup,
+    isAdmins,
+    isBotAdmins
 }) => {
-  try {
-    if (!isGroup || isAdmins || !isBotAdmins) {
-      return;
-    }
+    try {
+        if (!isGroup || isAdmins || !isBotAdmins) {
+            return;
+        }
 
-    const containsLink = linkPatterns.some(pattern => pattern.test(body));
+        const containsLink = linkPatterns.some(pattern => pattern.test(body));
 
-    if (containsLink && config.DELETE_LINKS === 'true') {
-      await conn.sendMessage(from, { delete: m.key }, { quoted: m });
+        if (containsLink && config.DELETE_LINKS === 'true') {
+            await conn.sendMessage(from, { delete: m.key }, { quoted: m });
+        }
+    } catch (error) {
+        console.error(error);
     }
-  } catch (error) {
-    console.error(error);
-  }
 });
 
 cmd({
     pattern: "report",
     alias: ["ask", "bug", "request"],
-    desc: "Report a bug or request a feature",
-    category: "utility",
     filename: __filename
 }, async (conn, mek, m, {
     from, body, command, args, senderNumber, reply
@@ -306,191 +300,183 @@ cmd({
 });
 
 cmd({
-  pattern: "sss",
-  react: "💫",
-  desc: "Capture a full-page screenshot of a website.",
-  category: "utility",
-  use: ".sss <url>",
-  filename: __filename,
+    pattern: "sss",
+    react: "💫",
+    use: ".sss <url>",
+    filename: __filename,
 }, async (conn, mek, msg, { from, args, reply }) => {
-  try {
-    const url = args[0];
-    if (!url) {
-      return reply("❌ Please provide a valid URL. Example: `.screenshot https://github.com`");
-    }
+    try {
+        const url = args[0];
+        if (!url) {
+            return reply("❌ Please provide a valid URL. Example: `.screenshot https://github.com`");
+        }
 
-    if (!url.startsWith("http://") && !url.startsWith("https://")) {
-      return reply("❌ Invalid URL. Please include 'http://' or 'https://'.");
-    }
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            return reply("❌ Invalid URL. Please include 'http://' or 'https://'.");
+        }
 
-    const screenshotUrl = `https://image.thum.io/get/fullpage/${url}`;
+        const screenshotUrl = `https://image.thum.io/get/fullpage/${url}`;
 
-    await conn.sendMessage(from, {
-      image: { url: screenshotUrl },
-      caption: `*WEB SS DOWNLOADER*\n\n> *© Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`,
-      contextInfo: {
-        mentionedJid: [msg.sender],
-        forwardingScore: 999,
-        isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: '120363400240662312@newsletter',
-          newsletterName: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
-          serverMessageId: 143,
-        },
-      },
-    }, { quoted: mek });
-
-  } catch (error) {
-    console.error("Error:", error);
-    reply("❌ Failed to capture the screenshot. Please try again.");
-  }
-});
-
-cmd({
-  pattern: "tiktoksearch",
-  alias: ["tiktoks", "tiks"],
-  desc: "Search for TikTok videos using a query.",
-  react: '✅',
-  category: 'tools',
-  filename: __filename
-}, async (conn, m, store, {
-  from,
-  args,
-  reply
-}) => {
-  if (!args[0]) {
-    return reply("🌸 What do you want to search on TikTok?\n\n*Usage Example:*\n.tiktoksearch <query>");
-  }
-
-  const query = args.join(" ");
-  await store.react('⌛');
-
-  try {
-    reply(`🔎 Searching TikTok for: *${query}*`);
-
-    const response = await fetch(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(query)}`);
-    const data = await response.json();
-
-    if (!data || !data.data || data.data.length === 0) {
-      await store.react('❌');
-      return reply("❌ No results found for your query. Please try with a different keyword.");
-    }
-
-    const results = data.data.slice(0, 5).sort(() => Math.random() - 0.5);
-
-    for (const video of results) {
-      const message = `🌸 *TikTok Video Result*:\n\n`
-        + `*• Title*: ${video.title}\n`
-        + `*• Author*: ${video.author || 'Unknown'}\n`
-        + `*• Duration*: ${video.duration || "Unknown"}\n`
-        + `*• URL*: ${video.link}\n\n`;
-
-      if (video.nowm) {
         await conn.sendMessage(from, {
-          video: { url: video.nowm },
-          caption: message
-        }, { quoted: m });
-      } else {
-        reply(`❌ Failed to retrieve video for *"${video.title}"*.`);
-      }
-    }
+            image: { url: screenshotUrl },
+            caption: `*WEB SS DOWNLOADER*\n\n> *© Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`,
+            contextInfo: {
+                mentionedJid: [msg.sender],
+                forwardingScore: 999,
+                isForwarded: true,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: '120363400240662312@newsletter',
+                    newsletterName: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
+                    serverMessageId: 143,
+                },
+            },
+        }, { quoted: mek });
 
-    await store.react('✅');
-  } catch (error) {
-    console.error("Error in TikTokSearch command:", error);
-    await store.react('❌');
-    reply("❌ An error occurred while searching TikTok. Please try again later.");
-  }
+    } catch (error) {
+        console.error("Error:", error);
+        reply("❌ Failed to capture the screenshot. Please try again.");
+    }
 });
 
 cmd({
-  'on': "body"
+    pattern: "tiktoksearch",
+    alias: ["tiktoks", "tiks"],
+    react: '✅',
+    filename: __filename
 }, async (conn, m, store, {
-  from,
-  body,
-  sender,
-  isGroup,
-  isAdmins,
-  isBotAdmins,
-  reply
+    from,
+    args,
+    reply
 }) => {
-  try {
-    if (!isGroup || isAdmins || !isBotAdmins) {
-      return;
+    if (!args[0]) {
+        return reply("🌸 What do you want to search on TikTok?\n\n*Usage Example:*\n.tiktoksearch <query>");
     }
 
-    const containsLink = linkPatterns.some(pattern => pattern.test(body));
+    const query = args.join(" ");
+    await store.react('⌛');
 
-    if (containsLink && config.ANTI_LINK_KICK === 'true') {
-      await conn.sendMessage(from, { 'delete': m.key }, { 'quoted': m });
-      await conn.sendMessage(from, {
-        'text': `⚠️ Links are not allowed in this group.\n@${sender.split('@')[0]} has been removed. 🚫`,
-        'mentions': [sender]
-      }, { 'quoted': m });
+    try {
+        reply(`🔎 Searching TikTok for: *${query}*`);
 
-      await conn.groupParticipantsUpdate(from, [sender], "remove");
+        const response = await fetch(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        if (!data || !data.data || data.data.length === 0) {
+            await store.react('❌');
+            return reply("❌ No results found for your query. Please try with a different keyword.");
+        }
+
+        const results = data.data.slice(0, 5).sort(() => Math.random() - 0.5);
+
+        for (const video of results) {
+            const message = `🌸 *TikTok Video Result*:\n\n`
+            + `*• Title*: ${video.title}\n`
+            + `*• Author*: ${video.author || 'Unknown'}\n`
+            + `*• Duration*: ${video.duration || "Unknown"}\n`
+            + `*• URL*: ${video.link}\n\n`;
+
+            if (video.nowm) {
+                await conn.sendMessage(from, {
+                    video: { url: video.nowm },
+                    caption: message
+                }, { quoted: m });
+            } else {
+                reply(`❌ Failed to retrieve video for *"${video.title}"*.`);
+            }
+        }
+
+        await store.react('✅');
+    } catch (error) {
+        console.error("Error in TikTokSearch command:", error);
+        await store.react('❌');
+        reply("❌ An error occurred while searching TikTok. Please try again later.");
     }
-  } catch (error) {
-    console.error(error);
-    reply("An error occurred while processing the message.");
-  }
 });
 
 cmd({
-  pattern: "fullpp2",
-  alias: ["setpp", "setdp"],
-  react: "🖼️",
-  desc: "Set full image as bot's profile picture",
-  category: "tools",
-  filename: __filename
+    'on': "body"
+}, async (conn, m, store, {
+    from,
+    body,
+    sender,
+    isGroup,
+    isAdmins,
+    isBotAdmins,
+    reply
+}) => {
+    try {
+        if (!isGroup || isAdmins || !isBotAdmins) {
+            return;
+        }
+
+        const containsLink = linkPatterns.some(pattern => pattern.test(body));
+
+        if (containsLink && config.ANTI_LINK_KICK === 'true') {
+            await conn.sendMessage(from, { 'delete': m.key }, { 'quoted': m });
+            await conn.sendMessage(from, {
+                'text': `⚠️ Links are not allowed in this group.\n@${sender.split('@')[0]} has been removed. 🚫`,
+                'mentions': [sender]
+            }, { 'quoted': m });
+
+            await conn.groupParticipantsUpdate(from, [sender], "remove");
+        }
+    } catch (error) {
+        console.error(error);
+        reply("An error occurred while processing the message.");
+    }
+});
+
+cmd({
+    pattern: "fullpp2",
+    alias: ["setpp", "setdp"],
+    react: "🖼️",
+    filename: __filename
 }, async (client, message, match, { from, isCreator }) => {
-  try {
+    try {
 
-    const botJid = client.user?.id || (client.user.id.split(":")[0] + "@s.whatsapp.net");
+        const botJid = client.user?.id || (client.user.id.split(":")[0] + "@s.whatsapp.net");
 
-    if (message.sender !== botJid && !isCreator) {
-      return await client.sendMessage(from, {
-        text: "*📛 This command can only be used by the bot or its owner.*"
-      }, { quoted: message });
+        if (message.sender !== botJid && !isCreator) {
+            return await client.sendMessage(from, {
+                text: "*📛 This command can only be used by the bot or its owner.*"
+            }, { quoted: message });
+        }
+
+        if (!message.quoted || !message.quoted.mtype || !message.quoted.mtype.includes("image")) {
+            return await client.sendMessage(from, {
+                text: "*⚠️ Please reply to an image to set as profile picture*"
+            }, { quoted: message });
+        }
+
+        await client.sendMessage(from, {
+            text: "*⏳ Processing image, please wait...*"
+        }, { quoted: message });
+
+        const imageBuffer = await message.quoted.download();
+        const image = await Jimp.read(imageBuffer);
+
+        const blurredBg = image.clone().cover(640, 640).blur(10);
+        const centeredImage = image.clone().contain(640, 640);
+        blurredBg.composite(centeredImage, 0, 0);
+        const finalImage = await blurredBg.getBufferAsync(Jimp.MIME_JPEG);
+
+        await client.updateProfilePicture(botJid, finalImage);
+
+        await client.sendMessage(from, {
+            text: "*✅ Bot's profile picture updated successfully!*"
+        }, { quoted: message });
+
+    } catch (error) {
+        console.error("fullpp Error:", error);
+        await client.sendMessage(from, {
+            text: `*❌ Error updating profile picture:*\n${error.message}`
+        }, { quoted: message });
     }
-
-    if (!message.quoted || !message.quoted.mtype || !message.quoted.mtype.includes("image")) {
-      return await client.sendMessage(from, {
-        text: "*⚠️ Please reply to an image to set as profile picture*"
-      }, { quoted: message });
-    }
-
-    await client.sendMessage(from, {
-      text: "*⏳ Processing image, please wait...*"
-    }, { quoted: message });
-
-    const imageBuffer = await message.quoted.download();
-    const image = await Jimp.read(imageBuffer);
-
-    const blurredBg = image.clone().cover(640, 640).blur(10);
-    const centeredImage = image.clone().contain(640, 640);
-    blurredBg.composite(centeredImage, 0, 0);
-    const finalImage = await blurredBg.getBufferAsync(Jimp.MIME_JPEG);
-
-    await client.updateProfilePicture(botJid, finalImage);
-
-    await client.sendMessage(from, {
-      text: "*✅ Bot's profile picture updated successfully!*"
-    }, { quoted: message });
-
-  } catch (error) {
-    console.error("fullpp Error:", error);
-    await client.sendMessage(from, {
-      text: `*❌ Error updating profile picture:*\n${error.message}`
-    }, { quoted: message });
-  }
 });
 
 cmd({
     pattern: "wstalk",
     alias: ["channelstalk", "chinfo"],
-    desc: "Get WhatsApp channel information",
-    category: "utility",
     react: "🔍",
     filename: __filename
 },
@@ -508,13 +494,13 @@ async (conn, mek, m, { from, reply, args }) => {
         const data = response.data.data;
 
         const channelInfo = `╭━━〔 *CHANNEL INFO* 〕━━┈⊷
-┃◈╭─────────────·๏
-┃◈┃• *📢 Title*: ${data.title}
-┃◈┃• *👥 Followers*: ${data.followers}
-┃◈┃• *📝 Description*: ${data.description.replace(/\n/g, '\n┃◈┃• ')}
-┃◈└───────────┈⊷
-╰──────────────┈⊷
-> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
+        ┃◈╭─────────────·๏
+        ┃◈┃• *📢 Title*: ${data.title}
+        ┃◈┃• *👥 Followers*: ${data.followers}
+        ┃◈┃• *📝 Description*: ${data.description.replace(/\n/g, '\n┃◈┃• ')}
+        ┃◈└───────────┈⊷
+        ╰──────────────┈⊷
+        > © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
 
         await conn.sendMessage(from, {
             image: { url: data.img },
@@ -537,8 +523,6 @@ cmd({
     pattern: "getname",
     alias: ["getnumber"],
     react: "🔎",
-    desc: "Get a Truecaller-style lookup for a phone number.",
-    category: "tools",
     filename: __filename
 },
 async (conn, mek, m, { reply, q }) => {
@@ -582,80 +566,76 @@ async (conn, mek, m, { reply, q }) => {
 });
 
 cmd({
-  pattern: "post",
-  alias: ["poststatus", "status", "story", "repost", "reshare"],
-  react: '📝',
-  desc: "Posts replied media to bot's status",
-  category: "utility",
-  filename: __filename
+    pattern: "post",
+    alias: ["poststatus", "status", "story", "repost", "reshare"],
+    react: '📝',
+    filename: __filename
 }, async (client, message, match, { from, isCreator }) => {
-  try {
-    if (!isCreator) {
-      return await client.sendMessage(from, {
-        text: "*📛 This is an owner-only command.*"
-      }, { quoted: message });
-    }
+    try {
+        if (!isCreator) {
+            return await client.sendMessage(from, {
+                text: "*📛 This is an owner-only command.*"
+            }, { quoted: message });
+        }
 
-    const quotedMsg = message.quoted ? message.quoted : message;
-    const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
+        const quotedMsg = message.quoted ? message.quoted : message;
+        const mimeType = (quotedMsg.msg || quotedMsg).mimetype || '';
 
-    if (!mimeType) {
-      return await client.sendMessage(message.chat, {
-        text: "*Please reply to an image, video, or audio file.*"
-      }, { quoted: message });
-    }
+        if (!mimeType) {
+            return await client.sendMessage(message.chat, {
+                text: "*Please reply to an image, video, or audio file.*"
+            }, { quoted: message });
+        }
 
-    const buffer = await quotedMsg.download();
-    const mtype = quotedMsg.mtype;
-    const caption = quotedMsg.text || '';
+        const buffer = await quotedMsg.download();
+        const mtype = quotedMsg.mtype;
+        const caption = quotedMsg.text || '';
 
-    let statusContent = {};
+        let statusContent = {};
 
-    switch (mtype) {
-      case "imageMessage":
-        statusContent = {
-          image: buffer,
-          caption: caption
-        };
-        break;
-      case "videoMessage":
-        statusContent = {
-          video: buffer,
-          caption: caption
-        };
-        break;
-      case "audioMessage":
-        statusContent = {
-          audio: buffer,
-          mimetype: "audio/mp4",
-          ptt: quotedMsg.ptt || false
-        };
-        break;
-      default:
-        return await client.sendMessage(message.chat, {
-          text: "Only image, video, and audio files can be posted to status."
+        switch (mtype) {
+            case "imageMessage":
+            statusContent = {
+                image: buffer,
+                caption: caption
+            };
+            break;
+            case "videoMessage":
+            statusContent = {
+                video: buffer,
+                caption: caption
+            };
+            break;
+            case "audioMessage":
+            statusContent = {
+                audio: buffer,
+                mimetype: "audio/mp4",
+                ptt: quotedMsg.ptt || false
+            };
+            break;
+            default:
+            return await client.sendMessage(message.chat, {
+                text: "Only image, video, and audio files can be posted to status."
+            }, { quoted: message });
+        }
+
+        await client.sendMessage("status@broadcast", statusContent);
+
+        await client.sendMessage(message.chat, {
+            text: "✅ Status Uploaded Successfully."
+        }, { quoted: message });
+
+    } catch (error) {
+        console.error("Status Error:", error);
+        await client.sendMessage(message.chat, {
+            text: "❌ Failed to post status:\n" + error.message
         }, { quoted: message });
     }
-
-    await client.sendMessage("status@broadcast", statusContent);
-
-    await client.sendMessage(message.chat, {
-      text: "✅ Status Uploaded Successfully."
-    }, { quoted: message });
-
-  } catch (error) {
-    console.error("Status Error:", error);
-    await client.sendMessage(message.chat, {
-      text: "❌ Failed to post status:\n" + error.message
-    }, { quoted: message });
-  }
 });
 
 cmd({
     pattern: "countryinfo",
     alias: ["cinfo", "country","cinfo2"],
-    desc: "Get information about a country",
-    category: "info",
     react: "🌍",
     filename: __filename
 },
@@ -673,21 +653,21 @@ async (conn, mek, m, { from, args, q, reply, react }) => {
 
         const info = data.data;
         let neighborsText = info.neighbors.length > 0
-            ? info.neighbors.map(n => `🌍 *${n.name}*`).join(", ")
-            : "No neighboring countries found.";
+        ? info.neighbors.map(n => `🌍 *${n.name}*`).join(", ")
+        : "No neighboring countries found.";
 
         const text = `🌍 *Country Information: ${info.name}* 🌍\n\n` +
-                     `🏛 *Capital:* ${info.capital}\n` +
-                     `📍 *Continent:* ${info.continent.name} ${info.continent.emoji}\n` +
-                     `📞 *Phone Code:* ${info.phoneCode}\n` +
-                     `📏 *Area:* ${info.area.squareKilometers} km² (${info.area.squareMiles} mi²)\n` +
-                     `🚗 *Driving Side:* ${info.drivingSide}\n` +
-                     `💱 *Currency:* ${info.currency}\n` +
-                     `🔤 *Languages:* ${info.languages.native.join(", ")}\n` +
-                     `🌟 *Famous For:* ${info.famousFor}\n` +
-                     `🌍 *ISO Codes:* ${info.isoCode.alpha2.toUpperCase()}, ${info.isoCode.alpha3.toUpperCase()}\n` +
-                     `🌎 *Internet TLD:* ${info.internetTLD}\n\n` +
-                     `🔗 *Neighbors:* ${neighborsText}`;
+        `🏛 *Capital:* ${info.capital}\n` +
+        `📍 *Continent:* ${info.continent.name} ${info.continent.emoji}\n` +
+        `📞 *Phone Code:* ${info.phoneCode}\n` +
+        `📏 *Area:* ${info.area.squareKilometers} km² (${info.area.squareMiles} mi²)\n` +
+        `🚗 *Driving Side:* ${info.drivingSide}\n` +
+        `💱 *Currency:* ${info.currency}\n` +
+        `🔤 *Languages:* ${info.languages.native.join(", ")}\n` +
+        `🌟 *Famous For:* ${info.famousFor}\n` +
+        `🌍 *ISO Codes:* ${info.isoCode.alpha2.toUpperCase()}, ${info.isoCode.alpha3.toUpperCase()}\n` +
+        `🌎 *Internet TLD:* ${info.internetTLD}\n\n` +
+        `🔗 *Neighbors:* ${neighborsText}`;
 
         await conn.sendMessage(from, {
             image: { url: info.flag },
@@ -704,103 +684,99 @@ async (conn, mek, m, { from, args, q, reply, react }) => {
 });
 
 cmd({
-  pattern: "gpass",
-  desc: "Generate a strong password with customizable options.",
-  category: "other",
-  react: '🔐',
-  filename: __filename
+    pattern: "gpass",
+    react: '🔐',
+    filename: __filename
 }, async (conn, m, store, {
-  from,
-  quoted,
-  body,
-  isCmd,
-  command,
-  args,
-  q,
-  isGroup,
-  sender,
-  senderNumber,
-  botNumber2,
-  botNumber,
-  pushname,
-  isMe,
-  isOwner,
-  groupMetadata,
-  groupName,
-  participants,
-  groupAdmins,
-  isBotAdmins,
-  isAdmins,
-  reply
+    from,
+    quoted,
+    body,
+    isCmd,
+    command,
+    args,
+    q,
+    isGroup,
+    sender,
+    senderNumber,
+    botNumber2,
+    botNumber,
+    pushname,
+    isMe,
+    isOwner,
+    groupMetadata,
+    groupName,
+    participants,
+    groupAdmins,
+    isBotAdmins,
+    isAdmins,
+    reply
 }) => {
-  try {
+    try {
 
-    let passwordLength = args[0] ? parseInt(args[0]) : 12;
-    const passwordType = args[1] || 'all';
+        let passwordLength = args[0] ? parseInt(args[0]) : 12;
+        const passwordType = args[1] || 'all';
 
-    if (isNaN(passwordLength) || passwordLength < 8) {
-      return reply("❌ Please provide a valid length for the password (Minimum 8 Characters).");
+        if (isNaN(passwordLength) || passwordLength < 8) {
+            return reply("❌ Please provide a valid length for the password (Minimum 8 Characters).");
+        }
+
+        const sets = {
+            letters: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            numbers: '0123456789',
+            symbols: '!@#$%^&*()_+[]{}|;:,.<>?'
+        };
+
+        let allChars = sets.letters + sets.numbers + sets.symbols;
+        let passwordChars = '';
+
+        if (passwordType === 'letters') {
+            passwordChars = sets.letters;
+        } else if (passwordType === 'numbers') {
+            passwordChars = sets.numbers;
+        } else if (passwordType === 'symbols') {
+            passwordChars = sets.symbols;
+        } else {
+            passwordChars = allChars;
+        }
+
+        const generatePassword = (length) => {
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                const randomIndex = crypto.randomInt(0, passwordChars.length);
+                password += passwordChars[randomIndex];
+            }
+            return password;
+        };
+
+        const generatedPassword = generatePassword(passwordLength);
+
+        const strength = passwordLength > 16 ? 'Very Strong' : passwordLength > 12 ? 'Strong' : 'Medium';
+
+        await conn.sendMessage(from, {
+            text: `🔐 *Your Strong Password* 🔐\n\nHere is your generated password (${strength}):\n\n*${generatedPassword}*\n\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
+        }, {
+            quoted: quoted
+        });
+
+    } catch (error) {
+        console.error(error);
+        reply("❌ Error generating password: " + error.message);
     }
-
-    const sets = {
-      letters: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
-      numbers: '0123456789',
-      symbols: '!@#$%^&*()_+[]{}|;:,.<>?'
-    };
-
-    let allChars = sets.letters + sets.numbers + sets.symbols;
-    let passwordChars = '';
-
-    if (passwordType === 'letters') {
-      passwordChars = sets.letters;
-    } else if (passwordType === 'numbers') {
-      passwordChars = sets.numbers;
-    } else if (passwordType === 'symbols') {
-      passwordChars = sets.symbols;
-    } else {
-      passwordChars = allChars;
-    }
-
-    const generatePassword = (length) => {
-      let password = '';
-      for (let i = 0; i < length; i++) {
-        const randomIndex = crypto.randomInt(0, passwordChars.length);
-        password += passwordChars[randomIndex];
-      }
-      return password;
-    };
-
-    const generatedPassword = generatePassword(passwordLength);
-
-    const strength = passwordLength > 16 ? 'Very Strong' : passwordLength > 12 ? 'Strong' : 'Medium';
-
-    await conn.sendMessage(from, {
-      text: `🔐 *Your Strong Password* 🔐\n\nHere is your generated password (${strength}):\n\n*${generatedPassword}*\n\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`
-    }, {
-      quoted: quoted
-    });
-
-  } catch (error) {
-    console.error(error);
-    reply("❌ Error generating password: " + error.message);
-  }
 });
 
 cmd({
-  pattern: "screenshot",
-  react: "🌐",
-  alias: ["ss", "ssweb"],
-  desc: "Capture a full-page screenshot of a website.",
-  category: "utility",
-  use: ".screenshot <url>",
-  filename: __filename,
+    pattern: "screenshot",
+    react: "🌐",
+    alias: ["ss", "ssweb"],
+    use: ".screenshot <url>",
+    filename: __filename,
 }, async (conn, mek, msg, { from, args, reply }) => {
-  try {
-    const url = args[0];
-    if (!url) return reply("❌ Please provide a URL\nExample: .screenshot https://google.com");
-    if (!url.startsWith("http")) return reply("❌ URL must start with http:// or https://");
+    try {
+        const url = args[0];
+        if (!url) return reply("❌ Please provide a URL\nExample: .screenshot https://google.com");
+        if (!url.startsWith("http")) return reply("❌ URL must start with http:// or https://");
 
-    const loadingBars = [
+        const loadingBars = [
         { percent: 10, bar: "[▓░░░░░░░░░]", text: "✦ Initializing capture..." },
         { percent: 20, bar: "[▓▓░░░░░░░░]", text: "✦ Connecting to website..." },
         { percent: 30, bar: "[▓▓▓░░░░░░░]", text: "✦ Loading page content..." },
@@ -811,48 +787,48 @@ cmd({
         { percent: 80, bar: "[▓▓▓▓▓▓▓▓░░]", text: "✦ Finalizing screenshot..." },
         { percent: 90, bar: "[▓▓▓▓▓▓▓▓▓░]", text: "✦ Optimizing image..." },
         { percent: 100, bar: "[▓▓▓▓▓▓▓▓▓▓]", text: "✓ Capture complete!" }
-    ];
+        ];
 
-    const loadingMsg = await conn.sendMessage(from, {
-        text: "🔄 Starting screenshot capture...\n✦ Please wait..."
-    }, { quoted: mek });
+        const loadingMsg = await conn.sendMessage(from, {
+            text: "🔄 Starting screenshot capture...\n✦ Please wait..."
+        }, { quoted: mek });
 
-    for (const frame of loadingBars) {
+        for (const frame of loadingBars) {
+            await sleep(800);
+            await conn.relayMessage(from, {
+                protocolMessage: {
+                    key: loadingMsg.key,
+                    type: 14,
+                    editedMessage: {
+                        conversation: `📸 ${frame.bar} ${frame.percent}%\n${frame.text}`
+                    }
+                }
+            }, {});
+        }
+
         await sleep(800);
         await conn.relayMessage(from, {
             protocolMessage: {
                 key: loadingMsg.key,
                 type: 14,
                 editedMessage: {
-                    conversation: `📸 ${frame.bar} ${frame.percent}%\n${frame.text}`
+                    conversation: "✅ Screenshot Captured!\n✦ Sending now..."
                 }
             }
         }, {});
+
+        await sleep(1000);
+
+        await conn.sendMessage(from, {
+            image: { url: `https://image.thum.io/get/fullpage/${url}` },
+            caption: "- 🖼️ *Screenshot Generated*\n\n" +
+            "> Its 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 say it beiby 🎭"
+        }, { quoted: mek });
+
+    } catch (error) {
+        console.error("Error:", error);
+        reply("❌ Failed to capture screenshot\n✦ Please try again later");
     }
-
-    await sleep(800);
-    await conn.relayMessage(from, {
-        protocolMessage: {
-            key: loadingMsg.key,
-            type: 14,
-            editedMessage: {
-                conversation: "✅ Screenshot Captured!\n✦ Sending now..."
-            }
-        }
-    }, {});
-
-    await sleep(1000);
-
-    await conn.sendMessage(from, {
-        image: { url: `https://image.thum.io/get/fullpage/${url}` },
-        caption: "- 🖼️ *Screenshot Generated*\n\n" +
-                "> Its 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 say it beiby 🎭"
-    }, { quoted: mek });
-
-  } catch (error) {
-    console.error("Error:", error);
-    reply("❌ Failed to capture screenshot\n✦ Please try again later");
-  }
 });
 
 const BASE_URL = "https://v6.exchangerate-api.com/v6";
@@ -862,8 +838,6 @@ cmd({
     pattern: "convertmoney",
     react: "💸",
     alias: ["currency", "cvmoney"],
-    desc: "Convert money from one currency to another currency",
-    category: "utility",
     use: ".currency amount fromCurrency toCurrency (e.g: .convert 100 USD EUR)",
     filename: __filename,
 }, async (conn, mek, msg, { from, reply, args }) => {
@@ -897,10 +871,10 @@ cmd({
         const formattedResult = new Intl.NumberFormat().format(convertedAmount);
 
         const message = `*🌍 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 CURRENCY CONVERSION 💵*\n\n` +
-            `*💲 Form:* ${formattedAmount} ${fromCurrency}\n` +
-            `*🏷️ To:* ${formattedResult} ${toCurrency}\n` +
-            `*💰 Rate:* 1 ${fromCurrency} = ${rates[toCurrency]} ${toCurrency}\n\n` +
-            `*⏰ Last Updated:* ${response.data.time_last_update_utc}`;
+        `*💲 Form:* ${formattedAmount} ${fromCurrency}\n` +
+        `*🏷️ To:* ${formattedResult} ${toCurrency}\n` +
+        `*💰 Rate:* 1 ${fromCurrency} = ${rates[toCurrency]} ${toCurrency}\n\n` +
+        `*⏰ Last Updated:* ${response.data.time_last_update_utc}`;
 
         reply(message);
 
@@ -924,113 +898,111 @@ cmd({
 });
 
 cmd({
-  'on': "body"
+    'on': "body"
 }, async (conn, m, store, {
-  from,
-  body,
-  sender,
-  isGroup,
-  isAdmins,
-  isBotAdmins,
-  reply
+    from,
+    body,
+    sender,
+    isGroup,
+    isAdmins,
+    isBotAdmins,
+    reply
 }) => {
-  try {
+    try {
 
-    if (!global.warnings) {
-      global.warnings = {};
+        if (!global.warnings) {
+            global.warnings = {};
+        }
+
+        if (!isGroup || isAdmins || !isBotAdmins) {
+            return;
+        }
+
+        const linkPatterns = [
+        /https?:\/\/(?:chat\.whatsapp\.com|wa\.me)\/\S+/gi,
+        /https?:\/\/(?:api\.whatsapp\.com|wa\.me)\/\S+/gi,
+        /wa\.me\/\S+/gi,
+        /https?:\/\/(?:t\.me|telegram\.me)\/\S+/gi,
+        /https?:\/\/(?:www\.)?\.com\/\S+/gi,
+        /https?:\/\/(?:www\.)?twitter\.com\/\S+/gi,
+        /https?:\/\/(?:www\.)?linkedin\.com\/\S+/gi,
+        /https?:\/\/(?:whatsapp\.com|channel\.me)\/\S+/gi,
+        /https?:\/\/(?:www\.)?reddit\.com\/\S+/gi,
+        /https?:\/\/(?:www\.)?discord\.com\/\S+/gi,
+        /https?:\/\/(?:www\.)?twitch\.tv\/\S+/gi,
+        /https?:\/\/(?:www\.)?vimeo\.com\/\S+/gi,
+        /https?:\/\/(?:www\.)?dailymotion\.com\/\S+/gi,
+        /https?:\/\/(?:www\.)?medium\.com\/\S+/gi
+        ];
+
+        const containsLink = linkPatterns.some(pattern => pattern.test(body));
+
+        if (containsLink && config.ANTI_LINK === 'true') {
+            console.log(`Link detected from ${sender}: ${body}`);
+
+            try {
+                await conn.sendMessage(from, {
+                    delete: m.key
+                });
+                console.log(`Message deleted: ${m.key.id}`);
+            } catch (error) {
+                console.error("Failed to delete message:", error);
+            }
+
+            global.warnings[sender] = (global.warnings[sender] || 0) + 1;
+            const warningCount = global.warnings[sender];
+
+            if (warningCount < 4) {
+
+                await conn.sendMessage(from, {
+                    text: `‎*⚠️LINKS ARE NOT ALLOWED⚠️*\n` +
+                    `*╭────⬡ WARNING ⬡────*\n` +
+                    `*├▢ USER :* @${sender.split('@')[0]}!\n` +
+                    `*├▢ COUNT : ${warningCount}*\n` +
+                    `*├▢ REASON : LINK SENDING*\n` +
+                    `*├▢ WARN LIMIT : 3*\n` +
+                    `*╰────────────────*`,
+                    mentions: [sender]
+                });
+            } else {
+
+                await conn.sendMessage(from, {
+                    text: `@${sender.split('@')[0]} *HAS BEEN REMOVED - WARN LIMIT EXCEEDED!*`,
+                    mentions: [sender]
+                });
+                await conn.groupParticipantsUpdate(from, [sender], "remove");
+                delete global.warnings[sender];
+            }
+        }
+    } catch (error) {
+        console.error("Anti-link error:", error);
+        reply("❌ An error occurred while processing the message.");
     }
-
-    if (!isGroup || isAdmins || !isBotAdmins) {
-      return;
-    }
-
-    const linkPatterns = [
-      /https?:\/\/(?:chat\.whatsapp\.com|wa\.me)\/\S+/gi,
-      /https?:\/\/(?:api\.whatsapp\.com|wa\.me)\/\S+/gi,
-      /wa\.me\/\S+/gi,
-      /https?:\/\/(?:t\.me|telegram\.me)\/\S+/gi,
-      /https?:\/\/(?:www\.)?\.com\/\S+/gi,
-      /https?:\/\/(?:www\.)?twitter\.com\/\S+/gi,
-      /https?:\/\/(?:www\.)?linkedin\.com\/\S+/gi,
-      /https?:\/\/(?:whatsapp\.com|channel\.me)\/\S+/gi,
-      /https?:\/\/(?:www\.)?reddit\.com\/\S+/gi,
-      /https?:\/\/(?:www\.)?discord\.com\/\S+/gi,
-      /https?:\/\/(?:www\.)?twitch\.tv\/\S+/gi,
-      /https?:\/\/(?:www\.)?vimeo\.com\/\S+/gi,
-      /https?:\/\/(?:www\.)?dailymotion\.com\/\S+/gi,
-      /https?:\/\/(?:www\.)?medium\.com\/\S+/gi
-    ];
-
-    const containsLink = linkPatterns.some(pattern => pattern.test(body));
-
-    if (containsLink && config.ANTI_LINK === 'true') {
-      console.log(`Link detected from ${sender}: ${body}`);
-
-      try {
-        await conn.sendMessage(from, {
-          delete: m.key
-        });
-        console.log(`Message deleted: ${m.key.id}`);
-      } catch (error) {
-        console.error("Failed to delete message:", error);
-      }
-
-      global.warnings[sender] = (global.warnings[sender] || 0) + 1;
-      const warningCount = global.warnings[sender];
-
-      if (warningCount < 4) {
-
-        await conn.sendMessage(from, {
-          text: `‎*⚠️LINKS ARE NOT ALLOWED⚠️*\n` +
-                `*╭────⬡ WARNING ⬡────*\n` +
-                `*├▢ USER :* @${sender.split('@')[0]}!\n` +
-                `*├▢ COUNT : ${warningCount}*\n` +
-                `*├▢ REASON : LINK SENDING*\n` +
-                `*├▢ WARN LIMIT : 3*\n` +
-                `*╰────────────────*`,
-          mentions: [sender]
-        });
-      } else {
-
-        await conn.sendMessage(from, {
-          text: `@${sender.split('@')[0]} *HAS BEEN REMOVED - WARN LIMIT EXCEEDED!*`,
-          mentions: [sender]
-        });
-        await conn.groupParticipantsUpdate(from, [sender], "remove");
-        delete global.warnings[sender];
-      }
-    }
-  } catch (error) {
-    console.error("Anti-link error:", error);
-    reply("❌ An error occurred while processing the message.");
-  }
 });
 
 cmd({
     pattern: "createapi",
-    desc: "Create a custom API endpoint",
     alias: ["makeapi", "apimaker"],
-    category: "utility",
     react: "🌐",
     filename: __filename
 }, async (conn, mek, m, { from, quoted, args, q, reply }) => {
     try {
         if (!q) {
             return reply(`
-*🌐 API CREATOR GUIDE*
+            *🌐 API CREATOR GUIDE*
 
-🔹 Usage: .createapi <METHOD> <ENDPOINT> <RESPONSE_TYPE>
+            🔹 Usage: .createapi <METHOD> <ENDPOINT> <RESPONSE_TYPE>
 
-📌 *Examples:*
-.createapi GET /users json
-.createapi POST /create-user json
-.createapi PUT /update-product json
+            📌 *Examples:*
+            .createapi GET /users json
+            .createapi POST /create-user json
+            .createapi PUT /update-product json
 
-📝 *Parameters:*
-- METHOD: GET, POST, PUT, DELETE
-- ENDPOINT: Must start with '/'
-- RESPONSE_TYPE: json, text, xml
-`);
+            📝 *Parameters:*
+            - METHOD: GET, POST, PUT, DELETE
+            - ENDPOINT: Must start with '/'
+            - RESPONSE_TYPE: json, text, xml
+            `);
         }
 
         const parts = q.split(/\s+/);
@@ -1076,35 +1048,35 @@ cmd({
         const responseTemplate = responseTemplates[responseType.toLowerCase()];
 
         const apiCode = `
-// ${apiStructure.method} ${apiStructure.endpoint}
-app.${apiStructure.method.toLowerCase()}('${apiStructure.endpoint}', (req, res) => {
-    try {
-        // Your API logic here
-        res.${apiStructure.responseType}(${JSON.stringify(responseTemplate, null, 2)});
-    } catch (error) {
-        res.status(500).json({ status: false, message: error.message });
-    }
-});
-`;
+        // ${apiStructure.method} ${apiStructure.endpoint}
+        app.${apiStructure.method.toLowerCase()}('${apiStructure.endpoint}', (req, res) => {
+            try {
+                // Your API logic here
+                res.${apiStructure.responseType}(${JSON.stringify(responseTemplate, null, 2)});
+            } catch (error) {
+                res.status(500).json({ status: false, message: error.message });
+            }
+        });
+        `;
 
         await reply(`
-*🌐 API ENDPOINT CREATED*
+        *🌐 API ENDPOINT CREATED*
 
-📍 Method: *${apiStructure.method}*
-🔗 Endpoint: *${apiStructure.endpoint}*
-📦 Response Type: *${apiStructure.responseType}*
-⏰ Created: *${apiStructure.createdAt}*
+        📍 Method: *${apiStructure.method}*
+        🔗 Endpoint: *${apiStructure.endpoint}*
+        📦 Response Type: *${apiStructure.responseType}*
+        ⏰ Created: *${apiStructure.createdAt}*
 
-*📝 Sample Implementation:*
-\`\`\`javascript
-${apiCode}
-\`\`\`
+        *📝 Sample Implementation:*
+        \`\`\`javascript
+        ${apiCode}
+        \`\`\`
 
-*📋 Sample Response:*
-\`\`\`${apiStructure.responseType}
-${JSON.stringify(responseTemplate, null, 2)}
-\`\`\`
-`);
+        *📋 Sample Response:*
+        \`\`\`${apiStructure.responseType}
+        ${JSON.stringify(responseTemplate, null, 2)}
+        \`\`\`
+        `);
 
         await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
 
@@ -1114,18 +1086,16 @@ ${JSON.stringify(responseTemplate, null, 2)}
         await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
 
         await reply(`
-❌ *API Creation Failed*
-🔍 Error: ${error.message}
-📝 Please try again
-`);
+        ❌ *API Creation Failed*
+        🔍 Error: ${error.message}
+        📝 Please try again
+        `);
     }
 });
 
 cmd({
     pattern: "tempnum",
     alias: ["fakenum", "tempnumber"],
-    desc: "Get temporary numbers & OTP instructions",
-    category: "tools",
     react: "📱",
     use: "<country-code>"
 },
@@ -1139,11 +1109,11 @@ async (conn, mek, m, { from, args, reply }) => {
         const countryCode = args[0].toLowerCase();
 
         const { data } = await axios.get(
-            `https://api.vreden.my.id/api/tools/fakenumber/listnumber?id=${countryCode}`,
-            {
-                timeout: 10000,
-                validateStatus: status => status === 200
-            }
+        `https://api.vreden.my.id/api/tools/fakenumber/listnumber?id=${countryCode}`,
+        {
+            timeout: 10000,
+            validateStatus: status => status === 200
+        }
         );
 
         if (!data?.result || !Array.isArray(data.result)) {
@@ -1157,25 +1127,25 @@ async (conn, mek, m, { from, args, reply }) => {
 
         const numbers = data.result.slice(0, 25);
         const numberList = numbers.map((num, i) =>
-            `${String(i+1).padStart(2, ' ')}. ${num.number}`
+        `${String(i+1).padStart(2, ' ')}. ${num.number}`
         ).join("\n");
 
         await reply(
-            `╭──「 📱 TEMPORARY NUMBERS 」\n` +
-            `│\n` +
-            `│ Country: ${countryCode.toUpperCase()}\n` +
-            `│ Numbers Found: ${numbers.length}\n` +
-            `│\n` +
-            `${numberList}\n\n` +
-            `╰──「 📦 USE: .otpbox <number> 」\n` +
-            `_Example: .otpbox +1234567890_`
+        `╭──「 📱 TEMPORARY NUMBERS 」\n` +
+        `│\n` +
+        `│ Country: ${countryCode.toUpperCase()}\n` +
+        `│ Numbers Found: ${numbers.length}\n` +
+        `│\n` +
+        `${numberList}\n\n` +
+        `╰──「 📦 USE: .otpbox <number> 」\n` +
+        `_Example: .otpbox +1234567890_`
         );
 
     } catch (err) {
         console.error("API Error:", err);
         const errorMessage = err.code === "ECONNABORTED" ?
-            `⏳ *Timeout*: API took too long\nTry smaller country codes like 'us', 'gb'` :
-            `⚠ *Error*: ${err.message}\nUse format: .tempnum <country-code>`;
+        `⏳ *Timeout*: API took too long\nTry smaller country codes like 'us', 'gb'` :
+        `⚠ *Error*: ${err.message}\nUse format: .tempnum <country-code>`;
 
         reply(`${errorMessage}\n\n🔑 Remember: ${prefix}otpinbox <number>`);
     }
@@ -1184,8 +1154,6 @@ async (conn, mek, m, { from, args, reply }) => {
 cmd({
     pattern: "templist",
     alias: ["tempnumberlist", "tempnlist", "listnumbers"],
-    desc: "Show list of countries with temp numbers",
-    category: "tools",
     react: "🌍",
     filename: __filename,
     use: ".templist"
@@ -1208,8 +1176,6 @@ async (conn, m, { reply }) => {
 cmd({
     pattern: "otpbox",
     alias: ["checkotp", "getotp"],
-    desc: "Check OTP messages for temporary number",
-    category: "tools",
     react: "🔑",
     use: "<full-number>"
 },
@@ -1223,11 +1189,11 @@ async (conn, mek, m, { from, args, reply }) => {
         const phoneNumber = args[0].trim();
 
         const { data } = await axios.get(
-            `https://api.vreden.my.id/api/tools/fakenumber/message?nomor=${encodeURIComponent(phoneNumber)}`,
-            {
-                timeout: 10000,
-                validateStatus: status => status === 200
-            }
+        `https://api.vreden.my.id/api/tools/fakenumber/message?nomor=${encodeURIComponent(phoneNumber)}`,
+        {
+            timeout: 10000,
+            validateStatus: status => status === 200
+        }
         );
 
         if (!data?.result || !Array.isArray(data.result)) {
@@ -1240,25 +1206,25 @@ async (conn, mek, m, { from, args, reply }) => {
             const otpCode = otpMatch ? otpMatch[0] : "Not found";
 
             return `┌ *From:* ${msg.from || "Unknown"}
-│ *Code:* ${otpCode}
-│ *Time:* ${msg.time_wib || msg.timestamp}
-└ *Message:* ${msg.content.substring(0, 50)}${msg.content.length > 50 ? "..." : ""}`;
+            │ *Code:* ${otpCode}
+            │ *Time:* ${msg.time_wib || msg.timestamp}
+            └ *Message:* ${msg.content.substring(0, 50)}${msg.content.length > 50 ? "..." : ""}`;
         }).join("\n\n");
 
         await reply(
-            `╭──「 🔑 OTP MESSAGES 」\n` +
-            `│ Number: ${phoneNumber}\n` +
-            `│ Messages Found: ${data.result.length}\n` +
-            `│\n` +
-            `${otpMessages}\n` +
-            `╰──「 📌 Use .tempnum to get numbers 」`
+        `╭──「 🔑 OTP MESSAGES 」\n` +
+        `│ Number: ${phoneNumber}\n` +
+        `│ Messages Found: ${data.result.length}\n` +
+        `│\n` +
+        `${otpMessages}\n` +
+        `╰──「 📌 Use .tempnum to get numbers 」`
         );
 
     } catch (err) {
         console.error("OTP Check Error:", err);
         const errorMsg = err.code === "ECONNABORTED" ?
-            "⌛ OTP check timed out. Try again later" :
-            `⚠ Error: ${err.response?.data?.error || err.message}`;
+        "⌛ OTP check timed out. Try again later" :
+        `⚠ Error: ${err.response?.data?.error || err.message}`;
 
         reply(`${errorMsg}\n\nUsage: .otpbox +2547322xx`);
     }
@@ -1266,15 +1232,13 @@ async (conn, mek, m, { from, args, reply }) => {
 
 cmd({
     pattern: "rcolor",
-    desc: "Generate a random color with name and code.",
-    category: "utility",
     filename: __filename,
 },
 async (conn, mek, m, { reply }) => {
     try {
         const colorNames = [
-            "Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink", "Brown", "Black", "White",
-            "Gray", "Cyan", "Magenta", "Violet", "Indigo", "Teal", "Lavender", "Turquoise"
+        "Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink", "Brown", "Black", "White",
+        "Gray", "Cyan", "Magenta", "Violet", "Indigo", "Teal", "Lavender", "Turquoise"
         ];
 
         const randomColorHex = "#" + Math.floor(Math.random()*16777215).toString(16);
@@ -1289,8 +1253,6 @@ async (conn, mek, m, { reply }) => {
 
 cmd({
     pattern: "binary",
-    desc: "Convert text into binary format.",
-    category: "utility",
     filename: __filename,
 },
 async (conn, mek, m, { args, reply }) => {
@@ -1311,8 +1273,6 @@ async (conn, mek, m, { args, reply }) => {
 
 cmd({
     pattern: "dbinary",
-    desc: "Decode binary string into text.",
-    category: "utility",
     filename: __filename,
 },
 async (conn, mek, m, { args, reply }) => {
@@ -1333,8 +1293,6 @@ async (conn, mek, m, { args, reply }) => {
 
 cmd({
     pattern: "base64",
-    desc: "Encode text into Base64 format.",
-    category: "utility",
     filename: __filename,
 },
 async (conn, mek, m, { args, reply }) => {
@@ -1355,8 +1313,6 @@ async (conn, mek, m, { args, reply }) => {
 
 cmd({
     pattern: "unbase64",
-    desc: "Decode Base64 encoded text.",
-    category: "utility",
     filename: __filename,
 },
 async (conn, mek, m, { args, reply }) => {
@@ -1377,8 +1333,6 @@ async (conn, mek, m, { args, reply }) => {
 
 cmd({
     pattern: "urlencode",
-    desc: "Encode text into URL encoding.",
-    category: "utility",
     filename: __filename,
 },
 async (conn, mek, m, { args, reply }) => {
@@ -1397,8 +1351,6 @@ async (conn, mek, m, { args, reply }) => {
 
 cmd({
     pattern: "urldecode",
-    desc: "Decode URL encoded text.",
-    category: "utility",
     filename: __filename,
 },
 async (conn, mek, m, { args, reply }) => {
@@ -1417,8 +1369,6 @@ async (conn, mek, m, { args, reply }) => {
 
 cmd({
     pattern: "roll",
-    desc: "Roll a dice (1-6).",
-    category: "fun",
     filename: __filename,
 },
 async (conn, mek, m, { reply }) => {
@@ -1435,8 +1385,6 @@ async (conn, mek, m, { reply }) => {
 
 cmd({
     pattern: "coinflip",
-    desc: "Flip a coin and get Heads or Tails.",
-    category: "fun",
     filename: __filename,
 },
 async (conn, mek, m, { reply }) => {
@@ -1453,8 +1401,6 @@ async (conn, mek, m, { reply }) => {
 
 cmd({
     pattern: "flip",
-    desc: "Flip the text you provide.",
-    category: "fun",
     filename: __filename,
 },
 async (conn, mek, m, { args, reply }) => {
@@ -1473,8 +1419,6 @@ async (conn, mek, m, { args, reply }) => {
 
 cmd({
     pattern: "pick",
-    desc: "Pick between two choices.",
-    category: "fun",
     filename: __filename,
 },
 async (conn, mek, m, { args, reply }) => {
@@ -1493,8 +1437,6 @@ async (conn, mek, m, { args, reply }) => {
 
 cmd({
     pattern: "timenow",
-    desc: "Check the current local time.",
-    category: "utility",
     filename: __filename,
 },
 async (conn, mek, m, { reply }) => {
@@ -1519,8 +1461,6 @@ async (conn, mek, m, { reply }) => {
 
 cmd({
     pattern: "date",
-    desc: "Check the current date.",
-    category: "utility",
     filename: __filename,
 },
 async (conn, mek, m, { reply }) => {
@@ -1544,8 +1484,6 @@ async (conn, mek, m, { reply }) => {
 
 cmd({
     pattern: "shapar",
-    desc: "Send shapar ASCII art with mentions.",
-    category: "fun",
     filename: __filename,
 },
 async (conn, mek, m, { from, isGroup, reply }) => {
@@ -1561,22 +1499,22 @@ async (conn, mek, m, { from, isGroup, reply }) => {
         }
 
         const asciiArt = `
-          _______
-       .-'       '-.
-      /           /|
-     /           / |
-    /___________/  |
-    |   _______ |  |
-    |  |  \\ \\  ||  |
-    |  |   \\ \\ ||  |
-    |  |____\\ \\||  |
-    |  '._  _.'||  |
-    |    .' '.  ||  |
-    |   '.___.' ||  |
-    |___________||  |
-    '------------'  |
-     \\_____________\\|
-`;
+        _______
+        .-'       '-.
+        /           /|
+        /           / |
+        /___________/  |
+        |   _______ |  |
+        |  |  \\ \\  ||  |
+        |  |   \\ \\ ||  |
+        |  |____\\ \\||  |
+        |  '._  _.'||  |
+        |    .' '.  ||  |
+        |   '.___.' ||  |
+        |___________||  |
+        '------------'  |
+        \\_____________\\|
+        `;
 
         const message = `😂 @${mentionedUser.split("@")[0]}!\n😂 that for you:\n\n${asciiArt}`;
 
@@ -1593,8 +1531,6 @@ async (conn, mek, m, { from, isGroup, reply }) => {
 
 cmd({
     pattern: "rate",
-    desc: "Rate someone out of 10.",
-    category: "fun",
     filename: __filename,
 },
 async (conn, mek, m, { from, isGroup, reply }) => {
@@ -1616,8 +1552,6 @@ async (conn, mek, m, { from, isGroup, reply }) => {
 
 cmd({
     pattern: "countx",
-    desc: "Start a reverse countdown from the specified number to 1.",
-    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { args, reply, senderNumber }) => {
@@ -1654,8 +1588,6 @@ async (conn, mek, m, { args, reply, senderNumber }) => {
 
 cmd({
     pattern: "count",
-    desc: "Start a countdown from 1 to the specified number.",
-    category: "owner",
     filename: __filename
 },
 async (conn, mek, m, { args, reply, senderNumber }) => {
@@ -1693,8 +1625,6 @@ async (conn, mek, m, { args, reply, senderNumber }) => {
 cmd({
     pattern: "calculate",
     alias: ["calc"],
-    desc: "Evaluate a mathematical expression.",
-    category: "utilities",
     filename: __filename
 },
 async (conn, mek, m, { args, reply }) => {
