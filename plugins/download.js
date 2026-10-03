@@ -292,8 +292,6 @@ async (conn, mek, m, {
         const response = await axios.head(link);
         const headers = response.headers;
 
-        const mimeType = headers['content-type'] || 'application/octet-stream';
-
         let fileName = "Downloaded_File";
         const contentDisposition = headers['content-disposition'];
         
@@ -303,11 +301,21 @@ async (conn, mek, m, {
             fileName = path.basename(new URL(link).pathname) || "file";
         }
 
+        let determinedMime = mime.lookup(fileName);
+        if (!determinedMime) {
+            try {
+                const headRes = await axios.head(link);
+                determinedMime = headRes.headers['content-type'];
+            } catch (e) {
+                determinedMime = "application/octet-stream";
+            }
+        }
+
         const caption = `*Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
 
         await conn.sendMessage(from, {
             document: { url: link },
-            mimetype: mimeType,
+            mimetype: determinedMime,
             fileName: fileName,
             caption: caption
         }, { quoted: mek });
