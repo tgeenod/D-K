@@ -1,404 +1,541 @@
 const axios = require('axios');
-const FormData = require('form-data');
-const {cmd, commands} = require('../command');
 const config = require('../config');
-cmd({
-  pattern: "gemini",
-  react: "🤖",
-  filename: __filename
-}, async (conn, mek, m, {from, args, reply}) => {
-try {
-  const text = args.join(" ");
-  if (!text)
-  return reply("කරුණාකර ප්‍රශ්නයක් අසන්න.");
-  const result = await getAIResponse(text);
-  if (result) {
-    await reply(result);
-  }
-else {
-  await reply("❌ සමාවන්න, පිළිතුරක් ලබා ගැනීමට නොහැකි විය.");
-}
-}
-catch (e) {
-  console.error(e);
-  reply("❌ දෝෂයක් සිදු විය.");
-}
-});
+const FormData = require('form-data');
+const { cmd, commands } = require('../command');
+
 async function getAIResponse(userInput) {
-  try {
-    const prompt = `Strictly respond in 100% Sinhala language only. User message: ${userInput}`;
-    const apiUrl = `https://api-abztech.zone.id/ai/gemini?message=${encodeURIComponent(prompt)}`;
-    const response = await axios.get(apiUrl);
-    if (response.data && response.data.status && response.data.data && response.data.data.answer) {
-      return response.data.data.answer;
+    try {
+        const prompt = `Strictly respond in 100% Sinhala language only. User message: ${userInput}`;
+        const apiUrl = `https://api-abztech.zone.id/ai/gemini?message=${encodeURIComponent(prompt)}`;
+
+        const response = await axios.get(apiUrl);
+
+        if (response.data && response.data.status && response.data.data && response.data.data.answer) {
+            return response.data.data.answer;
+        }
+        return null;
+    } catch (e) {
+        console.error("AI API Error:", e);
+        return null;
     }
-  return null;
 }
-catch (e) {
-  console.error("AI API Error:", e);
-  return null;
+async function uploadToCatbox(fileBuffer) {
+  const form = new FormData();
+  form.append("reqtype", "fileupload");
+  form.append("fileToUpload", fileBuffer, "image.jpg");
+
+  const res = await axios.post("https://catbox.moe/user/api.php", form, {
+    headers: form.getHeaders(),
+  });
+  return res.data;
 }
-}
+
+cmd({
+    pattern: "gemini",
+    react: "🤖",
+    filename: __filename
+},
+async (conn, mek, m, { from, args, reply }) => {
+    try {
+        const text = args.join(" ");
+        if (!text) return reply("කරුණාකර ප්‍රශ්නයක් අසන්න.");
+
+        const result = await getAIResponse(text);
+
+        if (result) {
+            await reply(result);
+        } else {
+            await reply("❌ සමාවන්න, පිළිතුරක් ලබා ගැනීමට නොහැකි විය.");
+        }
+    } catch (e) {
+        console.error(e);
+        reply("❌ දෝෂයක් සිදු විය.");
+    }
+});
+
 cmd({
   'on': "body"
-}, async (conn, m, store, {from, body, isCmd, reply}) => {
-try {
-  if (m.fromMe || !body || isCmd)
-  return;
-  if (config.CHAT_BOT === "true") {
-    const aiResult = await getAIResponse(body);
-    if (aiResult) {
-      await conn.sendMessage(from, {react: {text: "🤖", key: m.key}});
-      await conn.sendMessage(from, {text: aiResult}, {quoted: m});
+}, async (conn, m, store, {
+  from,
+  body,
+  isCmd,
+  reply
+}) => {
+  try {
+    if (m.fromMe || !body || isCmd) return;
+
+    if (config.CHAT_BOT === "true") {
+      const aiResult = await getAIResponse(body);
+
+      if (aiResult) {
+        await conn.sendMessage(from, { react: { text: "🤖", key: m.key } });
+        await conn.sendMessage(from, { text: aiResult }, { quoted: m });
+      }
     }
-}
-}
-catch (error) {
-  console.error("Chatbot Error:", error);
-}
-});
-cmd({
-  pattern: "ai",
-  react: "🤖",
-  filename: __filename
-}, async (conn, mek, m, {from, args, q, reply, react}) => {
-try {
-  if (!q)
-  return reply("Please provide a message for the AI.\nExample: `.ai Hello`");
-  const apiUrl = `https://supun-x-apis.vercel.app/ai/openai?text=${encodeURIComponent(q)}`;
-  const {data} = await axios.get(apiUrl);
-  if (!data || !data.result) {
-    await react("❌");
-    return reply("AI failed to respond. Please try again later.");
+  } catch (error) {
+    console.error("Chatbot Error:", error);
   }
-await reply(`🤖 *AI Response:*\n\n${data.result}`);
-await react("✅");
-}
-catch (e) {
-  console.error("Error in AI command:", e);
-  await react("❌");
-  reply("An error occurred while communicating with the AI.");
-}
 });
+
 cmd({
-  pattern: "openai",
-  react: "🧠",
-  filename: __filename
-}, async (conn, mek, m, {from, args, q, reply, react}) => {
-try {
-  if (!q)
-  return reply("Please provide a message for OpenAI.\nExample: `.openai Hello`");
-  const apiUrl = `https://supun-md-api-xmjh.vercel.app/api/ai/openai?q=${encodeURIComponent(q)}`;
-  const {data} = await axios.get(apiUrl);
-  if (!data || !data.results) {
-    await react("❌");
-    return reply("OpenAI failed to respond. Please try again later.");
-  }
-await reply(`🧠 *OpenAI Response:*\n\n${data.results}`);
-await react("✅");
-}
-catch (e) {
-  console.error("Error in OpenAI command:", e);
-  await react("❌");
-  reply("An error occurred while communicating with OpenAI.");
-}
+    pattern: "ai",
+    react: "🤖",
+    filename: __filename
+},
+async (conn, mek, m, { from, args, q, reply, react }) => {
+    try {
+        if (!q) return reply("Please provide a message for the AI.\nExample: `.ai Hello`");
+
+        const apiUrl = `https://supun-x-apis.vercel.app/ai/openai?text=${encodeURIComponent(q)}`;
+        const { data } = await axios.get(apiUrl);
+
+        if (!data || !data.result) {
+            await react("❌");
+            return reply("AI failed to respond. Please try again later.");
+        }
+
+        await reply(`🤖 *AI Response:*\n\n${data.result}`);
+        await react("✅");
+    } catch (e) {
+        console.error("Error in AI command:", e);
+        await react("❌");
+        reply("An error occurred while communicating with the AI.");
+    }
 });
+
 cmd({
-  pattern: "openai2",
-  react: "🧠",
-  filename: __filename
-}, async (conn, mek, m, {from, args, q, reply, react}) => {
-try {
-  if (!q)
-  return reply("Please provide a message for OpenAI.\nExample: `.openai Hello`");
-  const apiUrl = `https://api.malvin.gleeze.com/ai/openai?text=${encodeURIComponent(q)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
-  const {data} = await axios.get(apiUrl);
-  if (!data || !data.result) {
-    await react("❌");
-    return reply("OpenAI failed to respond. Please try again later.");
-  }
-await reply(`🧠 *OpenAI Response:*\n\n${data.result}`);
-await react("✅");
-}
-catch (e) {
-  console.error("Error in OpenAI command:", e);
-  await react("❌");
-  reply("An error occurred while communicating with OpenAI.");
-}
+    pattern: "openai",
+    react: "🧠",
+    filename: __filename
+},
+async (conn, mek, m, { from, args, q, reply, react }) => {
+    try {
+        if (!q) return reply("Please provide a message for OpenAI.\nExample: `.openai Hello`");
+
+        const apiUrl = `https://supun-md-api-xmjh.vercel.app/api/ai/openai?q=${encodeURIComponent(q)}`;
+        const { data } = await axios.get(apiUrl);
+
+        if (!data || !data.results) {
+            await react("❌");
+            return reply("OpenAI failed to respond. Please try again later.");
+        }
+
+        await reply(`🧠 *OpenAI Response:*\n\n${data.results}`);
+        await react("✅");
+    } catch (e) {
+        console.error("Error in OpenAI command:", e);
+        await react("❌");
+        reply("An error occurred while communicating with OpenAI.");
+    }
 });
+
 cmd({
-  pattern: "venice",
-  react: "🤖",
-  filename: __filename
-}, async (conn, mek, m, {from, args, q, reply, react}) => {
-try {
-  if (!q) {
-    return reply("🧠 Please provide a message for the AI.\nExample: `.venice Hello`");
-  }
-const apiUrl = `https://api.malvin.gleeze.com/ai/venice?text=${encodeURIComponent(q)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
-const {data} = await axios.get(apiUrl);
-if (!data?.status || !data?.result) {
-  await react("❌");
-  return reply("AI failed to respond. Please try again later.");
-}
-const responseMsg = `
-Venice AI - Dolphin 3.0 Mistral 24B
-━━━━━━━━━━━━━━━
-${data.result}
-`.trim();
-await reply(responseMsg);
-await react("✅");
-}
-catch (e) {
-  console.error("Error in AI command:", e);
-  await react("❌");
-  reply("An error occurred while communicating with the AI.");
-}
+    pattern: "openai2",
+    react: "🧠",
+    filename: __filename
+},
+async (conn, mek, m, { from, args, q, reply, react }) => {
+    try {
+        if (!q) return reply("Please provide a message for OpenAI.\nExample: `.openai Hello`");
+
+        const apiUrl = `https://api.malvin.gleeze.com/ai/openai?text=${encodeURIComponent(q)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
+        const { data } = await axios.get(apiUrl);
+
+        if (!data || !data.result) {
+            await react("❌");
+            return reply("OpenAI failed to respond. Please try again later.");
+        }
+
+        await reply(`🧠 *OpenAI Response:*\n\n${data.result}`);
+        await react("✅");
+    } catch (e) {
+        console.error("Error in OpenAI command:", e);
+        await react("❌");
+        reply("An error occurred while communicating with OpenAI.");
+    }
 });
+
 cmd({
   pattern: "aianime",
   react: "🎨",
   filename: __filename
-}, async (conn, mek, m, {reply}) => {
-try {
-  await reply("> *FETCHING RANDOM ANIME IMAGE...✨*");
-  const apiUrl = "https://lance-frank-asta.onrender.com/api/anime-random";
-  const response = await axios.get(apiUrl);
-  if (!response.data?.status || !response.data.random?.imgAnime) {
-    return reply("Error: Could not fetch an anime image. Try again later.");
+}, async (conn, mek, m, { reply }) => {
+  try {
+    await reply("> *FETCHING RANDOM ANIME IMAGE...✨*");
+
+    const apiUrl = "https://lance-frank-asta.onrender.com/api/anime-random";
+
+    const response = await axios.get(apiUrl);
+
+    if (!response.data?.status || !response.data.random?.imgAnime) {
+      return reply("Error: Could not fetch an anime image. Try again later.");
+    }
+
+    const anime = response.data.random;
+
+    await conn.sendMessage(m.chat, {
+      image: { url: anime.imgAnime },
+      caption: `💫 *Random Anime Image*\n👤 Name: ${anime.name}\n🎬 Movie/Anime: ${anime.movie}\n🎨 Color: ${anime.colorBg}`
+    });
+
+  } catch (error) {
+    console.error("AnimeImage Error:", error);
+    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
   }
-const anime = response.data.random;
-await conn.sendMessage(m.chat, {
-  image: {url: anime.imgAnime},
-  caption: `💫 *Random Anime Image*\n👤 Name: ${anime.name}\n🎬 Movie/Anime: ${anime.movie}\n🎨 Color: ${anime.colorBg}`
 });
-}
-catch (error) {
-  console.error("AnimeImage Error:", error);
-  reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
-}
-});
-cmd({
-  pattern: "gpt",
-  react: "🤖",
-  filename: __filename
-}, async (conn, mek, m, {from, args, q, reply, react}) => {
-try {
-  if (!q) {
-    return reply("🧠 Please provide a message for the AI.\nExample: `.gpt Hello`");
-  }
-const apiUrl = `https://api.malvin.gleeze.com/ai/gpt-5?text=${encodeURIComponent(q)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
-const {data} = await axios.get(apiUrl);
-if (!data?.status || !data?.result) {
-  await react("❌");
-  return reply("AI failed to respond. Please try again later.");
-}
-const responseMsg = `
-🤖 *Microsoft Copilot GPT-5 AI Response*
-━━━━━━━━━━━━━━━
-${data.result}
-🕒 *Response Time:* ${data.response_time}
-`.trim();
-await reply(responseMsg);
-await react("✅");
-}
-catch (e) {
-  console.error("Error in AI command:", e);
-  await react("❌");
-  reply("An error occurred while communicating with the AI.");
-}
-});
-cmd({
-  pattern: "copilot",
-  react: "🤖",
-  filename: __filename
-}, async (conn, mek, m, {from, args, q, reply, react}) => {
-try {
-  if (!q)
-  return reply("🧠 Please provide a message for the AI.\n\nExample: `.copilot Hello`");
-  const apiUrl = `https://api.malvin.gleeze.com/ai/copilot?text=${encodeURIComponent(q)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
-  const {data} = await axios.get(apiUrl);
-  if (!data?.status || !data?.result) {
-    await react("❌");
-    return reply("AI failed to respond. Please try again later.");
-  }
-const responseMsg = `
-🤖 *Microsoft Copilot AI Response*
-━━━━━━━━━━━━━━━
-${data.result}
-🕒 *Response Time:* ${data.response_time}
-`.trim();
-await reply(responseMsg);
-await react("✅");
-}
-catch (e) {
-  console.error("Error in AI command:", e);
-  await react("❌");
-  reply("An error occurred while communicating with the AI.");
-}
-});
+
 cmd({
   pattern: "aiimg",
   react: "🚀",
   filename: __filename
-}, async (conn, mek, m, {q, reply}) => {
-try {
-  if (!q)
-  return reply("Please provide a prompt for the image.");
-  await reply("> *CREATING IMAGE ...🔥*");
-  const apiUrl = `https://lance-frank-asta.onrender.com/api/art?prompt=${encodeURIComponent(q)}`;
-  const response = await axios.get(apiUrl, {responseType: "arraybuffer"});
-  if (!response || !response.data) {
-    return reply("Error: The API did not return a valid image. Try again later.");
+}, async (conn, mek, m, { q, reply }) => {
+  try {
+    if (!q) return reply("Please provide a prompt for the image.");
+
+    await reply("> *CREATING IMAGE ...🔥*");
+
+    const apiUrl = `https://lance-frank-asta.onrender.com/api/art?prompt=${encodeURIComponent(q)}`;
+
+    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+
+    if (!response || !response.data) {
+      return reply("Error: The API did not return a valid image. Try again later.");
+    }
+
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    await conn.sendMessage(m.chat, {
+      image: imageBuffer,
+      caption: `💸 *Imagine Generated By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n✨ Prompt: *${q}*`
+    });
+
+  } catch (error) {
+    console.error("AiImgage Error:", error);
+    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
   }
-const imageBuffer = Buffer.from(response.data, "binary");
-await conn.sendMessage(m.chat, {
-  image: imageBuffer,
-  caption: `💸 *Imagine Generated By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n✨ Prompt: *${q}*`
 });
-}
-catch (error) {
-  console.error("AiImgage Error:", error);
-  reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
-}
-});
-cmd({
-  pattern: "copilot2",
-  react: "🤖",
-  filename: __filename
-}, async (conn, mek, m, {from, args, q, reply, react}) => {
-try {
-  if (!q)
-  return reply("🧠 Please provide a message for the AI.\nExample: `.copilot2 Hello`");
-  const apiUrl = `https://api.malvin.gleeze.com/ai/copilot-think?text=${encodeURIComponent(q)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
-  const {data} = await axios.get(apiUrl);
-  if (!data?.status || !data?.result) {
-    await react("❌");
-    return reply("AI failed to respond. Please try again later.");
-  }
-const responseMsg = `
-🤖 *Microsoft Copilot - Deep Thinking*
-━━━━━━━━━━━━━━━
-${data.result}
-🕒 *Response Time:* ${data.response_time}
-`.trim();
-await reply(responseMsg);
-await react("✅");
-}
-catch (e) {
-  console.error("Error in AI command:", e);
-  await react("❌");
-  reply("An error occurred while communicating with the AI.");
-}
-});
+
 cmd({
   pattern: "aiimg3",
   react: "🚀",
   filename: __filename
-}, async (conn, mek, m, {q, reply}) => {
-try {
-  if (!q)
-  return reply("Please provide a prompt for the image.");
-  await reply("> *CREATING IMAGES ...🔥*");
-  const apiUrl = `https://api-aswin-sparky.koyeb.app/api/search/imageai?search=${encodeURIComponent(q)}`;
-  const response = await axios.get(apiUrl);
-  if (!response || !response.data || !response.data.data || !response.data.data.length) {
-    return reply("Error: The API did not return any images. Try again later.");
+}, async (conn, mek, m, { q, reply }) => {
+  try {
+    if (!q) return reply("Please provide a prompt for the image.");
+
+    await reply("> *CREATING IMAGES ...🔥*");
+
+    const apiUrl = `https://api-aswin-sparky.koyeb.app/api/search/imageai?search=${encodeURIComponent(q)}`;
+
+    const response = await axios.get(apiUrl);
+
+    if (!response || !response.data || !response.data.data || !response.data.data.length) {
+      return reply("Error: The API did not return any images. Try again later.");
+    }
+
+    const images = response.data.data;
+
+    for (const imageUrl of images) {
+      await conn.sendMessage(m.chat, {
+        image: { url: imageUrl },
+        caption: `💸 *Imagine Generated By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n✨ Prompt: *${q}*`
+      });
+    }
+
+  } catch (error) {
+    console.error("AiImage Error:", error);
+    reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
   }
-const images = response.data.data;
-for (const imageUrl of images) {
-  await conn.sendMessage(m.chat, {
-    image: {url: imageUrl},
-    caption: `💸 *Imagine Generated By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n✨ Prompt: *${q}*`
-  });
-}
-}
-catch (error) {
-  console.error("AiImage Error:", error);
-  reply(`An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
-}
 });
+
 cmd({
   pattern: "aiimg1",
   react: "🚀",
   filename: __filename
-}, async (conn, mek, m, {q, reply}) => {
-try {
-  if (!q) {
-    return reply("⚠️ Please provide a prompt for the image.\n\nExample: *.aiimg Dog wearing sunglasses*");
+}, async (conn, mek, m, { q, reply }) => {
+  try {
+    if (!q) {
+      return reply("⚠️ Please provide a prompt for the image.\n\nExample: *.aiimg Dog wearing sunglasses*");
+    }
+
+    await reply("> 🧠 *Creating AI Image... Please wait!* 🔥");
+
+    const apiUrl = `https://api.malvin.gleeze.com/ai/creart/image?prompt=${encodeURIComponent(q)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
+
+    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+
+    if (!response || !response.data) {
+      return reply("❌ The API did not return an image. Try again later.");
+    }
+
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    await conn.sendMessage(m.chat, {
+      image: imageBuffer,
+      caption: `💫 *AI Image Generated by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n\n🎨 *Prompt:* ${q}`
+    });
+
+  } catch (error) {
+    console.error("AiImage Error:", error);
+    reply(`❌ Error: ${error.response?.statusText || error.message || "Unknown error occurred"}`);
   }
-await reply("> 🧠 *Creating AI Image... Please wait!* 🔥");
-const apiUrl = `https://api.malvin.gleeze.com/ai/creart/image?prompt=${encodeURIComponent(q)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
-const response = await axios.get(apiUrl, {responseType: "arraybuffer"});
-if (!response || !response.data) {
-  return reply("❌ The API did not return an image. Try again later.");
-}
-const imageBuffer = Buffer.from(response.data, "binary");
-await conn.sendMessage(m.chat, {
-  image: imageBuffer,
-  caption: `💫 *AI Image Generated by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n\n🎨 *Prompt:* ${q}`
 });
-}
-catch (error) {
-  console.error("AiImage Error:", error);
-  reply(`❌ Error: ${error.response?.statusText || error.message || "Unknown error occurred"}`);
-}
+
+cmd({
+    pattern: "venice",
+    react: "🤖",
+    filename: __filename
+},
+async (conn, mek, m, { from, args, q, reply, react }) => {
+    try {
+        if (!q) {
+            return reply("🧠 Please provide a message for the AI.\nExample: `.venice Hello`");
+        }
+
+        const apiUrl = `https://api.malvin.gleeze.com/ai/venice?text=${encodeURIComponent(q)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
+
+        const { data } = await axios.get(apiUrl);
+
+        if (!data?.status || !data?.result) {
+            await react("❌");
+            return reply("AI failed to respond. Please try again later.");
+        }
+
+        const responseMsg = `
+Venice AI - Dolphin 3.0 Mistral 24B  
+━━━━━━━━━━━━━━━  
+${data.result}
+        `.trim();
+
+        await reply(responseMsg);
+        await react("✅");
+    } catch (e) {
+        console.error("Error in AI command:", e);
+        await react("❌");
+        reply("An error occurred while communicating with the AI.");
+    }
 });
+
+cmd({
+    pattern: "copilot",
+    react: "🤖",
+    filename: __filename
+},
+async (conn, mek, m, { from, args, q, reply, react }) => {
+    try {
+        if (!q) return reply("🧠 Please provide a message for the AI.\n\nExample: `.copilot Hello`");
+
+        const apiUrl = `https://api.malvin.gleeze.com/ai/copilot?text=${encodeURIComponent(q)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
+
+        const { data } = await axios.get(apiUrl);
+
+        if (!data?.status || !data?.result) {
+            await react("❌");
+            return reply("AI failed to respond. Please try again later.");
+        }
+
+        const responseMsg = `
+🤖 *Microsoft Copilot AI Response*  
+━━━━━━━━━━━━━━━  
+${data.result}  
+
+🕒 *Response Time:* ${data.response_time}
+        `.trim();
+
+        await reply(responseMsg);
+        await react("✅");
+    } catch (e) {
+        console.error("Error in AI command:", e);
+        await react("❌");
+        reply("An error occurred while communicating with the AI.");
+    }
+});
+
+cmd({
+    pattern: "copilot2",
+    react: "🤖",
+    filename: __filename
+},
+async (conn, mek, m, { from, args, q, reply, react }) => {
+    try {
+        if (!q) return reply("🧠 Please provide a message for the AI.\nExample: `.copilot2 Hello`");
+
+        const apiUrl = `https://api.malvin.gleeze.com/ai/copilot-think?text=${encodeURIComponent(q)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
+
+        const { data } = await axios.get(apiUrl);
+
+        if (!data?.status || !data?.result) {
+            await react("❌");
+            return reply("AI failed to respond. Please try again later.");
+        }
+
+        const responseMsg = `
+🤖 *Microsoft Copilot - Deep Thinking*  
+━━━━━━━━━━━━━━━  
+${data.result}
+
+🕒 *Response Time:* ${data.response_time}  
+        `.trim();
+
+        await reply(responseMsg);
+        await react("✅");
+    } catch (e) {
+        console.error("Error in AI command:", e);
+        await react("❌");
+        reply("An error occurred while communicating with the AI.");
+    }
+});
+
 cmd({
   pattern: "aiimg2",
   react: "🚀",
   filename: __filename
-}, async (conn, mek, m, {q, reply}) => {
-try {
-  if (!q) {
-    return reply("⚠️ Please provide a prompt for the image.\n\nExample: *.aiimg3 query in space*");
+}, async (conn, mek, m, { q, reply }) => {
+  try {
+    if (!q) {
+      return reply("⚠️ Please provide a prompt for the image.\n\nExample: *.aiimg3 query in space*");
+    }
+
+    await reply("> 🧠 *Generating image with DeepIMG... please wait!* 🔥");
+
+    const style = "img";
+
+    const apiUrl = `https://api.malvin.gleeze.com/ai/deepimg?prompt=${encodeURIComponent(q)}&style=${encodeURIComponent(style)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
+
+    const response = await axios.get(apiUrl);
+
+    if (!response.data || !response.data.status || !response.data.image_url) {
+      return reply("❌ The API did not return a valid image. Try again later.");
+    }
+
+    const { image_url, model, dimensions } = response.data;
+
+    await conn.sendMessage(m.chat, {
+      image: { url: image_url },
+      caption: `💫 *Image Generated by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n\n🎨 *Prompt:* ${q}\n🧩 *Style:* ${style}\n📸 *Model:* ${model}\n📏 *Size:* ${dimensions}`
+    });
+
+  } catch (error) {
+    console.error("AiImage Error:", error);
+    reply(`❌ An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
   }
-await reply("> 🧠 *Generating image with DeepIMG... please wait!* 🔥");
-const style = "img";
-const apiUrl = `https://api.malvin.gleeze.com/ai/deepimg?prompt=${encodeURIComponent(q)}&style=${encodeURIComponent(style)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
-const response = await axios.get(apiUrl);
-if (!response.data || !response.data.status || !response.data.image_url) {
-  return reply("❌ The API did not return a valid image. Try again later.");
-}
-const {image_url, model, dimensions} = response.data;
-await conn.sendMessage(m.chat, {
-  image: {url: image_url},
-  caption: `💫 *Image Generated by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 🚀\n\n🎨 *Prompt:* ${q}\n🧩 *Style:* ${style}\n📸 *Model:* ${model}\n📏 *Size:* ${dimensions}`
 });
-}
-catch (error) {
-  console.error("AiImage Error:", error);
-  reply(`❌ An error occurred: ${error.response?.data?.message || error.message || "Unknown error"}`);
-}
+
+cmd({
+    pattern: "gpt",
+    react: "🤖",
+    filename: __filename
+},
+async (conn, mek, m, { from, args, q, reply, react }) => {
+    try {
+        if (!q) {
+            return reply("🧠 Please provide a message for the AI.\nExample: `.gpt Hello`");
+        }
+
+        const apiUrl = `https://api.malvin.gleeze.com/ai/gpt-5?text=${encodeURIComponent(q)}&apikey=mvn_c2faaeeccbfd38b5c21c08e5d60f4db8`;
+
+        const { data } = await axios.get(apiUrl);
+
+        if (!data?.status || !data?.result) {
+            await react("❌");
+            return reply("AI failed to respond. Please try again later.");
+        }
+
+        const responseMsg = `
+🤖 *Microsoft Copilot GPT-5 AI Response*  
+━━━━━━━━━━━━━━━  
+${data.result}
+
+🕒 *Response Time:* ${data.response_time}
+        `.trim();
+
+        await reply(responseMsg);
+        await react("✅");
+    } catch (e) {
+        console.error("Error in AI command:", e);
+        await react("❌");
+        reply("An error occurred while communicating with the AI.");
+    }
 });
+
 cmd({
   pattern: 'topromt',
   alias: ['imagetoprompt'],
   react: '🖼️',
   filename: __filename
-}, async (conn, mek, m, {reply}) => {
-try {
-  const q = m.quoted ? m.quoted : m;
-  const mime = (q.msg || q).mimetype || '';
-  if (!mime.startsWith('image/'))
-  return reply('❌ Please provide an image!');
-  reply('⏳ Generating prompt from your image...');
-  const buffer = await q.download();
-  const form = new FormData();
-  form.append('file', buffer, {filename: 'image.jpg'});
-  const {data} = await axios.post('https://be.neuralframes.com/clip_interrogate/', form, {
-    headers: {
-      ...form.getHeaders(),
-      'Accept': 'application/json, text/plain, */*',
-      'Authorization': 'Bearer uvcKfXuj6Ygncs6tiSJ6VXLxoapJdjQ3EEsSIt45Zm+vsl8qcLAAOrnnGWYBccx4sbEaQtCr416jxvc/zJNAlcDjLYjfHfHzPpfJ00l05h0oy7twPKzZrO4xSB+YGrmCyb/zOduHh1l9ogFPg/3aeSsz+wZYL9nlXfXdvCqDIP9bLcQMHiUKB0UCGuew2oRt',
-      'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36',
-      'Referer': 'https://www.neuralframes.com/tools/image-to-prompt'
+}, async (conn, mek, m, { reply }) => {
+  try {
+    const q = m.quoted ? m.quoted : m;
+    const mime = (q.msg || q).mimetype || '';
+
+    if (!mime.startsWith('image/')) return reply('❌ Please provide an image!');
+
+    reply('⏳ Generating prompt from your image...');
+
+    const buffer = await q.download();
+    const form = new FormData();
+    form.append('file', buffer, { filename: 'image.jpg' });
+
+    const { data } = await axios.post(
+      'https://be.neuralframes.com/clip_interrogate/',
+      form,
+      {
+        headers: {
+          ...form.getHeaders(),
+          'Accept': 'application/json, text/plain, */*',
+          'Authorization': 'Bearer uvcKfXuj6Ygncs6tiSJ6VXLxoapJdjQ3EEsSIt45Zm+vsl8qcLAAOrnnGWYBccx4sbEaQtCr416jxvc/zJNAlcDjLYjfHfHzPpfJ00l05h0oy7twPKzZrO4xSB+YGrmCyb/zOduHh1l9ogFPg/3aeSsz+wZYL9nlXfXdvCqDIP9bLcQMHiUKB0UCGuew2oRt',
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36',
+          'Referer': 'https://www.neuralframes.com/tools/image-to-prompt'
+        }
+      }
+    );
+
+    await reply(`📝 Generated prompt:\n${data.prompt}`);
+  } catch (e) {
+    console.error(e);
+    reply(`❌ Failed: ${e.message}`);
+  }
+});
+
+cmd(
+  {
+    pattern: "editimg",
+    alias: ["imgedit"],
+    react: "🎨",
+    use: ".imgedit <prompt> (reply to an image)",
+    filename: __filename,
+  },
+  async (client, message, args, { q: prompt }) => {
+    try {
+      if (!prompt) {
+        return message.reply("⚠️ Please provide a prompt.\nExample: `.imgedit make it look like a cartoon`");
+      }
+
+      if (!message.quoted || message.quoted.mtype !== "imageMessage") {
+        return message.reply("❌ Reply to an image with your prompt to edit it.");
+      }
+
+      const imageBuffer = await message.quoted.download();
+
+      const uploadedUrl = await uploadToCatbox(imageBuffer);
+
+      const apiUrl = `https://api.zenzxz.my.id/maker/imagedit?url=${encodeURIComponent(
+        uploadedUrl
+      )}&prompt=${encodeURIComponent(prompt)}`;
+
+      const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+
+      await client.sendMessage(
+        message.chat,
+        {
+          image: response.data,
+          caption: `✨ Image edited with prompt: *${prompt}*`,
+        },
+        { quoted: message }
+      );
+    } catch (err) {
+      console.error(err);
+      message.reply("❌ Error while editing image. Please try again later.");
     }
-});
-await reply(`📝 Generated prompt:\n${data.prompt}`);
-}
-catch (e) {
-  console.error(e);
-  reply(`❌ Failed: ${e.message}`);
-}
-});
+  }
+);
