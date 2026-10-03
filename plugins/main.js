@@ -502,7 +502,7 @@ cmd({
   from, sender, pushname, reply
 }) => {
   try {
-    const localVersionPath = path.join(__dirname, '../data/version.json');
+    const localVersionPath = path.join(__dirname, '../lib/version.json');
     let localVersion = 'Unknown';
     let changelog = 'No changelog available.';
     if (fs.existsSync(localVersionPath)) {
