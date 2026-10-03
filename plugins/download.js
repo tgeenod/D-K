@@ -1314,25 +1314,23 @@ cmd({
 
     await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
-    const response = await axios.get(`https://api.nexoracle.com/downloader/tiktok-nowm?apikey=free_key@maher_apis&url=${q}`);
+    const response = await axios.get(`https://ominisave.store/api/tiktok?url=${q}`);
     const data = response.data;
 
-    if (!data || !data.status || !data.result) {
+    if (!data || !data.status || !data.downloads) {
       return reply("⚠️ Failed to retrieve TikTok media. Please check the link and try again.");
     }
 
-    const result = data.result;
-    const { title, url, thumbnail, duration, metrics } = result;
+    const { title, thumbnail, stats, downloads } = data;
 
     const caption = `
 📺 Tiktok Downloader. 📥
 
 📑 *Title:* ${title || "No title"}
-⏱️ *Duration:* ${duration || "N/A"}s
-👍 *Likes:* ${metrics?.digg_count?.toLocaleString() || "0"}
-💬 *Comments:* ${metrics?.comment_count?.toLocaleString() || "0"}
-🔁 *Shares:* ${metrics?.share_count?.toLocaleString() || "0"}
-📥 *Downloads:* ${metrics?.download_count?.toLocaleString() || "0"}
+👍 *Likes:* ${stats?.likes?.toLocaleString() || "0"}
+💬 *Comments:* ${stats?.comments?.toLocaleString() || "0"}
+🔁 *Shares:* ${stats?.shares?.toLocaleString() || "0"}
+👁️ *Views:* ${stats?.views?.toLocaleString() || "0"}
 
 🔢 *Reply Below Number*
 
@@ -1362,14 +1360,14 @@ cmd({
         switch (receivedText.trim()) {
           case "1":
             await conn.sendMessage(senderID, {
-              video: { url },
+              video: { url: downloads.video },
               caption: "📥 *Downloaded Original Quality*"
             }, { quoted: receivedMsg });
             break;
 
           case "2":
             await conn.sendMessage(senderID, {
-              audio: { url },
+              audio: { url: downloads.music },
               mimetype: "audio/mp4",
               ptt: false
             }, { quoted: receivedMsg });
