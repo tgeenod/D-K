@@ -7,7 +7,6 @@ const NodeCache = require('node-cache');
 const { cmd, commands } = require('../command');
 const { runtime, fetchJson, sleep } = require('../lib/functions');
 const lyricsCache = new NodeCache({ stdTTL: 100, checkperiod: 120 });
-
 function getFlagEmoji(countryCode) {
   if (!countryCode) return "";
   return countryCode
@@ -44,34 +43,6 @@ async (conn, m, { reply }) => {
 });
 
 cmd({
-  pattern: "fancy",
-  alias: ["font", "style"],
-  react: "✍️",
-  filename: __filename
-}, async (conn, m, store, { from, quoted, args, q, reply }) => {
-  try {
-    if (!q) {
-      return reply("❎ Please provide text to convert into fancy fonts.\n\n*Example:* .fancy Hello");
-    }
-
-    const apiUrl = `https://www.movanest.xyz/v2/fancytext?word=${encodeURIComponent(q)}`;
-    const response = await axios.get(apiUrl);
-    
-    if (!response.data.status) {
-      return reply("❌ Error fetching fonts. Please try again later.");
-    }
-
-    const fonts = response.data.results.join("\n\n");
-    const resultText = `✨ *Fancy Fonts Converter* ✨\n\n${fonts}\n\n> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
-
-    await conn.sendMessage(from, { text: resultText }, { quoted: m });
-  } catch (error) {
-    console.error("❌ Error in fancy command:", error);
-    reply("⚠️ An error occurred while fetching fonts.");
-  }
-});
-
-cmd({
     pattern: "yts",
     alias: ["ytsearch"],
     use: '.yts tech',
@@ -101,211 +72,31 @@ await conn.sendMessage(from , { text:  mesaj }, { quoted: mek } )
 });
 
 cmd({
-  pattern: "srepo",
-  react: "🍃",
+  pattern: "fancy",
+  alias: ["font", "style"],
+  react: "✍️",
   filename: __filename
-}, async (conn, m, store, { from, args, reply }) => {
+}, async (conn, m, store, { from, quoted, args, q, reply }) => {
   try {
-    const repoName = args.join(" ");
-    if (!repoName) {
-      return reply("❌ Please provide a GitHub repository in the format 📌 `owner/repo`.");
+    if (!q) {
+      return reply("❎ Please provide text to convert into fancy fonts.\n\n*Example:* .fancy Hello");
     }
 
-    const apiUrl = `https://api.github.com/repos/${repoName}`;
-    const { data } = await axios.get(apiUrl);
+    const apiUrl = `https://www.movanest.xyz/v2/fancytext?word=${encodeURIComponent(q)}`;
+    const response = await axios.get(apiUrl);
+    
+    if (!response.data.status) {
+      return reply("❌ Error fetching fonts. Please try again later.");
+    }
 
-    let responseMsg = `📁 *GitHub Repository Info* 📁\n\n`;
-    responseMsg += `📌 *Name*: ${data.name}\n`;
-    responseMsg += `🔗 *URL*: ${data.html_url}\n`;
-    responseMsg += `📝 *Description*: ${data.description || "No description"}\n`;
-    responseMsg += `⭐ *Stars*: ${data.stargazers_count}\n`;
-    responseMsg += `🍴 *Forks*: ${data.forks_count}\n`;
-    responseMsg += `👤 *Owner*: ${data.owner.login}\n`;
-    responseMsg += `📅 *Created At*: ${new Date(data.created_at).toLocaleDateString()}\n`;
-    responseMsg += `\n> *© Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
+    const fonts = response.data.results.join("\n\n");
+    const resultText = `✨ *Fancy Fonts Converter* ✨\n\n${fonts}\n\n> *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
 
-    await conn.sendMessage(from, { text: responseMsg }, { quoted: m });
+    await conn.sendMessage(from, { text: resultText }, { quoted: m });
   } catch (error) {
-    console.error("GitHub API Error:", error);
-    reply(`❌ Error fetching repository data: ${error.response?.data?.message || error.message}`);
+    console.error("❌ Error in fancy command:", error);
+    reply("⚠️ An error occurred while fetching fonts.");
   }
-});
-
-cmd({
-    pattern: "githubstalk",
-    react: "🖥️",
-    filename: __filename
-},
-async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
-        const username = args[0];
-        if (!username) {
-            return reply("Please provide a GitHub username.");
-        }
-        const apiUrl = `https://api.github.com/users/${username}`;
-        const response = await axios.get(apiUrl);
-        const data = response.data;
-
-        let userInfo = `👤 *Username*: ${data.name || data.login}
-🔗 *Github Url*:(${data.html_url})
-📝 *Bio*: ${data.bio || 'Not available'}
-🏙️ *Location*: ${data.location || 'Unknown'}
-📊 *Public Repos*: ${data.public_repos}
-👥 *Followers*: ${data.followers} | Following: ${data.following}
-📅 *Created At*: ${new Date(data.created_at).toDateString()}
-🔭 *Public Gists*: ${data.public_gists}
-> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
-          const sentMsg = await conn.sendMessage(from,{image:{url: data.avatar_url },caption: userInfo },{quoted:mek })
-    } catch (e) {
-        console.log(e);
-        reply(`error: ${e.response ? e.response.data.message : e.message}`);
-    }
-});
-
-cmd({
-    pattern: "vcc",
-    react: "💳",
-    filename: __filename,
-}, async (conn, mek, m, { reply }) => {
-    const apiUrl = `https://api.siputzx.my.id/api/tools/vcc-generator?type=MasterCard&count=5`;
-
-    try {
-        const response = await axios.get(apiUrl);
-        const result = response.data;
-
-        if (!result.status || !result.data || result.data.length === 0) {
-            return reply("❌ Unable to generate VCCs. Please try again later.");
-        }
-
-        let responseMessage = `🎴 *Generated VCCs* (Type: Mastercard, Count: 5):\n\n`;
-
-        result.data.forEach((card, index) => {
-            responseMessage += `#️⃣ *Card ${index + 1}:*\n`;
-            responseMessage += `🔢 *Card Number:* ${card.cardNumber}\n`;
-            responseMessage += `📅 *Expiration Date:* ${card.expirationDate}\n`;
-            responseMessage += `🧾 *Cardholder Name:* ${card.cardholderName}\n`;
-            responseMessage += `🔒 *CVV:* ${card.cvv}\n\n`;
-        });
-
-        return reply(responseMessage);
-    } catch (error) {
-        console.error("Error fetching VCC data:", error);
-        return reply("❌ An error occurred while generating VCCs. Please try again later.");
-    }
-});
-
-cmd({
-    pattern: "weather",
-    react: "🌤",
-    filename: __filename
-},
-async (conn, mek, m, { from, q, reply }) => {
-    try {
-        if (!q) return reply("❗ Please provide a city name. Usage: .weather [city name]");
-        const apiKey = '2d61a72574c11c4f36173b627f8cb177'; 
-        const city = q;
-        const url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
-        const response = await axios.get(url);
-        const data = response.data;
-        const weather = `
-> 🌍 *Weather Information for ${data.name}, ${data.sys.country}* 🌍
-> 🌡️ *Temperature*: ${data.main.temp}°C
-> 🌡️ *Feels Like*: ${data.main.feels_like}°C
-> 🌡️ *Min Temp*: ${data.main.temp_min}°C
-> 🌡️ *Max Temp*: ${data.main.temp_max}°C
-> 💧 *Humidity*: ${data.main.humidity}%
-> ☁️ *Weather*: ${data.weather[0].main}
-> 🌫️ *Description*: ${data.weather[0].description}
-> 💨 *Wind Speed*: ${data.wind.speed} m/s
-> 🔽 *Pressure*: ${data.main.pressure} hPa
-
-> *© Powdered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*
-`;
-        return reply(weather);
-    } catch (e) {
-        console.log(e);
-        if (e.response && e.response.status === 404) {
-            return reply("🚫 City not found. Please check the spelling and try again.");
-        }
-        return reply("⚠️ An error occurred while fetching the weather information. Please try again later.");
-    }
-});
-
-cmd({
-    pattern: "ytpost",
-    react: "🎥",
-    filename: __filename
-},
-async (conn, mek, m, { from, args, q, reply, react }) => {
-    try {
-        if (!q) return reply("Please provide a YouTube community post URL.\nExample: `.ytpost <url>`");
-
-        const apiUrl = `https://api.siputzx.my.id/api/d/ytpost?url=${encodeURIComponent(q)}`;
-        const { data } = await axios.get(apiUrl);
-
-        if (!data.status || !data.data) {
-            await react("❌");
-            return reply("Failed to fetch the community post. Please check the URL.");
-        }
-
-        const post = data.data;
-        let caption = `📢 *YouTube Community Post* 📢\n\n` +
-                      `📜 *Content:* ${post.content}`;
-
-        if (post.images && post.images.length > 0) {
-            for (const img of post.images) {
-                await conn.sendMessage(from, { image: { url: img }, caption }, { quoted: mek });
-                caption = "";
-            }
-        } else {
-            await conn.sendMessage(from, { text: caption }, { quoted: mek });
-        }
-
-        await react("✅");
-    } catch (e) {
-        console.error("Error in ytpost command:", e);
-        await react("❌");
-        reply("An error occurred while fetching the YouTube community post.");
-    }
-});
-
-cmd({
-    pattern: "news2",
-    react: "📰",
-    filename: __filename
-},
-async (conn, mek, m, { from, reply }) => {
-    try {
-        const apiKey="0f2c43ab11324578a7b1709651736382";
-        const response = await axios.get(`https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`);
-        const articles = response.data.articles;
-
-        if (!articles.length) return reply("No news articles found.");
-
-        for (let i = 0; i < Math.min(articles.length, 5); i++) {
-            const article = articles[i];
-            let message = `
-📰 *${article.title}*
-
-⚠️ _${article.description}_
-
-🔗 _${article.url}_
-
-  ©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳
-            `;
-
-            console.log('Article URL:', article.urlToImage);
-
-            if (article.urlToImage) {
-                await conn.sendMessage(from, { image: { url: article.urlToImage }, caption: message });
-            } else {
-                await conn.sendMessage(from, { text: message });
-            }
-        };
-    } catch (e) {
-        console.error("Error fetching news:", e);
-        reply("Could not fetch news. Please try again later.");
-    }
 });
 
 cmd({
@@ -349,169 +140,41 @@ cmd({
 });
 
 cmd({
-  pattern: "check",
-  filename: __filename
-}, async (conn, mek, m, { from, args, reply }) => {
-  try {
-    let code = args[0];
-    if (!code) return reply("❌ Please provide a country code. Example: `.check 255`");
-    code = code.replace(/\+/g, '');
-
-    const url = "https://country-code-1-hmla.onrender.com/countries";
-    const { data } = await axios.get(url);
-
-    const matchingCountries = data.filter(country => country.calling_code === code);
-
-    if (matchingCountries.length > 0) {
-      const countryNames = matchingCountries
-        .map(c => `${getFlagEmoji(c.code)} ${c.name}`)
-        .join("\n");
-
-      await conn.sendMessage(from, {
-        text: `✅ *Country Code:* ${code}\n🌍 *Countries:*\n${countryNames}`,
-        contextInfo: {
-          mentionedJid: [m.sender],
-          forwardingScore: 999,
-          isForwarded: true,
-          forwardedNewsletterMessageInfo: {
-            newsletterJid: "120363400240662312@newsletter",
-            newsletterName: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
-            serverMessageId: 1
-          }
-        }
-      }, { quoted: mek });
-    } else {
-      reply(`❌ No country found for the code ${code}.`);
-    }
-  } catch (error) {
-    console.error(error);
-    reply("❌ An error occurred while checking the country code.");
-  }
-});
-
-cmd({
-  pattern: "ytstalk2",
-  alias: ["ytinfo2"],
-  react: "🔍",
-  filename: __filename
-}, async (conn, m, store, { from, quoted, q, reply }) => {
-  try {
-    if (!q) {
-      return reply("❌ Please provide a valid YouTube channel username or ID.");
-    }
-
-    await conn.sendMessage(from, {
-      react: { text: "⏳", key: m.key }
-    });
-
-    const apiUrl = `https://delirius-apiofc.vercel.app/tools/ytstalk?channel=${encodeURIComponent(q)}`;
-    const { data } = await axios.get(apiUrl);
-
-    if (!data || !data.status || !data.data) {
-      return reply("⚠️ Failed to fetch YouTube channel details. Ensure the username or ID is correct.");
-    }
-
-    const yt = data.data;
-    const caption = `╭━━━〔 *YOUTUBE STALKER* 〕━━━⊷\n`
-      + `┃👤 *Username:* ${yt.username}\n`
-      + `┃📊 *Subscribers:* ${yt.subscriber_count}\n`
-      + `┃🎥 *Videos:* ${yt.video_count}\n`
-      + `┃🔗 *Channel Link:* (${yt.channel})\n`
-      + `╰━━━⪼\n\n`
-      + `🔹 *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
-
-    await conn.sendMessage(from, {
-      image: { url: yt.avatar },
-      caption: caption
-    }, { quoted: m });
-
-  } catch (error) {
-    console.error("Error:", error);
-    reply("❌ An error occurred while processing your request. Please try again.");
-  }
-});
-
-cmd({
-    pattern: "wstalk",
-    alias: ["channelstalk", "chinfo"],
-    react: "🔍",
+    pattern: "news2",
+    react: "📰",
     filename: __filename
 },
-async (conn, mek, m, { from, reply, args }) => {
+async (conn, mek, m, { from, reply }) => {
     try {
-        if (!args) return reply("❌ Please provide a WhatsApp channel URL\nExample: .wstalk https://whatsapp.com/channel/0029Vad7YNyJuyA77CtIPX0x");
+        const apiKey="0f2c43ab11324578a7b1709651736382";
+        const response = await axios.get(`https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`);
+        const articles = response.data.articles;
 
-        const channelId = args.match(/channel\/([0-9A-Za-z]+)/i)?.[1];
-        if (!channelId) return reply("❌ Invalid WhatsApp channel URL");
+        if (!articles.length) return reply("No news articles found.");
 
-        const apiUrl = `https://itzpire.com/stalk/whatsapp-channel?url=https://whatsapp.com/channel/${channelId}`;
+        for (let i = 0; i < Math.min(articles.length, 5); i++) {
+            const article = articles[i];
+            let message = `
+📰 *${article.title}*
 
-        const response = await axios.get(apiUrl);
-        const data = response.data.data;
+⚠️ _${article.description}_
 
-        const channelInfo = `╭━━〔 *CHANNEL INFO* 〕━━┈⊷
-┃◈╭─────────────·๏
-┃◈┃• *📢 Title*: ${data.title}
-┃◈┃• *👥 Followers*: ${data.followers}
-┃◈┃• *📝 Description*: ${data.description.replace(/\n/g, '\n┃◈┃• ')}
-┃◈└───────────┈⊷
-╰──────────────┈⊷
-> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
+🔗 _${article.url}_
 
-        await conn.sendMessage(from, {
-            image: { url: data.img },
-            caption: channelInfo,
-            contextInfo: {
-                forwardingScore: 999,
-                isForwarded: true
+  ©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳
+            `;
+
+            console.log('Article URL:', article.urlToImage);
+
+            if (article.urlToImage) {
+                await conn.sendMessage(from, { image: { url: article.urlToImage }, caption: message });
+            } else {
+                await conn.sendMessage(from, { text: message });
             }
-        }, { quoted: mek });
-
+        };
     } catch (e) {
-        console.error("Error in wstalk command:", e);
-        reply(`❌ Error: ${e.response?.data?.message || e.message}`);
-    }
-});
-
-cmd({
-    pattern: "checkmail",
-    alias: ["inbox", "tmail", "mailinbox"],
-    react: "📬",
-    filename: __filename
-},
-async (conn, mek, m, { from, reply, args }) => {
-    try {
-        const sessionId = args[0];
-        if (!sessionId) return reply('🔑 Please provide your session ID\nExample: .checkmail YOUR_SESSION_ID');
-
-        const inboxUrl = `https://apis.davidcyril.name.ng/temp-mail/inbox?id=${encodeURIComponent(sessionId)}`;
-        const response = await axios.get(inboxUrl);
-
-        if (!response.data.success) {
-            return reply('❌ Invalid session ID or expired email');
-        }
-
-        const { inbox_count, messages } = response.data;
-
-        if (inbox_count === 0) {
-            return reply('📭 Your inbox is empty');
-        }
-
-        let messageList = `📬 *You have ${inbox_count} message(s)*\n\n`;
-        messages.forEach((msg, index) => {
-            messageList += `━━━━━━━━━━━━━━━━━━\n` +
-                          `📌 *Message ${index + 1}*\n` +
-                          `👤 *From:* ${msg.from}\n` +
-                          `📝 *Subject:* ${msg.subject}\n` +
-                          `⏰ *Date:* ${new Date(msg.date).toLocaleString()}\n\n` +
-                          `📄 *Content:*\n${msg.body}\n\n`;
-        });
-
-        await reply(messageList);
-
-    } catch (e) {
-        console.error('CheckMail error:', e);
-        reply(`❌ Error checking inbox: ${e.response?.data?.message || e.message}`);
+        console.error("Error fetching news:", e);
+        reply("Could not fetch news. Please try again later.");
     }
 });
 
@@ -559,46 +222,338 @@ async (conn, mek, m, { from, reply }) => {
 });
 
 cmd({
-    pattern: "define",
+    pattern: "vcc",
+    react: "💳",
+    filename: __filename,
+}, async (conn, mek, m, { reply }) => {
+    const apiUrl = `https://api.siputzx.my.id/api/tools/vcc-generator?type=MasterCard&count=5`;
+
+    try {
+        const response = await axios.get(apiUrl);
+        const result = response.data;
+
+        if (!result.status || !result.data || result.data.length === 0) {
+            return reply("❌ Unable to generate VCCs. Please try again later.");
+        }
+
+        let responseMessage = `🎴 *Generated VCCs* (Type: Mastercard, Count: 5):\n\n`;
+
+        result.data.forEach((card, index) => {
+            responseMessage += `#️⃣ *Card ${index + 1}:*\n`;
+            responseMessage += `🔢 *Card Number:* ${card.cardNumber}\n`;
+            responseMessage += `📅 *Expiration Date:* ${card.expirationDate}\n`;
+            responseMessage += `🧾 *Cardholder Name:* ${card.cardholderName}\n`;
+            responseMessage += `🔒 *CVV:* ${card.cvv}\n\n`;
+        });
+
+        return reply(responseMessage);
+    } catch (error) {
+        console.error("Error fetching VCC data:", error);
+        return reply("❌ An error occurred while generating VCCs. Please try again later.");
+    }
+});
+
+cmd({
+  pattern: "srepo",
+  react: "🍃",
+  filename: __filename
+}, async (conn, m, store, { from, args, reply }) => {
+  try {
+    const repoName = args.join(" ");
+    if (!repoName) {
+      return reply("❌ Please provide a GitHub repository in the format 📌 `owner/repo`.");
+    }
+
+    const apiUrl = `https://api.github.com/repos/${repoName}`;
+    const { data } = await axios.get(apiUrl);
+
+    let responseMsg = `📁 *GitHub Repository Info* 📁\n\n`;
+    responseMsg += `📌 *Name*: ${data.name}\n`;
+    responseMsg += `🔗 *URL*: ${data.html_url}\n`;
+    responseMsg += `📝 *Description*: ${data.description || "No description"}\n`;
+    responseMsg += `⭐ *Stars*: ${data.stargazers_count}\n`;
+    responseMsg += `🍴 *Forks*: ${data.forks_count}\n`;
+    responseMsg += `👤 *Owner*: ${data.owner.login}\n`;
+    responseMsg += `📅 *Created At*: ${new Date(data.created_at).toLocaleDateString()}\n`;
+    responseMsg += `\n> *© Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
+
+    await conn.sendMessage(from, { text: responseMsg }, { quoted: m });
+  } catch (error) {
+    console.error("GitHub API Error:", error);
+    reply(`❌ Error fetching repository data: ${error.response?.data?.message || error.message}`);
+  }
+});
+
+cmd({
+  pattern: "ytstalk2",
+  alias: ["ytinfo2"],
+  react: "🔍",
+  filename: __filename
+}, async (conn, m, store, { from, quoted, q, reply }) => {
+  try {
+    if (!q) {
+      return reply("❌ Please provide a valid YouTube channel username or ID.");
+    }
+
+    await conn.sendMessage(from, {
+      react: { text: "⏳", key: m.key }
+    });
+
+    const apiUrl = `https://delirius-apiofc.vercel.app/tools/ytstalk?channel=${encodeURIComponent(q)}`;
+    const { data } = await axios.get(apiUrl);
+
+    if (!data || !data.status || !data.data) {
+      return reply("⚠️ Failed to fetch YouTube channel details. Ensure the username or ID is correct.");
+    }
+
+    const yt = data.data;
+    const caption = `╭━━━〔 *YOUTUBE STALKER* 〕━━━⊷\n`
+      + `┃👤 *Username:* ${yt.username}\n`
+      + `┃📊 *Subscribers:* ${yt.subscriber_count}\n`
+      + `┃🎥 *Videos:* ${yt.video_count}\n`
+      + `┃🔗 *Channel Link:* (${yt.channel})\n`
+      + `╰━━━⪼\n\n`
+      + `🔹 *Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
+
+    await conn.sendMessage(from, {
+      image: { url: yt.avatar },
+      caption: caption
+    }, { quoted: m });
+
+  } catch (error) {
+    console.error("Error:", error);
+    reply("❌ An error occurred while processing your request. Please try again.");
+  }
+});
+
+cmd({
+    pattern: "ytpost",
+    react: "🎥",
+    filename: __filename
+},
+async (conn, mek, m, { from, args, q, reply, react }) => {
+    try {
+        if (!q) return reply("Please provide a YouTube community post URL.\nExample: `.ytpost <url>`");
+
+        const apiUrl = `https://api.siputzx.my.id/api/d/ytpost?url=${encodeURIComponent(q)}`;
+        const { data } = await axios.get(apiUrl);
+
+        if (!data.status || !data.data) {
+            await react("❌");
+            return reply("Failed to fetch the community post. Please check the URL.");
+        }
+
+        const post = data.data;
+        let caption = `📢 *YouTube Community Post* 📢\n\n` +
+                      `📜 *Content:* ${post.content}`;
+
+        if (post.images && post.images.length > 0) {
+            for (const img of post.images) {
+                await conn.sendMessage(from, { image: { url: img }, caption }, { quoted: mek });
+                caption = "";
+            }
+        } else {
+            await conn.sendMessage(from, { text: caption }, { quoted: mek });
+        }
+
+        await react("✅");
+    } catch (e) {
+        console.error("Error in ytpost command:", e);
+        await react("❌");
+        reply("An error occurred while fetching the YouTube community post.");
+    }
+});
+
+cmd({
+  pattern: "check",
+  filename: __filename
+}, async (conn, mek, m, { from, args, reply }) => {
+  try {
+    let code = args[0];
+    if (!code) return reply("❌ Please provide a country code. Example: `.check 255`");
+    code = code.replace(/\+/g, '');
+
+    const url = "https://country-code-1-hmla.onrender.com/countries";
+    const { data } = await axios.get(url);
+
+    const matchingCountries = data.filter(country => country.calling_code === code);
+
+    if (matchingCountries.length > 0) {
+      const countryNames = matchingCountries
+        .map(c => `${getFlagEmoji(c.code)} ${c.name}`)
+        .join("\n");
+
+      await conn.sendMessage(from, {
+        text: `✅ *Country Code:* ${code}\n🌍 *Countries:*\n${countryNames}`,
+        contextInfo: {
+          mentionedJid: [m.sender],
+          forwardingScore: 999,
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+            newsletterJid: "120363400240662312@newsletter",
+            newsletterName: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
+            serverMessageId: 1
+          }
+        }
+      }, { quoted: mek });
+    } else {
+      reply(`❌ No country found for the code ${code}.`);
+    }
+  } catch (error) {
+    console.error(error);
+    reply("❌ An error occurred while checking the country code.");
+  }
+});
+
+cmd({
+    pattern: "githubstalk",
+    react: "🖥️",
+    filename: __filename
+},
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+        const username = args[0];
+        if (!username) {
+            return reply("Please provide a GitHub username.");
+        }
+        const apiUrl = `https://api.github.com/users/${username}`;
+        const response = await axios.get(apiUrl);
+        const data = response.data;
+
+        let userInfo = `👤 *Username*: ${data.name || data.login}
+🔗 *Github Url*:(${data.html_url})
+📝 *Bio*: ${data.bio || 'Not available'}
+🏙️ *Location*: ${data.location || 'Unknown'}
+📊 *Public Repos*: ${data.public_repos}
+👥 *Followers*: ${data.followers} | Following: ${data.following}
+📅 *Created At*: ${new Date(data.created_at).toDateString()}
+🔭 *Public Gists*: ${data.public_gists}
+> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
+          const sentMsg = await conn.sendMessage(from,{image:{url: data.avatar_url },caption: userInfo },{quoted:mek })
+    } catch (e) {
+        console.log(e);
+        reply(`error: ${e.response ? e.response.data.message : e.message}`);
+    }
+});
+
+cmd({
+    pattern: "wstalk",
+    alias: ["channelstalk", "chinfo"],
     react: "🔍",
+    filename: __filename
+},
+async (conn, mek, m, { from, reply, args }) => {
+    try {
+        if (!args) return reply("❌ Please provide a WhatsApp channel URL\nExample: .wstalk https://whatsapp.com/channel/0029Vad7YNyJuyA77CtIPX0x");
+
+        const channelId = args.match(/channel\/([0-9A-Za-z]+)/i)?.[1];
+        if (!channelId) return reply("❌ Invalid WhatsApp channel URL");
+
+        const apiUrl = `https://itzpire.com/stalk/whatsapp-channel?url=https://whatsapp.com/channel/${channelId}`;
+
+        const response = await axios.get(apiUrl);
+        const data = response.data.data;
+
+        const channelInfo = `╭━━〔 *CHANNEL INFO* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃• *📢 Title*: ${data.title}
+┃◈┃• *👥 Followers*: ${data.followers}
+┃◈┃• *📝 Description*: ${data.description.replace(/\n/g, '\n┃◈┃• ')}
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
+
+        await conn.sendMessage(from, {
+            image: { url: data.img },
+            caption: channelInfo,
+            contextInfo: {
+                forwardingScore: 999,
+                isForwarded: true
+            }
+        }, { quoted: mek });
+
+    } catch (e) {
+        console.error("Error in wstalk command:", e);
+        reply(`❌ Error: ${e.response?.data?.message || e.message}`);
+    }
+});
+
+cmd({
+    pattern: "weather",
+    react: "🌤",
     filename: __filename
 },
 async (conn, mek, m, { from, q, reply }) => {
     try {
-        if (!q) return reply("Please provide a word to define.\n\n📌 *Usage:* .define [word]");
-
-        const word = q.trim();
-        const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
-
+        if (!q) return reply("❗ Please provide a city name. Usage: .weather [city name]");
+        const apiKey = '2d61a72574c11c4f36173b627f8cb177'; 
+        const city = q;
+        const url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
         const response = await axios.get(url);
-        const definitionData = response.data[0];
+        const data = response.data;
+        const weather = `
+> 🌍 *Weather Information for ${data.name}, ${data.sys.country}* 🌍
+> 🌡️ *Temperature*: ${data.main.temp}°C
+> 🌡️ *Feels Like*: ${data.main.feels_like}°C
+> 🌡️ *Min Temp*: ${data.main.temp_min}°C
+> 🌡️ *Max Temp*: ${data.main.temp_max}°C
+> 💧 *Humidity*: ${data.main.humidity}%
+> ☁️ *Weather*: ${data.weather[0].main}
+> 🌫️ *Description*: ${data.weather[0].description}
+> 💨 *Wind Speed*: ${data.wind.speed} m/s
+> 🔽 *Pressure*: ${data.main.pressure} hPa
 
-        const definition = definitionData.meanings[0].definitions[0].definition;
-        const example = definitionData.meanings[0].definitions[0].example || '❌ No example available';
-        const synonyms = definitionData.meanings[0].definitions[0].synonyms.join(', ') || '❌ No synonyms available';
-        const phonetics = definitionData.phonetics[0]?.text || '🔇 No phonetics available';
-        const audio = definitionData.phonetics[0]?.audio || null;
-
-        const wordInfo = `
-📖 *Word*: *${definitionData.word}*  
-🗣️ *Pronunciation*: _${phonetics}_  
-📚 *Definition*: ${definition}  
-✍️ *Example*: ${example}  
-📝 *Synonyms*: ${synonyms}  
-
-🔗 *Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
-
-        if (audio) {
-            await conn.sendMessage(from, { audio: { url: audio }, mimetype: 'audio/mpeg' }, { quoted: mek });
-        }
-
-        return reply(wordInfo);
+> *© Powdered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*
+`;
+        return reply(weather);
     } catch (e) {
-        console.error("❌ Error:", e);
+        console.log(e);
         if (e.response && e.response.status === 404) {
-            return reply("🚫 *Word not found.* Please check the spelling and try again.");
+            return reply("🚫 City not found. Please check the spelling and try again.");
         }
-        return reply("⚠️ An error occurred while fetching the definition. Please try again later.");
+        return reply("⚠️ An error occurred while fetching the weather information. Please try again later.");
+    }
+});
+
+cmd({
+    pattern: "checkmail",
+    alias: ["inbox", "tmail", "mailinbox"],
+    react: "📬",
+    filename: __filename
+},
+async (conn, mek, m, { from, reply, args }) => {
+    try {
+        const sessionId = args[0];
+        if (!sessionId) return reply('🔑 Please provide your session ID\nExample: .checkmail YOUR_SESSION_ID');
+
+        const inboxUrl = `https://apis.davidcyril.name.ng/temp-mail/inbox?id=${encodeURIComponent(sessionId)}`;
+        const response = await axios.get(inboxUrl);
+
+        if (!response.data.success) {
+            return reply('❌ Invalid session ID or expired email');
+        }
+
+        const { inbox_count, messages } = response.data;
+
+        if (inbox_count === 0) {
+            return reply('📭 Your inbox is empty');
+        }
+
+        let messageList = `📬 *You have ${inbox_count} message(s)*\n\n`;
+        messages.forEach((msg, index) => {
+            messageList += `━━━━━━━━━━━━━━━━━━\n` +
+                          `📌 *Message ${index + 1}*\n` +
+                          `👤 *From:* ${msg.from}\n` +
+                          `📝 *Subject:* ${msg.subject}\n` +
+                          `⏰ *Date:* ${new Date(msg.date).toLocaleString()}\n\n` +
+                          `📄 *Content:*\n${msg.body}\n\n`;
+        });
+
+        await reply(messageList);
+
+    } catch (e) {
+        console.error('CheckMail error:', e);
+        reply(`❌ Error checking inbox: ${e.response?.data?.message || e.message}`);
     }
 });
 
@@ -645,52 +600,6 @@ async (conn, mek, m, { args, reply }) => {
     } catch (e) {
         console.error("Error in webinfo command:", e);
         reply(`🚨 *An error occurred:* ${e.message}`);
-    }
-});
-
-cmd({
-    pattern: "getname",
-    alias: ["getnumber"],
-    react: "🔎",
-    filename: __filename
-},
-async (conn, mek, m, { reply, q }) => {
-    try {
-        if (!q) return reply("❌ Please provide a phone number.\n👉 Example: /getname +94771825xxx");
-
-        const num = q.replace(/[\s()-]/g, "");
-
-        if (numberCache[num]) return reply(numberCache[num]);
-
-        let contactName = num;
-        try {
-            const contact = await conn.onWhatsApp(num);
-            if (contact && contact.length > 0 && contact[0].exists) {
-                contactName = contact[0].notify || num;
-            }
-        } catch { }
-
-        const apiKey = "5fae6e0f3e530c6e638b6b924c6fddd3";
-        const url = `http://apilayer.net/api/validate?access_key=${apiKey}&number=${encodeURIComponent(num)}`;
-        const res = await axios.get(url);
-        const data = res.data;
-
-        let msg = `🛑 *Phone Lookup Result* ✅\n\n`;
-        msg += `👤 Name: ${contactName}\n`;
-        msg += `📞 Number: ${num}\n`;
-        msg += `✅ Valid: ${data.valid ? "Yes" : "No"}\n`;
-        msg += `🌍 Country: ${data.country_name || "Unknown"} (${data.country_code || "-"})\n`;
-        msg += `📍 Location: ${data.location || "Unknown"}\n`;
-        msg += `📡 Carrier: ${data.carrier || "Unknown"}\n`;
-        msg += `📱 Line Type: ${data.line_type || "Unknown"}\n`;
-
-        numberCache[num] = msg;
-
-        reply(msg);
-
-    } catch (e) {
-        console.error("Error in getname:", e);
-        reply("❌ Failed to fetch number details. Please check your API or try again.");
     }
 });
 
@@ -791,104 +700,6 @@ cmd({
 });
 
 cmd({
-    pattern: "app",
-    react: '📲',
-    filename: __filename
-},
-async (conn, mek, m, { from, q, reply }) => {
-    try {
-        if (!q) return reply("❌ Please provide an app name to search.");
-
-        await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
-
-        const apiUrl = `https://api.deline.web.id/search/playstore?q=${encodeURIComponent(q)}`;
-        const response = await axios.get(apiUrl);
-
-        if (!response.data || !response.data.result || response.data.result.length === 0) {
-            await conn.sendMessage(from, { react: { text: '❌', key: m.key } });
-            return reply("❌ No results found for that app name.");
-        }
-
-        const apps = response.data.result.slice(0, 5);
-
-        let finalMessage = `📲 *PLAY STORE SEARCH RESULTS*\n\n`;
-
-        apps.forEach((app, index) => {
-            finalMessage += `🔸 *${index + 1}. ${app.nama}*\n`;
-            finalMessage += `• 👨‍💻 *Dev:* ${app.developer}\n`;
-            finalMessage += `• ⭐ *Rating:* ${app.rate2 || 'N/A'}\n`;
-            finalMessage += `• 🔗 *Link:* ${app.link}\n\n`;
-            finalMessage += `─────────────────\n\n`;
-        });
-
-        finalMessage += `*Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
-
-        await conn.sendMessage(
-            from,
-            { text: finalMessage },
-            { quoted: mek }
-        );
-
-        await conn.sendMessage(from, { react: { text: '✅', key: m.key } });
-
-    } catch (error) {
-        console.error("Play Store Error:", error);
-        await conn.sendMessage(from, { react: { text: '❌', key: m.key } });
-        reply("❌ Error fetching Play Store results. Please try again later.");
-    }
-});
-
-cmd({
-    pattern: "countryinfo",
-    alias: ["cinfo", "country","cinfo2"],
-    react: "🌍",
-    filename: __filename
-},
-async (conn, mek, m, { from, args, q, reply, react }) => {
-    try {
-        if (!q) return reply("Please provide a country name.\nExample: `.countryinfo Sri Lanka`");
-
-        const apiUrl = `https://api.siputzx.my.id/api/tools/countryInfo?name=${encodeURIComponent(q)}`;
-        const { data } = await axios.get(apiUrl);
-
-        if (!data.status || !data.data) {
-            await react("❌");
-            return reply(`No information found for *${q}*. Please check the country name.`);
-        }
-
-        const info = data.data;
-        let neighborsText = info.neighbors.length > 0
-            ? info.neighbors.map(n => `🌍 *${n.name}*`).join(", ")
-            : "No neighboring countries found.";
-
-        const text = `🌍 *Country Information: ${info.name}* 🌍\n\n` +
-                     `🏛 *Capital:* ${info.capital}\n` +
-                     `📍 *Continent:* ${info.continent.name} ${info.continent.emoji}\n` +
-                     `📞 *Phone Code:* ${info.phoneCode}\n` +
-                     `📏 *Area:* ${info.area.squareKilometers} km² (${info.area.squareMiles} mi²)\n` +
-                     `🚗 *Driving Side:* ${info.drivingSide}\n` +
-                     `💱 *Currency:* ${info.currency}\n` +
-                     `🔤 *Languages:* ${info.languages.native.join(", ")}\n` +
-                     `🌟 *Famous For:* ${info.famousFor}\n` +
-                     `🌍 *ISO Codes:* ${info.isoCode.alpha2.toUpperCase()}, ${info.isoCode.alpha3.toUpperCase()}\n` +
-                     `🌎 *Internet TLD:* ${info.internetTLD}\n\n` +
-                     `🔗 *Neighbors:* ${neighborsText}`;
-
-        await conn.sendMessage(from, {
-            image: { url: info.flag },
-            caption: text,
-            contextInfo: { mentionedJid: [m.sender] }
-        }, { quoted: mek });
-
-        await react("✅");
-    } catch (e) {
-        console.error("Error in countryinfo command:", e);
-        await react("❌");
-        reply("An error occurred while fetching country information.");
-    }
-});
-
-cmd({
     pattern: "cjid",
     react: "📡",
     filename: __filename
@@ -937,6 +748,267 @@ async (conn, mek, m) => {
         },
         { quoted: mek }
     );
+});
+
+cmd({
+    pattern: "getname",
+    alias: ["getnumber"],
+    react: "🔎",
+    filename: __filename
+},
+async (conn, mek, m, { reply, q }) => {
+    try {
+        if (!q) return reply("❌ Please provide a phone number.\n👉 Example: /getname +94771825xxx");
+
+        const num = q.replace(/[\s()-]/g, "");
+
+        if (numberCache[num]) return reply(numberCache[num]);
+
+        let contactName = num;
+        try {
+            const contact = await conn.onWhatsApp(num);
+            if (contact && contact.length > 0 && contact[0].exists) {
+                contactName = contact[0].notify || num;
+            }
+        } catch { }
+
+        const apiKey = "5fae6e0f3e530c6e638b6b924c6fddd3";
+        const url = `http://apilayer.net/api/validate?access_key=${apiKey}&number=${encodeURIComponent(num)}`;
+        const res = await axios.get(url);
+        const data = res.data;
+
+        let msg = `🛑 *Phone Lookup Result* ✅\n\n`;
+        msg += `👤 Name: ${contactName}\n`;
+        msg += `📞 Number: ${num}\n`;
+        msg += `✅ Valid: ${data.valid ? "Yes" : "No"}\n`;
+        msg += `🌍 Country: ${data.country_name || "Unknown"} (${data.country_code || "-"})\n`;
+        msg += `📍 Location: ${data.location || "Unknown"}\n`;
+        msg += `📡 Carrier: ${data.carrier || "Unknown"}\n`;
+        msg += `📱 Line Type: ${data.line_type || "Unknown"}\n`;
+
+        numberCache[num] = msg;
+
+        reply(msg);
+
+    } catch (e) {
+        console.error("Error in getname:", e);
+        reply("❌ Failed to fetch number details. Please check your API or try again.");
+    }
+});
+
+cmd({
+  pattern: "ytstalk",
+  alias: ["youtubestalk", "ytsearch"],
+  use: ".ytstalk <username>",
+  filename: __filename,
+}, async (conn, mek, msg, { from, args, reply }) => {
+  try {
+    const username = args.join(" ");
+    if (!username) {
+      return reply("❌ Please provide a YouTube username. Example: `.ytstalk tech`");
+    }
+
+    const response = await axios.get(`https://api.siputzx.my.id/api/stalk/youtube?username=${encodeURIComponent(username)}`);
+    const { status, data } = response.data;
+
+    if (!status || !data) {
+      return reply("❌ No information found for the specified YouTube channel. Please try again.");
+    }
+
+    const {
+      channel: {
+        username: ytUsername,
+        subscriberCount,
+        videoCount,
+        avatarUrl,
+        channelUrl,
+        description,
+      },
+      latest_videos,
+    } = data;
+
+    const ytMessage = `
+📺 *YouTube Channel*: ${ytUsername}
+👥 *Subscribers*: ${subscriberCount}
+🎥 *Total Videos*: ${videoCount}
+📝 *Description*: ${description || "N/A"}
+🔗 *Channel URL*: ${channelUrl}
+
+🎬 *Latest Videos*:
+${latest_videos.slice(0, 3).map((video, index) => `
+${index + 1}. *${video.title}*
+   ▶️ *Views*: ${video.viewCount}
+   ⏱️ *Duration*: ${video.duration}
+   📅 *Published*: ${video.publishedTime}
+   🔗 *Video URL*: ${video.videoUrl}
+`).join("\n")}
+    `;
+
+    await conn.sendMessage(from, {
+      image: { url: avatarUrl },
+      caption: ytMessage,
+    });
+  } catch (error) {
+    console.error("Error fetching YouTube channel information:", error);
+    reply("❌ Unable to fetch YouTube channel information. Please try again later.");
+  }
+});
+
+cmd({
+    pattern: "tempmail",
+    alias: ["genmail"],
+    react: "📧",
+    filename: __filename
+},
+async (conn, mek, m, { from, reply, prefix }) => {
+    try {
+        const response = await axios.get('https://apis.davidcyril.name.ng/temp-mail');
+        const { email, session_id, expires_at } = response.data;
+
+        const expiresDate = new Date(expires_at);
+        const timeString = expiresDate.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+        const dateString = expiresDate.toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        });
+
+        const message = `
+📧 *TEMPORARY EMAIL GENERATED*
+
+✉️ *Email Address:*
+${email}
+
+⏳ *Expires:*
+${timeString} • ${dateString}
+
+🔑 *Session ID:*
+\`\`\`${session_id}\`\`\`
+
+📥 *Check Inbox:*
+.inbox ${session_id}
+
+_Email will expire after 24 hours_
+`;
+
+        await conn.sendMessage(
+            from,
+            { 
+                text: message,
+                contextInfo: {
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363400240662312@newsletter',
+                        newsletterName: 'TempMail Service',
+                        serverMessageId: 101
+                    }
+                }
+            },
+            { quoted: mek }
+        );
+
+    } catch (e) {
+        console.error('TempMail error:', e);
+        reply(`❌ Error: ${e.message}`);
+    }
+});
+
+cmd({
+    pattern: "define",
+    react: "🔍",
+    filename: __filename
+},
+async (conn, mek, m, { from, q, reply }) => {
+    try {
+        if (!q) return reply("Please provide a word to define.\n\n📌 *Usage:* .define [word]");
+
+        const word = q.trim();
+        const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
+
+        const response = await axios.get(url);
+        const definitionData = response.data[0];
+
+        const definition = definitionData.meanings[0].definitions[0].definition;
+        const example = definitionData.meanings[0].definitions[0].example || '❌ No example available';
+        const synonyms = definitionData.meanings[0].definitions[0].synonyms.join(', ') || '❌ No synonyms available';
+        const phonetics = definitionData.phonetics[0]?.text || '🔇 No phonetics available';
+        const audio = definitionData.phonetics[0]?.audio || null;
+
+        const wordInfo = `
+📖 *Word*: *${definitionData.word}*  
+🗣️ *Pronunciation*: _${phonetics}_  
+📚 *Definition*: ${definition}  
+✍️ *Example*: ${example}  
+📝 *Synonyms*: ${synonyms}  
+
+🔗 *Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
+
+        if (audio) {
+            await conn.sendMessage(from, { audio: { url: audio }, mimetype: 'audio/mpeg' }, { quoted: mek });
+        }
+
+        return reply(wordInfo);
+    } catch (e) {
+        console.error("❌ Error:", e);
+        if (e.response && e.response.status === 404) {
+            return reply("🚫 *Word not found.* Please check the spelling and try again.");
+        }
+        return reply("⚠️ An error occurred while fetching the definition. Please try again later.");
+    }
+});
+
+cmd({
+    pattern: "app",
+    react: '📲',
+    filename: __filename
+},
+async (conn, mek, m, { from, q, reply }) => {
+    try {
+        if (!q) return reply("❌ Please provide an app name to search.");
+
+        await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
+
+        const apiUrl = `https://api.deline.web.id/search/playstore?q=${encodeURIComponent(q)}`;
+        const response = await axios.get(apiUrl);
+
+        if (!response.data || !response.data.result || response.data.result.length === 0) {
+            await conn.sendMessage(from, { react: { text: '❌', key: m.key } });
+            return reply("❌ No results found for that app name.");
+        }
+
+        const apps = response.data.result.slice(0, 5);
+
+        let finalMessage = `📲 *PLAY STORE SEARCH RESULTS*\n\n`;
+
+        apps.forEach((app, index) => {
+            finalMessage += `🔸 *${index + 1}. ${app.nama}*\n`;
+            finalMessage += `• 👨‍💻 *Dev:* ${app.developer}\n`;
+            finalMessage += `• ⭐ *Rating:* ${app.rate2 || 'N/A'}\n`;
+            finalMessage += `• 🔗 *Link:* ${app.link}\n\n`;
+            finalMessage += `─────────────────\n\n`;
+        });
+
+        finalMessage += `*Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
+
+        await conn.sendMessage(
+            from,
+            { text: finalMessage },
+            { quoted: mek }
+        );
+
+        await conn.sendMessage(from, { react: { text: '✅', key: m.key } });
+
+    } catch (error) {
+        console.error("Play Store Error:", error);
+        await conn.sendMessage(from, { react: { text: '❌', key: m.key } });
+        reply("❌ Error fetching Play Store results. Please try again later.");
+    }
 });
 
 cmd({
@@ -1101,121 +1173,6 @@ async (conn, mek, m, { from, args, reply }) => {
 });
 
 cmd({
-    pattern: "tempnum",
-    alias: ["fakenum", "tempnumber"],
-    react: "📱",
-    use: "<country-code>"
-},
-async (conn, mek, m, { from, args, reply }) => {
-    try {
-        if (!args || args.length < 1) {
-            return reply(`❌ *Usage:* .tempnum <country-code>\nExample: .tempnum us\n\n📦 Use .otpbox <number>* to check OTPs`);
-        }
-
-        const countryCode = args[0].toLowerCase();
-        
-        const { data } = await axios.get(
-            `https://api.vreden.my.id/api/tools/fakenumber/listnumber?id=${countryCode}`,
-            { 
-                timeout: 10000,
-                validateStatus: status => status === 200
-            }
-        );
-
-        if (!data?.result || !Array.isArray(data.result)) {
-            console.error("Invalid API structure:", data);
-            return reply(`⚠ Invalid API response format\nTry .tempnum us`);
-        }
-
-        if (data.result.length === 0) {
-            return reply(`📭 No numbers available for *${countryCode.toUpperCase()}*\nTry another country code!\n\nUse .otpbox <number> after selection`);
-        }
-
-        const numbers = data.result.slice(0, 25);
-        const numberList = numbers.map((num, i) => 
-            `${String(i+1).padStart(2, ' ')}. ${num.number}`
-        ).join("\n");
-
-        await reply(
-            `╭──「 📱 TEMPORARY NUMBERS 」\n` +
-            `│\n` +
-            `│ Country: ${countryCode.toUpperCase()}\n` +
-            `│ Numbers Found: ${numbers.length}\n` +
-            `│\n` +
-            `${numberList}\n\n` +
-            `╰──「 📦 USE: .otpbox <number> 」\n` +
-            `_Example: .otpbox +1234567890_`
-        );
-
-    } catch (err) {
-        console.error("API Error:", err);
-        const errorMessage = err.code === "ECONNABORTED" ? 
-            `⏳ *Timeout*: API took too long\nTry smaller country codes like 'us', 'gb'` :
-            `⚠ *Error*: ${err.message}\nUse format: .tempnum <country-code>`;
-            
-        reply(`${errorMessage}\n\n🔑 Remember: ${prefix}otpinbox <number>`);
-    }
-});
-
-cmd({
-  pattern: "ytstalk",
-  alias: ["youtubestalk", "ytsearch"],
-  use: ".ytstalk <username>",
-  filename: __filename,
-}, async (conn, mek, msg, { from, args, reply }) => {
-  try {
-    const username = args.join(" ");
-    if (!username) {
-      return reply("❌ Please provide a YouTube username. Example: `.ytstalk tech`");
-    }
-
-    const response = await axios.get(`https://api.siputzx.my.id/api/stalk/youtube?username=${encodeURIComponent(username)}`);
-    const { status, data } = response.data;
-
-    if (!status || !data) {
-      return reply("❌ No information found for the specified YouTube channel. Please try again.");
-    }
-
-    const {
-      channel: {
-        username: ytUsername,
-        subscriberCount,
-        videoCount,
-        avatarUrl,
-        channelUrl,
-        description,
-      },
-      latest_videos,
-    } = data;
-
-    const ytMessage = `
-📺 *YouTube Channel*: ${ytUsername}
-👥 *Subscribers*: ${subscriberCount}
-🎥 *Total Videos*: ${videoCount}
-📝 *Description*: ${description || "N/A"}
-🔗 *Channel URL*: ${channelUrl}
-
-🎬 *Latest Videos*:
-${latest_videos.slice(0, 3).map((video, index) => `
-${index + 1}. *${video.title}*
-   ▶️ *Views*: ${video.viewCount}
-   ⏱️ *Duration*: ${video.duration}
-   📅 *Published*: ${video.publishedTime}
-   🔗 *Video URL*: ${video.videoUrl}
-`).join("\n")}
-    `;
-
-    await conn.sendMessage(from, {
-      image: { url: avatarUrl },
-      caption: ytMessage,
-    });
-  } catch (error) {
-    console.error("Error fetching YouTube channel information:", error);
-    reply("❌ Unable to fetch YouTube channel information. Please try again later.");
-  }
-});
-
-cmd({
     pattern: "searchsti",
     alias: ["stickers"],
     react: "🦋",
@@ -1279,121 +1236,171 @@ cmd({
 });
 
 cmd({
-    pattern: "convertmoney",
-    react: "💸",
-    alias: ["currency", "cvmoney"],
-    use: ".currency amount fromCurrency toCurrency (e.g: .convert 100 USD EUR)",
-    filename: __filename,
-}, async (conn, mek, msg, { from, reply, args }) => {
+    pattern: "tempnum",
+    alias: ["fakenum", "tempnumber"],
+    react: "📱",
+    use: "<country-code>"
+},
+async (conn, mek, m, { from, args, reply }) => {
     try {
-        if (args.length !== 3) {
-            return reply("*⭕ ɪɴᴠᴀʟɪᴅ ғᴏʀᴍᴀᴛ! ᴜsᴇ: .ᴄᴜʀʀᴇɴᴄʏ ᴀᴍᴏᴜɴᴛ ғʀᴏᴍᴄᴜʀʀᴇɴᴄʏ ᴛᴏᴄᴜʀʀᴇɴᴄʏ*\n*ᴇxᴀᴍᴘʟᴇ: .ᴄᴜʀʀᴇɴᴄʏ 𝟷𝟶𝟶 ᴜsᴅ ᴘᴋʀ*");
+        if (!args || args.length < 1) {
+            return reply(`❌ *Usage:* .tempnum <country-code>\nExample: .tempnum us\n\n📦 Use .otpbox <number>* to check OTPs`);
         }
 
-        const amount = parseFloat(args[0]);
-        const fromCurrency = args[1].toUpperCase();
-        const toCurrency = args[2].toUpperCase();
-
-        if (isNaN(amount)) {
-            return reply("*❌ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ᴀᴍᴏᴜɴᴛ!*");
-        }
-
-        const response = await axios.get(`${BASE_URL}/${API_KEY}/latest/${fromCurrency}`);
+        const countryCode = args[0].toLowerCase();
         
-        if (response.data.result === "error") {
-            throw new Error(response.data["error-type"]);
+        const { data } = await axios.get(
+            `https://api.vreden.my.id/api/tools/fakenumber/listnumber?id=${countryCode}`,
+            { 
+                timeout: 10000,
+                validateStatus: status => status === 200
+            }
+        );
+
+        if (!data?.result || !Array.isArray(data.result)) {
+            console.error("Invalid API structure:", data);
+            return reply(`⚠ Invalid API response format\nTry .tempnum us`);
         }
 
-        const rates = response.data.conversion_rates;
-
-        if (!rates[toCurrency]) {
-            return reply("*❌ ɪɴᴠᴀʟɪᴅ ᴛᴀʀɢᴇᴛ ᴄᴜʀʀᴇɴᴄʏ ᴄᴏᴅᴇ! ᴘʟᴇᴀsᴇ ᴜsᴇ ᴠᴀʟɪᴅ ᴄᴜʀʀᴇɴᴄʏ ᴄᴏᴅᴇs ʟɪᴋᴇ ᴜsᴅ, ᴇᴜʀ, ɢʙᴘ, ᴇᴛᴄ.*");
+        if (data.result.length === 0) {
+            return reply(`📭 No numbers available for *${countryCode.toUpperCase()}*\nTry another country code!\n\nUse .otpbox <number> after selection`);
         }
 
-        const convertedAmount = (amount * rates[toCurrency]).toFixed(2);
-        const formattedAmount = new Intl.NumberFormat().format(amount);
-        const formattedResult = new Intl.NumberFormat().format(convertedAmount);
+        const numbers = data.result.slice(0, 25);
+        const numberList = numbers.map((num, i) => 
+            `${String(i+1).padStart(2, ' ')}. ${num.number}`
+        ).join("\n");
 
-        const message = `*🌍 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 CURRENCY CONVERSION 💵*\n\n` +
-            `*💲 Form:* ${formattedAmount} ${fromCurrency}\n` +
-            `*🏷️ To:* ${formattedResult} ${toCurrency}\n` +
-            `*💰 Rate:* 1 ${fromCurrency} = ${rates[toCurrency]} ${toCurrency}\n\n` +
-            `*⏰ Last Updated:* ${response.data.time_last_update_utc}`;
+        await reply(
+            `╭──「 📱 TEMPORARY NUMBERS 」\n` +
+            `│\n` +
+            `│ Country: ${countryCode.toUpperCase()}\n` +
+            `│ Numbers Found: ${numbers.length}\n` +
+            `│\n` +
+            `${numberList}\n\n` +
+            `╰──「 📦 USE: .otpbox <number> 」\n` +
+            `_Example: .otpbox +1234567890_`
+        );
 
-        reply(message);
-
-    } catch (error) {
-        console.error("Currency conversion error:", error);
-        
-        if (error.message === "unsupported-code") {
-            reply("❌ Invalid currency code! Please use valid currency codes like USD, EUR, GBP, etc.");
-        } else if (error.message === "malformed-request") {
-            reply("❌ Invalid API request format. Please try again.");
-        } else if (error.message === "invalid-key") {
-            reply("❌ API key validation failed. Please contact the administrator.");
-        } else if (error.message === "inactive-account") {
-            reply("❌ API account is not active. Please contact the administrator.");
-        } else if (error.message === "quota-reached") {
-            reply("❌ API quota has been reached. Please try again later.");
-        } else {
-            reply("❌ Failed to convert currency. Please try again later.");
-        }
+    } catch (err) {
+        console.error("API Error:", err);
+        const errorMessage = err.code === "ECONNABORTED" ? 
+            `⏳ *Timeout*: API took too long\nTry smaller country codes like 'us', 'gb'` :
+            `⚠ *Error*: ${err.message}\nUse format: .tempnum <country-code>`;
+            
+        reply(`${errorMessage}\n\n🔑 Remember: ${prefix}otpinbox <number>`);
     }
 });
 
 cmd({
-    pattern: "tempmail",
-    alias: ["genmail"],
-    react: "📧",
+    pattern: "countryinfo",
+    alias: ["cinfo", "country","cinfo2"],
+    react: "🌍",
     filename: __filename
 },
-async (conn, mek, m, { from, reply, prefix }) => {
+async (conn, mek, m, { from, args, q, reply, react }) => {
     try {
-        const response = await axios.get('https://apis.davidcyril.name.ng/temp-mail');
-        const { email, session_id, expires_at } = response.data;
+        if (!q) return reply("Please provide a country name.\nExample: `.countryinfo Sri Lanka`");
 
-        const expiresDate = new Date(expires_at);
-        const timeString = expiresDate.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        });
-        const dateString = expiresDate.toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        });
+        const apiUrl = `https://api.siputzx.my.id/api/tools/countryInfo?name=${encodeURIComponent(q)}`;
+        const { data } = await axios.get(apiUrl);
 
-        const message = `
-📧 *TEMPORARY EMAIL GENERATED*
+        if (!data.status || !data.data) {
+            await react("❌");
+            return reply(`No information found for *${q}*. Please check the country name.`);
+        }
 
-✉️ *Email Address:*
-${email}
+        const info = data.data;
+        let neighborsText = info.neighbors.length > 0
+            ? info.neighbors.map(n => `🌍 *${n.name}*`).join(", ")
+            : "No neighboring countries found.";
 
-⏳ *Expires:*
-${timeString} • ${dateString}
+        const text = `🌍 *Country Information: ${info.name}* 🌍\n\n` +
+                     `🏛 *Capital:* ${info.capital}\n` +
+                     `📍 *Continent:* ${info.continent.name} ${info.continent.emoji}\n` +
+                     `📞 *Phone Code:* ${info.phoneCode}\n` +
+                     `📏 *Area:* ${info.area.squareKilometers} km² (${info.area.squareMiles} mi²)\n` +
+                     `🚗 *Driving Side:* ${info.drivingSide}\n` +
+                     `💱 *Currency:* ${info.currency}\n` +
+                     `🔤 *Languages:* ${info.languages.native.join(", ")}\n` +
+                     `🌟 *Famous For:* ${info.famousFor}\n` +
+                     `🌍 *ISO Codes:* ${info.isoCode.alpha2.toUpperCase()}, ${info.isoCode.alpha3.toUpperCase()}\n` +
+                     `🌎 *Internet TLD:* ${info.internetTLD}\n\n` +
+                     `🔗 *Neighbors:* ${neighborsText}`;
 
-🔑 *Session ID:*
-\`\`\`${session_id}\`\`\`
+        await conn.sendMessage(from, {
+            image: { url: info.flag },
+            caption: text,
+            contextInfo: { mentionedJid: [m.sender] }
+        }, { quoted: mek });
 
-📥 *Check Inbox:*
-.inbox ${session_id}
+        await react("✅");
+    } catch (e) {
+        console.error("Error in countryinfo command:", e);
+        await react("❌");
+        reply("An error occurred while fetching country information.");
+    }
+});
 
-_Email will expire after 24 hours_
+cmd({
+    pattern: "mvdetail",
+    react: "🎬",
+    filename: __filename
+},
+async (conn, mek, m, { from, reply, sender, args }) => {
+    try {
+        const movieName = args.length > 0 ? args.join(' ') : m.text.replace(/^[\.\#\$\!]?movie\s?/i, '').trim();
+        
+        if (!movieName) {
+            return reply("📽️ Please provide the name of the movie.\nExample: .movie Iron Man");
+        }
+
+        const apiUrl = `https://apis.davidcyril.name.ng/imdb?query=${encodeURIComponent(movieName)}`;
+        const response = await axios.get(apiUrl);
+
+        if (!response.data.status || !response.data.movie) {
+            return reply("🚫 Movie not found. Please check the name and try again.");
+        }
+
+        const movie = response.data.movie;
+        
+        const dec = `
+🎬 *${movie.title}* (${movie.year}) ${movie.rated || ''}
+
+⭐ *IMDb:* ${movie.imdbRating || 'N/A'} | 🍅 *Rotten Tomatoes:* ${movie.ratings.find(r => r.source === 'Rotten Tomatoes')?.value || 'N/A'} | 💰 *Box Office:* ${movie.boxoffice || 'N/A'}
+
+📅 *Released:* ${new Date(movie.released).toLocaleDateString()}
+⏳ *Runtime:* ${movie.runtime}
+🎭 *Genre:* ${movie.genres}
+
+📝 *Plot:* ${movie.plot}
+
+🎥 *Director:* ${movie.director}
+✍️ *Writer:* ${movie.writer}
+🌟 *Actors:* ${movie.actors}
+
+🌍 *Country:* ${movie.country}
+🗣️ *Language:* ${movie.languages}
+🏆 *Awards:* ${movie.awards || 'None'}
+
+[View on IMDb](${movie.imdbUrl})
 `;
 
         await conn.sendMessage(
             from,
-            { 
-                text: message,
+            {
+                image: { 
+                    url: movie.poster && movie.poster !== 'N/A' ? movie.poster : 'https://files.catbox.moe/brlkte.jpg'
+                },
+                caption: dec,
                 contextInfo: {
+                    mentionedJid: [sender],
                     forwardingScore: 999,
                     isForwarded: true,
                     forwardedNewsletterMessageInfo: {
                         newsletterJid: '120363400240662312@newsletter',
-                        newsletterName: 'TempMail Service',
-                        serverMessageId: 101
+                        newsletterName: '𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳',
+                        serverMessageId: 143
                     }
                 }
             },
@@ -1401,7 +1408,7 @@ _Email will expire after 24 hours_
         );
 
     } catch (e) {
-        console.error('TempMail error:', e);
+        console.error('Movie command error:', e);
         reply(`❌ Error: ${e.message}`);
     }
 });
@@ -1541,73 +1548,65 @@ async(conn, mek, m, {from, l, quoted, body, isCmd, command, args, q, isGroup, se
 });
 
 cmd({
-    pattern: "mvdetail",
-    react: "🎬",
-    filename: __filename
-},
-async (conn, mek, m, { from, reply, sender, args }) => {
+    pattern: "convertmoney",
+    react: "💸",
+    alias: ["currency", "cvmoney"],
+    use: ".currency amount fromCurrency toCurrency (e.g: .convert 100 USD EUR)",
+    filename: __filename,
+}, async (conn, mek, msg, { from, reply, args }) => {
     try {
-        const movieName = args.length > 0 ? args.join(' ') : m.text.replace(/^[\.\#\$\!]?movie\s?/i, '').trim();
-        
-        if (!movieName) {
-            return reply("📽️ Please provide the name of the movie.\nExample: .movie Iron Man");
+        if (args.length !== 3) {
+            return reply("*⭕ ɪɴᴠᴀʟɪᴅ ғᴏʀᴍᴀᴛ! ᴜsᴇ: .ᴄᴜʀʀᴇɴᴄʏ ᴀᴍᴏᴜɴᴛ ғʀᴏᴍᴄᴜʀʀᴇɴᴄʏ ᴛᴏᴄᴜʀʀᴇɴᴄʏ*\n*ᴇxᴀᴍᴘʟᴇ: .ᴄᴜʀʀᴇɴᴄʏ 𝟷𝟶𝟶 ᴜsᴅ ᴘᴋʀ*");
         }
 
-        const apiUrl = `https://apis.davidcyril.name.ng/imdb?query=${encodeURIComponent(movieName)}`;
-        const response = await axios.get(apiUrl);
+        const amount = parseFloat(args[0]);
+        const fromCurrency = args[1].toUpperCase();
+        const toCurrency = args[2].toUpperCase();
 
-        if (!response.data.status || !response.data.movie) {
-            return reply("🚫 Movie not found. Please check the name and try again.");
+        if (isNaN(amount)) {
+            return reply("*❌ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ᴀᴍᴏᴜɴᴛ!*");
         }
 
-        const movie = response.data.movie;
+        const response = await axios.get(`${BASE_URL}/${API_KEY}/latest/${fromCurrency}`);
         
-        const dec = `
-🎬 *${movie.title}* (${movie.year}) ${movie.rated || ''}
+        if (response.data.result === "error") {
+            throw new Error(response.data["error-type"]);
+        }
 
-⭐ *IMDb:* ${movie.imdbRating || 'N/A'} | 🍅 *Rotten Tomatoes:* ${movie.ratings.find(r => r.source === 'Rotten Tomatoes')?.value || 'N/A'} | 💰 *Box Office:* ${movie.boxoffice || 'N/A'}
+        const rates = response.data.conversion_rates;
 
-📅 *Released:* ${new Date(movie.released).toLocaleDateString()}
-⏳ *Runtime:* ${movie.runtime}
-🎭 *Genre:* ${movie.genres}
+        if (!rates[toCurrency]) {
+            return reply("*❌ ɪɴᴠᴀʟɪᴅ ᴛᴀʀɢᴇᴛ ᴄᴜʀʀᴇɴᴄʏ ᴄᴏᴅᴇ! ᴘʟᴇᴀsᴇ ᴜsᴇ ᴠᴀʟɪᴅ ᴄᴜʀʀᴇɴᴄʏ ᴄᴏᴅᴇs ʟɪᴋᴇ ᴜsᴅ, ᴇᴜʀ, ɢʙᴘ, ᴇᴛᴄ.*");
+        }
 
-📝 *Plot:* ${movie.plot}
+        const convertedAmount = (amount * rates[toCurrency]).toFixed(2);
+        const formattedAmount = new Intl.NumberFormat().format(amount);
+        const formattedResult = new Intl.NumberFormat().format(convertedAmount);
 
-🎥 *Director:* ${movie.director}
-✍️ *Writer:* ${movie.writer}
-🌟 *Actors:* ${movie.actors}
+        const message = `*🌍 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 CURRENCY CONVERSION 💵*\n\n` +
+            `*💲 Form:* ${formattedAmount} ${fromCurrency}\n` +
+            `*🏷️ To:* ${formattedResult} ${toCurrency}\n` +
+            `*💰 Rate:* 1 ${fromCurrency} = ${rates[toCurrency]} ${toCurrency}\n\n` +
+            `*⏰ Last Updated:* ${response.data.time_last_update_utc}`;
 
-🌍 *Country:* ${movie.country}
-🗣️ *Language:* ${movie.languages}
-🏆 *Awards:* ${movie.awards || 'None'}
+        reply(message);
 
-[View on IMDb](${movie.imdbUrl})
-`;
-
-        await conn.sendMessage(
-            from,
-            {
-                image: { 
-                    url: movie.poster && movie.poster !== 'N/A' ? movie.poster : 'https://files.catbox.moe/brlkte.jpg'
-                },
-                caption: dec,
-                contextInfo: {
-                    mentionedJid: [sender],
-                    forwardingScore: 999,
-                    isForwarded: true,
-                    forwardedNewsletterMessageInfo: {
-                        newsletterJid: '120363400240662312@newsletter',
-                        newsletterName: '𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳',
-                        serverMessageId: 143
-                    }
-                }
-            },
-            { quoted: mek }
-        );
-
-    } catch (e) {
-        console.error('Movie command error:', e);
-        reply(`❌ Error: ${e.message}`);
+    } catch (error) {
+        console.error("Currency conversion error:", error);
+        
+        if (error.message === "unsupported-code") {
+            reply("❌ Invalid currency code! Please use valid currency codes like USD, EUR, GBP, etc.");
+        } else if (error.message === "malformed-request") {
+            reply("❌ Invalid API request format. Please try again.");
+        } else if (error.message === "invalid-key") {
+            reply("❌ API key validation failed. Please contact the administrator.");
+        } else if (error.message === "inactive-account") {
+            reply("❌ API account is not active. Please contact the administrator.");
+        } else if (error.message === "quota-reached") {
+            reply("❌ API quota has been reached. Please try again later.");
+        } else {
+            reply("❌ Failed to convert currency. Please try again later.");
+        }
     }
 });
 

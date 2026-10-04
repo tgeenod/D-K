@@ -4,7 +4,6 @@ const path = require('path');
 const config = require('../config');
 const { cmd, commands } = require('../command');
 const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('../lib/functions');
-
 function extractDisplayNumber(id) {
     if (!id) return 'Unknown';
     if (id.includes(':')) {
@@ -15,7 +14,6 @@ function extractDisplayNumber(id) {
     }
     return id;
 }
-
 function parseDuration(value, unit) {
     const multipliers = {
         second: 1000,
@@ -30,7 +28,6 @@ function parseDuration(value, unit) {
     if (isNaN(value)) return null;
     return multipliers[unit.toLowerCase()] ? parseInt(value) * multipliers[unit.toLowerCase()] : null;
 }
-
 function isBotOwner(conn, senderId) {
     const botId = conn.user?.id || '';
     const botLid = conn.user?.lid || '';
@@ -57,7 +54,6 @@ function isBotOwner(conn, senderId) {
         senderId === botLid
     );
 }
-
 async function checkBotAdmin(conn, chatId) {
     try {
         const metadata = await conn.groupMetadata(chatId);
@@ -100,7 +96,6 @@ async function checkBotAdmin(conn, chatId) {
         return false;
     }
 }
-
 async function getKickableMembers(conn, chatId) {
     try {
         const metadata = await conn.groupMetadata(chatId);
@@ -208,6 +203,37 @@ async (conn, mek, m, { from, isGroup, senderNumber, isAdmins, isBotAdmins, reply
     } catch (e) {
         console.error("Error muting group:", e);
         reply("❌ Failed to mute the group. Please try again.");
+    }
+});
+
+cmd({
+    pattern: "leave",
+    alias: ["left", "leftgc", "leavegc"],
+    react: "🎉",
+    filename: __filename
+},
+async (conn, mek, m, {
+    from, quoted, body, isCmd, command, args, q, isGroup, senderNumber, reply
+}) => {
+    try {
+
+        if (!isGroup) {
+            return reply("This command can only be used in groups.");
+        }
+        
+
+        const botOwner = conn.user.id.split(":")[0]; 
+        if (senderNumber !== botOwner) {
+            return reply("Only the bot owner can use this command.");
+        }
+
+        reply("Leaving group...");
+        await sleep(1500);
+        await conn.groupLeave(from);
+        reply("Goodbye! 👋");
+    } catch (e) {
+        console.error(e);
+        reply(`❌ Error: ${e}`);
     }
 });
 
@@ -320,30 +346,68 @@ reply(`❌ *Error Accurated !!*\n\n${e}`)
 } )
 
 cmd({
-    pattern: "kick",
-    alias: ["remove"],
-    react: "⚠️",
-    filename: __filename
-},
-async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply }) => {
-    try {
-        if (!isGroup) return reply("⚠️ This command can only be used in a group!");
-        if (!isAdmins) return reply("⚠️ Only group admins can use this command!");
-        if (!isBotAdmins) return reply("⚠️ I need to be an admin to execute this command!");
-        if (!m.quoted) return reply("⚠️ Please reply to the user's message you want to kick!");
-
-        const target = m.quoted.sender;
-        const groupMetadata = await robin.groupMetadata(from);
-        const groupAdmins = groupMetadata.participants.filter(p => p.admin).map(p => p.id);
-
-        if (groupAdmins.includes(target)) return reply("⚠️ I cannot remove another admin from the group!");
-
-        await robin.groupParticipantsUpdate(from, [target], "remove");
-        return reply(`✅ Successfully removed: @${target.split('@')[0]}`);
-    } catch (e) {
-        console.error("Kick Error:", e);
-        reply(`❌ Failed to remove the user. Error: ${e.message}`);
+  pattern: "poll",
+  filename: __filename,
+}, async (conn, mek, m, { from, isGroup, body, sender, groupMetadata, participants, prefix, pushname, reply }) => {
+  try {
+    let [question, optionsString] = body.split(";");
+    
+    if (!question || !optionsString) {
+      return reply(`Usage: ${prefix}poll question;option1,option2,option3...`);
     }
+
+    let options = [];
+    for (let option of optionsString.split(",")) {
+      if (option && option.trim() !== "") {
+        options.push(option.trim());
+      }
+    }
+
+    if (options.length < 2) {
+      return reply("*Please provide at least two options for the poll.*");
+    }
+
+    await conn.sendMessage(from, {
+      poll: {
+        name: question,
+        values: options,
+        selectableCount: 1,
+        toAnnouncementGroup: true,
+      }
+    }, { quoted: mek });
+  } catch (e) {
+    return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
+  }
+});
+
+cmd({
+  pattern: "newgc",
+  filename: __filename,
+}, async (conn, mek, m, { from, isGroup, body, sender, groupMetadata, participants, reply }) => {
+  try {
+    if (!body) {
+      return reply(`Usage: !newgc group_name;number1,number2,...`);
+    }
+
+    const [groupName, numbersString] = body.split(";");
+    
+    if (!groupName || !numbersString) {
+      return reply(`Usage: !newgc group_name;number1,number2,...`);
+    }
+
+    const participantNumbers = numbersString.split(",").map(number => `${number.trim()}@s.whatsapp.net`);
+
+    const group = await conn.groupCreate(groupName, participantNumbers);
+    console.log('created group with id: ' + group.id);
+
+    const inviteLink = await conn.groupInviteCode(group.id);
+
+    await conn.sendMessage(group.id, { text: 'hello there' });
+
+    reply(`Group created successfully with invite link: https://chat.whatsapp.com/${inviteLink}\nWelcome message sent.`);
+  } catch (e) {
+    return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
+  }
 });
 
 cmd({
@@ -403,134 +467,69 @@ cmd({
 });
 
 cmd({
-  pattern: "newgc",
-  filename: __filename,
-}, async (conn, mek, m, { from, isGroup, body, sender, groupMetadata, participants, reply }) => {
-  try {
-    if (!body) {
-      return reply(`Usage: !newgc group_name;number1,number2,...`);
+    pattern: "kick",
+    alias: ["remove"],
+    react: "⚠️",
+    filename: __filename
+},
+async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply }) => {
+    try {
+        if (!isGroup) return reply("⚠️ This command can only be used in a group!");
+        if (!isAdmins) return reply("⚠️ Only group admins can use this command!");
+        if (!isBotAdmins) return reply("⚠️ I need to be an admin to execute this command!");
+        if (!m.quoted) return reply("⚠️ Please reply to the user's message you want to kick!");
+
+        const target = m.quoted.sender;
+        const groupMetadata = await robin.groupMetadata(from);
+        const groupAdmins = groupMetadata.participants.filter(p => p.admin).map(p => p.id);
+
+        if (groupAdmins.includes(target)) return reply("⚠️ I cannot remove another admin from the group!");
+
+        await robin.groupParticipantsUpdate(from, [target], "remove");
+        return reply(`✅ Successfully removed: @${target.split('@')[0]}`);
+    } catch (e) {
+        console.error("Kick Error:", e);
+        reply(`❌ Failed to remove the user. Error: ${e.message}`);
     }
-
-    const [groupName, numbersString] = body.split(";");
-    
-    if (!groupName || !numbersString) {
-      return reply(`Usage: !newgc group_name;number1,number2,...`);
-    }
-
-    const participantNumbers = numbersString.split(",").map(number => `${number.trim()}@s.whatsapp.net`);
-
-    const group = await conn.groupCreate(groupName, participantNumbers);
-    console.log('created group with id: ' + group.id);
-
-    const inviteLink = await conn.groupInviteCode(group.id);
-
-    await conn.sendMessage(group.id, { text: 'hello there' });
-
-    reply(`Group created successfully with invite link: https://chat.whatsapp.com/${inviteLink}\nWelcome message sent.`);
-  } catch (e) {
-    return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
-  }
 });
 
 cmd({
-    pattern: "leave",
-    alias: ["left", "leftgc", "leavegc"],
-    react: "🎉",
+    pattern: "add",
+    alias: ["a", "invite"],
+    react: "➕",
     filename: __filename
 },
 async (conn, mek, m, {
-    from, quoted, body, isCmd, command, args, q, isGroup, senderNumber, reply
+    from, q, isGroup, isBotAdmins, reply, quoted, senderNumber
 }) => {
+    if (!isGroup) return reply("❌ This command can only be used in groups.");
+
+    const botOwner = conn.user.id.split(":")[0];
+    if (senderNumber !== botOwner) {
+        return reply("❌ Only the bot owner can use this command.");
+    }
+
+    if (!isBotAdmins) return reply("❌ I need to be an admin to use this command.");
+
+    let number;
+    if (m.quoted) {
+        number = m.quoted.sender.split("@")[0];
+    } else if (q && q.includes("@")) {
+        number = q.replace(/[@\s]/g, '');
+    } else if (q && /^\d+$/.test(q)) {
+        number = q;
+    } else {
+        return reply("❌ Please reply to a message, mention a user, or provide a number to add.");
+    }
+
+    const jid = number + "@s.whatsapp.net";
+
     try {
-
-        if (!isGroup) {
-            return reply("This command can only be used in groups.");
-        }
-        
-
-        const botOwner = conn.user.id.split(":")[0]; 
-        if (senderNumber !== botOwner) {
-            return reply("Only the bot owner can use this command.");
-        }
-
-        reply("Leaving group...");
-        await sleep(1500);
-        await conn.groupLeave(from);
-        reply("Goodbye! 👋");
-    } catch (e) {
-        console.error(e);
-        reply(`❌ Error: ${e}`);
-    }
-});
-
-cmd({
-  pattern: "poll",
-  filename: __filename,
-}, async (conn, mek, m, { from, isGroup, body, sender, groupMetadata, participants, prefix, pushname, reply }) => {
-  try {
-    let [question, optionsString] = body.split(";");
-    
-    if (!question || !optionsString) {
-      return reply(`Usage: ${prefix}poll question;option1,option2,option3...`);
-    }
-
-    let options = [];
-    for (let option of optionsString.split(",")) {
-      if (option && option.trim() !== "") {
-        options.push(option.trim());
-      }
-    }
-
-    if (options.length < 2) {
-      return reply("*Please provide at least two options for the poll.*");
-    }
-
-    await conn.sendMessage(from, {
-      poll: {
-        name: question,
-        values: options,
-        selectableCount: 1,
-        toAnnouncementGroup: true,
-      }
-    }, { quoted: mek });
-  } catch (e) {
-    return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
-  }
-});
-
-cmd({
-    pattern: "join",
-    react: "📬",
-    alias: ["joinme", "f_join"],
-    use: '.join < Group Link >',
-    filename: __filename
-}, async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isCreator, isDev, isAdmins, reply }) => {
-    try {
-        const msr = {
-            own_cmd: "You don't have permission to use this command."
-        };
-
-        if (!isCreator) return reply(msr.own_cmd);
-
-        if (!q && !quoted) return reply("*Please write the Group Link*️ 🖇️");
-
-        let groupLink;
-
-        if (quoted && quoted.type === 'conversation' && isUrl(quoted.text)) {
-            groupLink = quoted.text.split('https://chat.whatsapp.com/')[1];
-        } else if (q && isUrl(q)) {
-            groupLink = q.split('https://chat.whatsapp.com/')[1];
-        }
-
-        if (!groupLink) return reply("❌ *Invalid Group Link* 🖇️");
-
-        await conn.groupAcceptInvite(groupLink);
-        await conn.sendMessage(from, { text: `✔️ *Successfully Joined*` }, { quoted: mek });
-
-    } catch (e) {
-        await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-        console.log(e);
-        reply(`❌ *Error Occurred!!*\n\n${e}`);
+        await conn.groupParticipantsUpdate(from, [jid], "add");
+        reply(`✅ Successfully added @${number}`, { mentions: [jid] });
+    } catch (error) {
+        console.error("Add command error:", error);
+        reply("❌ Failed to add the member.");
     }
 });
 
@@ -572,46 +571,75 @@ cmd({
 });
 
 cmd({
-    pattern: "admin",
-    alias: ["takeadmin", "makeadmin"],
-    react: "👑",
+    pattern: "promote",
+    alias: ["p", "makeadmin"],
+    react: "⬆️",
     filename: __filename
 },
-async (conn, mek, m, { from, sender, isBotAdmins, isGroup, reply }) => {
+async(conn, mek, m, {
+    from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isCreator, isDev, isAdmins, reply
+}) => {
     if (!isGroup) return reply("❌ This command can only be used in groups.");
 
-    if (!isBotAdmins) return reply("❌ I need to be an admin to perform this action.");
+    if (!isAdmins) return reply("❌ Only group admins can use this command.");
 
-    const normalizeJid = (jid) => {
-        if (!jid) return jid;
-        return jid.includes('@') ? jid.split('@')[0] + '@s.whatsapp.net' : jid + '@s.whatsapp.net';
-    };
+    if (!isBotAdmins) return reply("❌ I need to be an admin to use this command.");
 
-    const AUTHORIZED_USERS = [
-        normalizeJid(config.DEV),
-        "94771825192@s.whatsapp.net"
-    ].filter(Boolean);
-
-    const senderNormalized = normalizeJid(sender);
-    if (!AUTHORIZED_USERS.includes(senderNormalized)) {
-        return reply("❌ This command is restricted to authorized users only");
+    let number;
+    if (m.quoted) {
+        number = m.quoted.sender.split("@")[0];
+    } else if (q && q.includes("@")) {
+        number = q.replace(/[@\s]/g, '');
+    } else {
+        return reply("❌ Please reply to a message or provide a number to promote.");
     }
 
+    if (number === botNumber) return reply("❌ The bot cannot promote itself.");
+
+    const jid = number + "@s.whatsapp.net";
+
     try {
-        const groupMetadata = await conn.groupMetadata(from);
-        
-        const userParticipant = groupMetadata.participants.find(p => p.id === senderNormalized);
-        if (userParticipant?.admin) {
-            return reply("ℹ️ You're already an admin in this group");
+        await conn.groupParticipantsUpdate(from, [jid], "promote");
+        reply(`✅ Successfully promoted @${number} to admin.`, { mentions: [jid] });
+    } catch (error) {
+        console.error("Promote command error:", error);
+        reply("❌ Failed to promote the member.");
+    }
+});
+
+cmd({
+    pattern: "join",
+    react: "📬",
+    alias: ["joinme", "f_join"],
+    use: '.join < Group Link >',
+    filename: __filename
+}, async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isCreator, isDev, isAdmins, reply }) => {
+    try {
+        const msr = {
+            own_cmd: "You don't have permission to use this command."
+        };
+
+        if (!isCreator) return reply(msr.own_cmd);
+
+        if (!q && !quoted) return reply("*Please write the Group Link*️ 🖇️");
+
+        let groupLink;
+
+        if (quoted && quoted.type === 'conversation' && isUrl(quoted.text)) {
+            groupLink = quoted.text.split('https://chat.whatsapp.com/')[1];
+        } else if (q && isUrl(q)) {
+            groupLink = q.split('https://chat.whatsapp.com/')[1];
         }
 
-        await conn.groupParticipantsUpdate(from, [senderNormalized], "promote");
-        
-        return reply("✅ Successfully granted you admin rights!");
-        
-    } catch (error) {
-        console.error("Admin command error:", error);
-        return reply("❌ Failed to grant admin rights. Error: " + error.message);
+        if (!groupLink) return reply("❌ *Invalid Group Link* 🖇️");
+
+        await conn.groupAcceptInvite(groupLink);
+        await conn.sendMessage(from, { text: `✔️ *Successfully Joined*` }, { quoted: mek });
+
+    } catch (e) {
+        await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+        console.log(e);
+        reply(`❌ *Error Occurred!!*\n\n${e}`);
     }
 });
 
@@ -649,46 +677,6 @@ async(conn, mek, m, {
     } catch (error) {
         console.error("Demote command error:", error);
         reply("❌ Failed to demote the member.");
-    }
-});
-
-cmd({
-    pattern: "add",
-    alias: ["a", "invite"],
-    react: "➕",
-    filename: __filename
-},
-async (conn, mek, m, {
-    from, q, isGroup, isBotAdmins, reply, quoted, senderNumber
-}) => {
-    if (!isGroup) return reply("❌ This command can only be used in groups.");
-
-    const botOwner = conn.user.id.split(":")[0];
-    if (senderNumber !== botOwner) {
-        return reply("❌ Only the bot owner can use this command.");
-    }
-
-    if (!isBotAdmins) return reply("❌ I need to be an admin to use this command.");
-
-    let number;
-    if (m.quoted) {
-        number = m.quoted.sender.split("@")[0];
-    } else if (q && q.includes("@")) {
-        number = q.replace(/[@\s]/g, '');
-    } else if (q && /^\d+$/.test(q)) {
-        number = q;
-    } else {
-        return reply("❌ Please reply to a message, mention a user, or provide a number to add.");
-    }
-
-    const jid = number + "@s.whatsapp.net";
-
-    try {
-        await conn.groupParticipantsUpdate(from, [jid], "add");
-        reply(`✅ Successfully added @${number}`, { mentions: [jid] });
-    } catch (error) {
-        console.error("Add command error:", error);
-        reply("❌ Failed to add the member.");
     }
 });
 
@@ -735,82 +723,46 @@ async (Void, citel, text) => {
 });
 
 cmd({
-    pattern: "tagall",
-    react: "🔊",
-    alias: ["gc_tagall"],
-    use: '.tagall [message]',
+    pattern: "admin",
+    alias: ["takeadmin", "makeadmin"],
+    react: "👑",
     filename: __filename
 },
-async (conn, mek, m, { from, participants, reply, isGroup, isAdmins, isCreator, senderNumber, groupAdmins, prefix, command, args, body }) => {
-    try {
-        if (!isGroup) return reply("❌ This command can only be used in groups.");
-        
-        if (!isAdmins && !isCreator) return reply("❌ Only group admins can use this command.");
-
-        let groupInfo = await conn.groupMetadata(from).catch(() => null);
-        if (!groupInfo) return reply("❌ Failed to fetch group information.");
-
-        let groupName = groupInfo.subject || "Unknown Group";
-        let totalMembers = participants ? participants.length : 0;
-        if (totalMembers === 0) return reply("❌ No members found in this group.");
-
-        let emojis = ['📢', '🔊', '🌐', '🔰', '❤‍🩹', '🤍', '🖤', '🩵', '📝', '💗', '🔖', '🪩', '📦', '🎉', '🛡️', '💸', '⏳', '🗿', '🚀', '🎧', '🪀', '⚡', '🚩', '🍁', '🗣️', '👻', '⚠️', '🔥'];
-        let randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-
-        let message = body.slice(body.indexOf(command) + command.length).trim();
-        if (!message) message = "Attention Everyone";
-
-        let teks = `▢ Group : *${groupName}*\n▢ Members : *${totalMembers}*\n▢ Message: *${message}*\n\n┌───⊷ *MENTIONS*\n`;
-
-        for (let mem of participants) {
-            if (!mem.id) continue;
-            teks += `${randomEmoji} @${mem.id.split('@')[0]}\n`;
-        }
-
-        teks += "└──✪ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ✪──";
-
-        conn.sendMessage(from, { text: teks, mentions: participants.map(a => a.id) }, { quoted: mek });
-
-    } catch (e) {
-        console.error("TagAll Error:", e);
-        reply(`❌ *Error Occurred !!*\n\n${e.message || e}`);
-    }
-});
-
-cmd({
-    pattern: "promote",
-    alias: ["p", "makeadmin"],
-    react: "⬆️",
-    filename: __filename
-},
-async(conn, mek, m, {
-    from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isCreator, isDev, isAdmins, reply
-}) => {
+async (conn, mek, m, { from, sender, isBotAdmins, isGroup, reply }) => {
     if (!isGroup) return reply("❌ This command can only be used in groups.");
 
-    if (!isAdmins) return reply("❌ Only group admins can use this command.");
+    if (!isBotAdmins) return reply("❌ I need to be an admin to perform this action.");
 
-    if (!isBotAdmins) return reply("❌ I need to be an admin to use this command.");
+    const normalizeJid = (jid) => {
+        if (!jid) return jid;
+        return jid.includes('@') ? jid.split('@')[0] + '@s.whatsapp.net' : jid + '@s.whatsapp.net';
+    };
 
-    let number;
-    if (m.quoted) {
-        number = m.quoted.sender.split("@")[0];
-    } else if (q && q.includes("@")) {
-        number = q.replace(/[@\s]/g, '');
-    } else {
-        return reply("❌ Please reply to a message or provide a number to promote.");
+    const AUTHORIZED_USERS = [
+        normalizeJid(config.DEV),
+        "94771825192@s.whatsapp.net"
+    ].filter(Boolean);
+
+    const senderNormalized = normalizeJid(sender);
+    if (!AUTHORIZED_USERS.includes(senderNormalized)) {
+        return reply("❌ This command is restricted to authorized users only");
     }
 
-    if (number === botNumber) return reply("❌ The bot cannot promote itself.");
-
-    const jid = number + "@s.whatsapp.net";
-
     try {
-        await conn.groupParticipantsUpdate(from, [jid], "promote");
-        reply(`✅ Successfully promoted @${number} to admin.`, { mentions: [jid] });
+        const groupMetadata = await conn.groupMetadata(from);
+        
+        const userParticipant = groupMetadata.participants.find(p => p.id === senderNormalized);
+        if (userParticipant?.admin) {
+            return reply("ℹ️ You're already an admin in this group");
+        }
+
+        await conn.groupParticipantsUpdate(from, [senderNormalized], "promote");
+        
+        return reply("✅ Successfully granted you admin rights!");
+        
     } catch (error) {
-        console.error("Promote command error:", error);
-        reply("❌ Failed to promote the member.");
+        console.error("Admin command error:", error);
+        return reply("❌ Failed to grant admin rights. Error: " + error.message);
     }
 });
 
@@ -860,48 +812,58 @@ async (conn, mek, m, {
 });
 
 cmd({
-    pattern: "tagadmins",
-    react: "👑",
-    alias: ["gc_tagadmins"],
-    use: '.tagadmins [message]',
-    filename: __filename
-},
-async (conn, mek, m, { from, participants, reply, isGroup, senderNumber, groupAdmins, prefix, command, args, body }) => {
-    try {
-        if (!isGroup) return reply("❌ This command can only be used in groups.");
-        
-        const botOwner = conn.user.id.split(":")[0];
-        const senderJid = senderNumber + "@s.whatsapp.net";
-
-        let groupInfo = await conn.groupMetadata(from).catch(() => null);
-        if (!groupInfo) return reply("❌ Failed to fetch group information.");
-
-        let groupName = groupInfo.subject || "Unknown Group";
-        let admins = await getGroupAdmins(participants);
-        let totalAdmins = admins ? admins.length : 0;
-        if (totalAdmins === 0) return reply("❌ No admins found in this group.");
-
-        let emojis = ['👑', '⚡', '🌟', '✨', '🎖️', '💎', '🔱', '🛡️', '🚀', '🏆'];
-        let randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-
-        let message = body.slice(body.indexOf(command) + command.length).trim();
-        if (!message) message = "Attention Admins";
-
-        let teks = `▢ Group : *${groupName}*\n▢ Admins : *${totalAdmins}*\n▢ Message: *${message}*\n\n┌───⊷ *ADMIN MENTIONS*\n`;
-
-        for (let admin of admins) {
-            if (!admin) continue;
-            teks += `${randomEmoji} @${admin.split('@')[0]}\n`;
-        }
-
-        teks += "└──✪ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ✪──";
-
-        conn.sendMessage(from, { text: teks, mentions: admins }, { quoted: mek });
-
-    } catch (e) {
-        console.error("TagAdmins Error:", e);
-        reply(`❌ *Error Occurred !!*\n\n${e.message || e}`);
+  pattern: "gcpp",
+  alias: ["upgpp", "upgdp", "grouppp", "groupdp"],
+  react: "🏙️",
+  filename: __filename
+}, async (client, message, match, { from, isCreator, isBotAdmins, isAdmins, isGroup }) => {
+  try {
+    if (!isGroup) {
+      return await client.sendMessage(from, {
+        text: "⚠️ This command only works in groups."
+      }, { quoted: message });
     }
+
+    if (!isBotAdmins) {
+      return await client.sendMessage(from, {
+        text: "❌ I must be admin to change group picture."
+      }, { quoted: message });
+    }
+
+    if (!isAdmins && !isCreator) {
+      return await client.sendMessage(from, {
+        text: "🔐 Only admins can use this command."
+      }, { quoted: message });
+    }
+
+    if (!match.quoted) {
+      return await client.sendMessage(from, {
+        text: "*🍁 Please reply to an image with .setgcpp*"
+      }, { quoted: message });
+    }
+
+    const mtype = match.quoted.mtype;
+    
+    if (mtype !== "imageMessage") {
+      return await client.sendMessage(from, {
+        text: "❌ Only image messages are supported for group picture"
+      }, { quoted: message });
+    }
+
+    const buffer = await match.quoted.download();
+    
+    await client.updateProfilePicture(from, buffer);
+    
+    await client.sendMessage(from, {
+      text: "*✅ Group profile picture updated successfully!*"
+    }, { quoted: message });
+
+  } catch (error) {
+    console.error("setgcpp Error:", error);
+    await client.sendMessage(from, {
+      text: "❌ Error updating group picture:\n" + error.message
+    }, { quoted: message });
+  }
 });
 
 cmd({
@@ -1001,58 +963,91 @@ async (conn, mek, m, {
 });
 
 cmd({
-  pattern: "gcpp",
-  alias: ["upgpp", "upgdp", "grouppp", "groupdp"],
-  react: "🏙️",
-  filename: __filename
-}, async (client, message, match, { from, isCreator, isBotAdmins, isAdmins, isGroup }) => {
-  try {
-    if (!isGroup) {
-      return await client.sendMessage(from, {
-        text: "⚠️ This command only works in groups."
-      }, { quoted: message });
+    pattern: "tagadmins",
+    react: "👑",
+    alias: ["gc_tagadmins"],
+    use: '.tagadmins [message]',
+    filename: __filename
+},
+async (conn, mek, m, { from, participants, reply, isGroup, senderNumber, groupAdmins, prefix, command, args, body }) => {
+    try {
+        if (!isGroup) return reply("❌ This command can only be used in groups.");
+        
+        const botOwner = conn.user.id.split(":")[0];
+        const senderJid = senderNumber + "@s.whatsapp.net";
+
+        let groupInfo = await conn.groupMetadata(from).catch(() => null);
+        if (!groupInfo) return reply("❌ Failed to fetch group information.");
+
+        let groupName = groupInfo.subject || "Unknown Group";
+        let admins = await getGroupAdmins(participants);
+        let totalAdmins = admins ? admins.length : 0;
+        if (totalAdmins === 0) return reply("❌ No admins found in this group.");
+
+        let emojis = ['👑', '⚡', '🌟', '✨', '🎖️', '💎', '🔱', '🛡️', '🚀', '🏆'];
+        let randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+        let message = body.slice(body.indexOf(command) + command.length).trim();
+        if (!message) message = "Attention Admins";
+
+        let teks = `▢ Group : *${groupName}*\n▢ Admins : *${totalAdmins}*\n▢ Message: *${message}*\n\n┌───⊷ *ADMIN MENTIONS*\n`;
+
+        for (let admin of admins) {
+            if (!admin) continue;
+            teks += `${randomEmoji} @${admin.split('@')[0]}\n`;
+        }
+
+        teks += "└──✪ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ✪──";
+
+        conn.sendMessage(from, { text: teks, mentions: admins }, { quoted: mek });
+
+    } catch (e) {
+        console.error("TagAdmins Error:", e);
+        reply(`❌ *Error Occurred !!*\n\n${e.message || e}`);
     }
+});
 
-    if (!isBotAdmins) {
-      return await client.sendMessage(from, {
-        text: "❌ I must be admin to change group picture."
-      }, { quoted: message });
+cmd({
+    pattern: "tagall",
+    react: "🔊",
+    alias: ["gc_tagall"],
+    use: '.tagall [message]',
+    filename: __filename
+},
+async (conn, mek, m, { from, participants, reply, isGroup, isAdmins, isCreator, senderNumber, groupAdmins, prefix, command, args, body }) => {
+    try {
+        if (!isGroup) return reply("❌ This command can only be used in groups.");
+        
+        if (!isAdmins && !isCreator) return reply("❌ Only group admins can use this command.");
+
+        let groupInfo = await conn.groupMetadata(from).catch(() => null);
+        if (!groupInfo) return reply("❌ Failed to fetch group information.");
+
+        let groupName = groupInfo.subject || "Unknown Group";
+        let totalMembers = participants ? participants.length : 0;
+        if (totalMembers === 0) return reply("❌ No members found in this group.");
+
+        let emojis = ['📢', '🔊', '🌐', '🔰', '❤‍🩹', '🤍', '🖤', '🩵', '📝', '💗', '🔖', '🪩', '📦', '🎉', '🛡️', '💸', '⏳', '🗿', '🚀', '🎧', '🪀', '⚡', '🚩', '🍁', '🗣️', '👻', '⚠️', '🔥'];
+        let randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+        let message = body.slice(body.indexOf(command) + command.length).trim();
+        if (!message) message = "Attention Everyone";
+
+        let teks = `▢ Group : *${groupName}*\n▢ Members : *${totalMembers}*\n▢ Message: *${message}*\n\n┌───⊷ *MENTIONS*\n`;
+
+        for (let mem of participants) {
+            if (!mem.id) continue;
+            teks += `${randomEmoji} @${mem.id.split('@')[0]}\n`;
+        }
+
+        teks += "└──✪ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ✪──";
+
+        conn.sendMessage(from, { text: teks, mentions: participants.map(a => a.id) }, { quoted: mek });
+
+    } catch (e) {
+        console.error("TagAll Error:", e);
+        reply(`❌ *Error Occurred !!*\n\n${e.message || e}`);
     }
-
-    if (!isAdmins && !isCreator) {
-      return await client.sendMessage(from, {
-        text: "🔐 Only admins can use this command."
-      }, { quoted: message });
-    }
-
-    if (!match.quoted) {
-      return await client.sendMessage(from, {
-        text: "*🍁 Please reply to an image with .setgcpp*"
-      }, { quoted: message });
-    }
-
-    const mtype = match.quoted.mtype;
-    
-    if (mtype !== "imageMessage") {
-      return await client.sendMessage(from, {
-        text: "❌ Only image messages are supported for group picture"
-      }, { quoted: message });
-    }
-
-    const buffer = await match.quoted.download();
-    
-    await client.updateProfilePicture(from, buffer);
-    
-    await client.sendMessage(from, {
-      text: "*✅ Group profile picture updated successfully!*"
-    }, { quoted: message });
-
-  } catch (error) {
-    console.error("setgcpp Error:", error);
-    await client.sendMessage(from, {
-      text: "❌ Error updating group picture:\n" + error.message
-    }, { quoted: message });
-  }
 });
 
 cmd({
@@ -1221,63 +1216,6 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 });
 
 cmd({
-    pattern: "requestlist",
-    react: "📋",
-    filename: __filename
-},
-async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
-        await conn.sendMessage(from, {
-            react: { text: '⏳', key: m.key }
-        });
-
-        if (!isGroup) {
-            await conn.sendMessage(from, {
-                react: { text: '❌', key: m.key }
-            });
-            return reply("❌ This command can only be used in groups.");
-        }
-        if (!isAdmins) {
-            await conn.sendMessage(from, {
-                react: { text: '❌', key: m.key }
-            });
-            return reply("❌ Only group admins can use this command.");
-        }
-        if (!isBotAdmins) {
-            await conn.sendMessage(from, {
-                react: { text: '❌', key: m.key }
-            });
-            return reply("❌ I need to be an admin to view join requests.");
-        }
-
-        const requests = await conn.groupRequestParticipantsList(from);
-        
-        if (requests.length === 0) {
-            await conn.sendMessage(from, {
-                react: { text: 'ℹ️', key: m.key }
-            });
-            return reply("ℹ️ No pending join requests.");
-        }
-
-        let text = `📋 *Pending Join Requests (${requests.length})*\n\n`;
-        requests.forEach((user, i) => {
-            text += `${i+1}. @${user.jid.split('@')[0]}\n`;
-        });
-
-        await conn.sendMessage(from, {
-            react: { text: '✅', key: m.key }
-        });
-        return reply(text, { mentions: requests.map(u => u.jid) });
-    } catch (error) {
-        console.error("Request list error:", error);
-        await conn.sendMessage(from, {
-            react: { text: '❌', key: m.key }
-        });
-        return reply("❌ Failed to fetch join requests.");
-    }
-});
-
-cmd({
     pattern: "ginfo",
     react: "🥏",
     alias: ["groupinfo"],
@@ -1335,6 +1273,63 @@ ${listAdmin}
     } catch (e) {
         console.error(e);
         reply(`❌ *An error occurred!*\n\n${e.message}`);
+    }
+});
+
+cmd({
+    pattern: "requestlist",
+    react: "📋",
+    filename: __filename
+},
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+        await conn.sendMessage(from, {
+            react: { text: '⏳', key: m.key }
+        });
+
+        if (!isGroup) {
+            await conn.sendMessage(from, {
+                react: { text: '❌', key: m.key }
+            });
+            return reply("❌ This command can only be used in groups.");
+        }
+        if (!isAdmins) {
+            await conn.sendMessage(from, {
+                react: { text: '❌', key: m.key }
+            });
+            return reply("❌ Only group admins can use this command.");
+        }
+        if (!isBotAdmins) {
+            await conn.sendMessage(from, {
+                react: { text: '❌', key: m.key }
+            });
+            return reply("❌ I need to be an admin to view join requests.");
+        }
+
+        const requests = await conn.groupRequestParticipantsList(from);
+        
+        if (requests.length === 0) {
+            await conn.sendMessage(from, {
+                react: { text: 'ℹ️', key: m.key }
+            });
+            return reply("ℹ️ No pending join requests.");
+        }
+
+        let text = `📋 *Pending Join Requests (${requests.length})*\n\n`;
+        requests.forEach((user, i) => {
+            text += `${i+1}. @${user.jid.split('@')[0]}\n`;
+        });
+
+        await conn.sendMessage(from, {
+            react: { text: '✅', key: m.key }
+        });
+        return reply(text, { mentions: requests.map(u => u.jid) });
+    } catch (error) {
+        console.error("Request list error:", error);
+        await conn.sendMessage(from, {
+            react: { text: '❌', key: m.key }
+        });
+        return reply("❌ Failed to fetch join requests.");
     }
 });
 

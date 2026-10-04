@@ -107,27 +107,6 @@ async (conn, mek, m, { from, q, reply }) => {
 });
 
 cmd({
-    pattern: "rate",
-    filename: __filename,
-}, 
-async (conn, mek, m, { from, isGroup, reply }) => {
-    try {
-        if (!isGroup) return reply("This command can only be used in groups.");
-
-        const mentionedUser = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0];
-        if (!mentionedUser) return reply("Please mention someone to rate.");
-
-        const randomRating = Math.floor(Math.random() * 10) + 1;
-        const message = `@${mentionedUser.split("@")[0]} is rated ${randomRating}/10.`;
-
-        await conn.sendMessage(from, { text: message, mentions: [mentionedUser] }, { quoted: m });
-    } catch (e) {
-        console.error("Error in .rate command:", e);
-        reply("An error occurred. Please try again.");
-    }
-});
-
-cmd({
   pattern: "fact",
   react: "🧠",
   filename: __filename
@@ -172,6 +151,59 @@ cmd({
 });
 
 cmd({
+    pattern: "rate",
+    filename: __filename,
+}, 
+async (conn, mek, m, { from, isGroup, reply }) => {
+    try {
+        if (!isGroup) return reply("This command can only be used in groups.");
+
+        const mentionedUser = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0];
+        if (!mentionedUser) return reply("Please mention someone to rate.");
+
+        const randomRating = Math.floor(Math.random() * 10) + 1;
+        const message = `@${mentionedUser.split("@")[0]} is rated ${randomRating}/10.`;
+
+        await conn.sendMessage(from, { text: message, mentions: [mentionedUser] }, { quoted: m });
+    } catch (e) {
+        console.error("Error in .rate command:", e);
+        reply("An error occurred. Please try again.");
+    }
+});
+
+cmd({
+  pattern: "aura",
+  react: "💀",
+  filename: __filename,
+  use: "@tag",
+}, async (conn, mek, m, { args, reply }) => {
+  try {
+    if (args.length < 1) {
+      return reply("Please mention a user to calculate their aura.\nUsage: `.aura @user`");
+    }
+
+    let user = m.mentionedJid[0]; 
+    const specialNumber = config.DEV ? `${config.DEV}@s.whatsapp.net` : null;
+
+    let auraScore = Math.floor(Math.random() * 1000) + 1;
+
+    if (user === specialNumber) {
+      auraScore = 999999;
+      return reply(`💀 Aura of @${user.split('@')[0]}: ${auraScore}+ 🗿`);
+    }
+
+    await conn.sendMessage(mek.chat, {
+      text: `💀 Aura of @${user.split('@')[0]}: ${auraScore}/1000 🗿`,
+      mentions: [user],
+    }, { quoted: mek });
+
+  } catch (error) {
+    console.log(error);
+    reply(`❌ Error: ${error.message}`);
+  }
+});
+
+cmd({
     pattern: "pickupline",
     alias: ["pickup"],
     react: "💬",
@@ -197,35 +229,6 @@ async (conn, mek, m, { from, reply }) => {
         console.error("Error in pickupline command:", error);
         reply("Sorry, something went wrong while fetching the pickup line. Please try again later.");
     }
-});
-
-cmd({
-    pattern: "lovetest",
-    react: "❤️",
-    filename: __filename,
-    use: "@tag1 @tag2"
-}, async (conn, mek, m, { args, reply }) => {
-    if (args.length < 2) return reply("Tag two users! Example: .lovetest @user1 @user2");
-
-    let user1 = args[0].replace("@", "") + "@s.whatsapp.net";
-    let user2 = args[1].replace("@", "") + "@s.whatsapp.net";
-
-    let lovePercent = Math.floor(Math.random() * 100) + 1;
-
-    let messages = [
-        { range: [90, 100], text: "💖 *A match made in heaven!* True love exists!" },
-        { range: [75, 89], text: "😍 *Strong connection!* This love is deep and meaningful." },
-        { range: [50, 74], text: "😊 *Good compatibility!* You both can make it work." },
-        { range: [30, 49], text: "🤔 *It’s complicated!* Needs effort, but possible!" },
-        { range: [10, 29], text: "😅 *Not the best match!* Maybe try being just friends?" },
-        { range: [1, 9], text: "💔 *Uh-oh!* This love is as real as a Bollywood breakup!" }
-    ];
-
-    let loveMessage = messages.find(msg => lovePercent >= msg.range[0] && lovePercent <= msg.range[1]).text;
-
-    let message = `💘 *Love Compatibility Test* 💘\n\n❤️ *@${user1.split("@")[0]}* + *@${user2.split("@")[0]}* = *${lovePercent}%*\n${loveMessage}`;
-
-    await conn.sendMessage(mek.chat, { text: message, mentions: [user1, user2] }, { quoted: mek });
 });
 
 cmd({
@@ -353,71 +356,6 @@ cmd({
 });
 
 cmd({
-  pattern: "aura",
-  react: "💀",
-  filename: __filename,
-  use: "@tag",
-}, async (conn, mek, m, { args, reply }) => {
-  try {
-    if (args.length < 1) {
-      return reply("Please mention a user to calculate their aura.\nUsage: `.aura @user`");
-    }
-
-    let user = m.mentionedJid[0]; 
-    const specialNumber = config.DEV ? `${config.DEV}@s.whatsapp.net` : null;
-
-    let auraScore = Math.floor(Math.random() * 1000) + 1;
-
-    if (user === specialNumber) {
-      auraScore = 999999;
-      return reply(`💀 Aura of @${user.split('@')[0]}: ${auraScore}+ 🗿`);
-    }
-
-    await conn.sendMessage(mek.chat, {
-      text: `💀 Aura of @${user.split('@')[0]}: ${auraScore}/1000 🗿`,
-      mentions: [user],
-    }, { quoted: mek });
-
-  } catch (error) {
-    console.log(error);
-    reply(`❌ Error: ${error.message}`);
-  }
-});
-
-cmd({
-    pattern: "flirt",
-    alias: ["masom", "line"],
-    react: "💘",
-    filename: __filename,
-}, 
-async (conn, mek, m, { from, reply }) => {
-    try {
-        const shizokeys = 'shizo';
-        const apiUrl = `https://shizoapi.onrender.com/api/texts/flirt?apikey=${shizokeys}`;
-
-        const res = await fetch(apiUrl);
-        if (!res.ok) {
-            throw new Error(`API error: ${await res.text()}`);
-        }
-        
-        const json = await res.json();
-        if (!json.result) {
-            throw new Error("Invalid response from API.");
-        }
-
-        const flirtMessage = `${json.result}`;
-        await conn.sendMessage(from, {
-            text: flirtMessage,
-            mentions: [m.sender],
-        }, { quoted: m });
-
-    } catch (error) {
-        console.error("Error in flirt command:", error);
-        reply("Sorry, something went wrong while fetching the flirt line. Please try again later.");
-    }
-});
-
-cmd({
     pattern: "shy",
     react: "🧐",
     filename: __filename
@@ -488,6 +426,39 @@ async (conn, mek, m, { from, reply }) => {
 });
 
 cmd({
+    pattern: "flirt",
+    alias: ["masom", "line"],
+    react: "💘",
+    filename: __filename,
+}, 
+async (conn, mek, m, { from, reply }) => {
+    try {
+        const shizokeys = 'shizo';
+        const apiUrl = `https://shizoapi.onrender.com/api/texts/flirt?apikey=${shizokeys}`;
+
+        const res = await fetch(apiUrl);
+        if (!res.ok) {
+            throw new Error(`API error: ${await res.text()}`);
+        }
+        
+        const json = await res.json();
+        if (!json.result) {
+            throw new Error("Invalid response from API.");
+        }
+
+        const flirtMessage = `${json.result}`;
+        await conn.sendMessage(from, {
+            text: flirtMessage,
+            mentions: [m.sender],
+        }, { quoted: m });
+
+    } catch (error) {
+        console.error("Error in flirt command:", error);
+        reply("Sorry, something went wrong while fetching the flirt line. Please try again later.");
+    }
+});
+
+cmd({
     pattern: "confused",
     react: "🤔",
     filename: __filename
@@ -510,111 +481,6 @@ async (conn, mek, m, { from, reply }) => {
                         type: 14,
                         editedMessage: {
                             conversation: line,
-                        },
-                    },
-                },
-                {}
-            );
-        }
-    } catch (e) {
-        console.log(e);
-        reply(`❌ *Error!* ${e.message}`);
-    }
-});
-
-cmd({
-  pattern: "friend",
-  alias: ["fcheck"],
-  react: "💖",
-  filename: __filename,
-  use: "@tag1 @tag2",
-}, async (conn, mek, m, { args, reply }) => {
-  try {
-    if (args.length < 2) {
-      return reply("Please mention two users to calculate compatibility.\nUsage: `.compatibility @user1 @user2`");
-    }
-
-    let user1 = m.mentionedJid[0]; 
-    let user2 = m.mentionedJid[1]; 
-
-    const specialNumber = config.DEV ? `${config.DEV}@s.whatsapp.net` : null;
-
-    let compatibilityScore = Math.floor(Math.random() * 1000) + 1;
-
-    if (user1 === specialNumber || user2 === specialNumber) {
-      compatibilityScore = 1000;
-      return reply(`💖 Compatibility between @${user1.split('@')[0]} and @${user2.split('@')[0]}: ${compatibilityScore}+/1000 💖`);
-    }
-
-    await conn.sendMessage(mek.chat, {
-      text: `💖 Compatibility between @${user1.split('@')[0]} and @${user2.split('@')[0]}: ${compatibilityScore}/1000 💖`,
-      mentions: [user1, user2],
-    }, { quoted: mek });
-
-  } catch (error) {
-    console.log(error);
-    reply(`❌ Error: ${error.message}`);
-  }
-});
-
-cmd({
-    pattern: "truth",
-    alias: ["truthquestion"],
-    react: "❓",
-    filename: __filename,
-}, 
-async (conn, mek, m, { from, reply }) => {
-    try {
-        const shizokeys = 'shizo';
-        const res = await fetch(`https://shizoapi.onrender.com/api/texts/truth?apikey=${shizokeys}`);
-        
-        if (!res.ok) {
-            console.error(`API request failed with status ${res.status}`);
-            throw new Error(`API request failed with status ${res.status}`);
-        }
-
-        const json = await res.json();
-
-        if (!json.result) {
-            console.error("Invalid API response: No 'result' field found.");
-            throw new Error("Invalid API response: No 'result' field found.");
-        }
-
-        const truthText = `${json.result}`;
-        await conn.sendMessage(from, { 
-            text: truthText, 
-            mentions: [m.sender] 
-        }, { quoted: m });
-
-    } catch (error) {
-        console.error("Error in truth command:", error);
-        reply("Sorry, something went wrong while fetching the truth question. Please try again later.");
-    }
-});
-
-cmd({
-    pattern: "nikal",
-    react: "🗿",
-    filename: __filename
-},
-async (conn, mek, m, { from, reply }) => {
-    try {
-        const loadingMessage = await conn.sendMessage(from, { text: 'KHANX-AI🗿' });
-        
-        const asciiMessages = [
-            "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀⠀     ⢳⡀⠀⡏⠀⠀⠀   ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀⠀  ⠀    ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲     ⣿  ⣸   Nikal   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀      ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀⠀__⠀   ⠀   ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀⠀  ⠀  ⢳⡀⠀⡏⠀⠀⠀   ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀⠀       ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲     ⣿  ⣸   Lavde   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀      ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀|__|⠀⠀   ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀     ⠀   ⢳⡀⠀⡏⠀⠀    ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀⠀⠀      ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲    ⣿  ⣸   Pehli   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀     ⣿  ⢹⠀           ⡇\n  ⠙⢿⣯⠄⠀⠀(P)⠀⠀     ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀     ⠀   ⢳⡀⠀⡏⠀⠀    ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀   ⠀     ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲    ⣿  ⣸  Fursat  ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀        ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀⠀__ ⠀  ⠀   ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀⠀      ⢳⡀⠀⡏⠀⠀    ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀ ⠀      ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲    ⣿  ⣸  Meeee   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀       ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀|__| ⠀    ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀   ⠀  ⠀⢳⡀⠀⡏⠀⠀       ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀  ⠀       ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲   ⣿  ⣸   Nikal   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀       ⣿  ⢹⠀           ⡇\n  ⠙⢿⣯⠄⠀⠀lodu⠀⠀   ⡿ ⠀⡇⠀⠀⠀⠀   ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀  ⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀"
-        ];
-
-        for (const asciiMessage of asciiMessages) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            await conn.relayMessage(
-                from,
-                {
-                    protocolMessage: {
-                        key: loadingMessage.key,
-                        type: 14,
-                        editedMessage: {
-                            conversation: asciiMessage,
                         },
                     },
                 },
@@ -775,6 +641,41 @@ async (conn, mek, m, { from, reply }) => {
 });
 
 cmd({
+  pattern: "friend",
+  alias: ["fcheck"],
+  react: "💖",
+  filename: __filename,
+  use: "@tag1 @tag2",
+}, async (conn, mek, m, { args, reply }) => {
+  try {
+    if (args.length < 2) {
+      return reply("Please mention two users to calculate compatibility.\nUsage: `.compatibility @user1 @user2`");
+    }
+
+    let user1 = m.mentionedJid[0]; 
+    let user2 = m.mentionedJid[1]; 
+
+    const specialNumber = config.DEV ? `${config.DEV}@s.whatsapp.net` : null;
+
+    let compatibilityScore = Math.floor(Math.random() * 1000) + 1;
+
+    if (user1 === specialNumber || user2 === specialNumber) {
+      compatibilityScore = 1000;
+      return reply(`💖 Compatibility between @${user1.split('@')[0]} and @${user2.split('@')[0]}: ${compatibilityScore}+/1000 💖`);
+    }
+
+    await conn.sendMessage(mek.chat, {
+      text: `💖 Compatibility between @${user1.split('@')[0]} and @${user2.split('@')[0]}: ${compatibilityScore}/1000 💖`,
+      mentions: [user1, user2],
+    }, { quoted: mek });
+
+  } catch (error) {
+    console.log(error);
+    reply(`❌ Error: ${error.message}`);
+  }
+});
+
+cmd({
     pattern: "dare",
     alias: ["truthordare"],
     react: "🎯",
@@ -808,6 +709,41 @@ async (conn, mek, m, { from, reply }) => {
     } catch (error) {
         console.error("Error in dare command:", error);
         reply("Sorry, something went wrong while fetching the dare. Please try again later.");
+    }
+});
+
+cmd({
+    pattern: "truth",
+    alias: ["truthquestion"],
+    react: "❓",
+    filename: __filename,
+}, 
+async (conn, mek, m, { from, reply }) => {
+    try {
+        const shizokeys = 'shizo';
+        const res = await fetch(`https://shizoapi.onrender.com/api/texts/truth?apikey=${shizokeys}`);
+        
+        if (!res.ok) {
+            console.error(`API request failed with status ${res.status}`);
+            throw new Error(`API request failed with status ${res.status}`);
+        }
+
+        const json = await res.json();
+
+        if (!json.result) {
+            console.error("Invalid API response: No 'result' field found.");
+            throw new Error("Invalid API response: No 'result' field found.");
+        }
+
+        const truthText = `${json.result}`;
+        await conn.sendMessage(from, { 
+            text: truthText, 
+            mentions: [m.sender] 
+        }, { quoted: m });
+
+    } catch (error) {
+        console.error("Error in truth command:", error);
+        reply("Sorry, something went wrong while fetching the truth question. Please try again later.");
     }
 });
 
@@ -848,174 +784,6 @@ async (conn, mek, m, { from, reply }) => {
         console.log(e);
         reply(`❌ *Error!* ${e.message}`);
     }
-});
-
-cmd({
-  pattern: "sends",
-  filename: __filename
-}, async (conn, m, store, { args, reply, senderNumber }) => {
-  try {
-    const botOwner = conn.user.id.split(":")[0];
-
-    if (senderNumber !== botOwner) {
-      return reply("❎ Only the bot owner can use this command.");
-    }
-
-    if (!args[0]) {
-      return reply("✳️ Use this command like:\n *Example:* .send 10,I love you");
-    }
-
-    const [countStr, ...messageParts] = args.join(" ").split(",");
-    const count = parseInt(countStr.trim());
-    const message = messageParts.join(",").trim();
-
-    if (isNaN(count) || count <= 0 || count > 100) {
-      return reply("❎ Please specify a valid number between 1 and 100.");
-    }
-
-    if (!message) {
-      return reply("❎ Please provide a message to send.");
-    }
-
-    reply(`⏳ Sending "${message}" ${count} times. This may take a while...`);
-
-    for (let i = 0; i < count; i++) {
-      await conn.sendMessage(m.from, { text: message }, { quoted: m });
-      await sleep(1000);
-    }
-
-    reply(`✅ Successfully sent the message ${count} times.`);
-  } catch (error) {
-    console.error("❌ Error in ask command:", error);
-    reply("❎ An error occurred while processing your request.");
-  }
-});
-
-cmd({
-    pattern: "compliment",
-    react: "😊",
-    filename: __filename,
-    use: "@tag (optional)"
-}, async (conn, mek, m, { reply }) => {
-    let compliments = [
-        "You're amazing just the way you are! 💖",
-        "You light up every room you walk into! 🌟",
-        "Your smile is contagious! 😊",
-        "You're a genius in your own way! 🧠",
-        "You bring happiness to everyone around you! 🥰",
-        "You're like a human sunshine! ☀️",
-        "Your kindness makes the world a better place! ❤️",
-        "You're unique and irreplaceable! ✨",
-        "You're a great listener and a wonderful friend! 🤗",
-        "Your positive vibes are truly inspiring! 💫",
-        "You're stronger than you think! 💪",
-        "Your creativity is beyond amazing! 🎨",
-        "You make life more fun and interesting! 🎉",
-        "Your energy is uplifting to everyone around you! 🔥",
-        "You're a true leader, even if you don’t realize it! 🏆",
-        "Your words have the power to make people smile! 😊",
-        "You're so talented, and the world needs your skills! 🎭",
-        "You're a walking masterpiece of awesomeness! 🎨",
-        "You're proof that kindness still exists in the world! 💕",
-        "You make even the hardest days feel a little brighter! ☀️"
-    ];
-
-    let randomCompliment = compliments[Math.floor(Math.random() * compliments.length)];
-    let sender = `@${mek.sender.split("@")[0]}`;
-    let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
-    let target = mentionedUser ? `@${mentionedUser.split("@")[0]}` : "";
-
-    let message = mentionedUser 
-        ? `${sender} complimented ${target}:\n😊 *${randomCompliment}*`
-        : `${sender}, you forgot to tag someone! But hey, here's a compliment for you:\n😊 *${randomCompliment}*`;
-
-    await conn.sendMessage(mek.chat, { text: message, mentions: [mek.sender, mentionedUser].filter(Boolean) }, { quoted: mek });
-});
-
-cmd({
-    pattern: "emix",
-    react: "😃",
-    use: ".emix 😂,🙂",
-    filename: __filename,
-}, async (conn, mek, m, { args, q, reply }) => {
-    try {
-        if (!q.includes(",")) {
-            return reply("❌ *Usage:* .emix 😂,🙂\n_Send two emojis separated by a comma._");
-        }
-
-        let [emoji1, emoji2] = q.split(",").map(e => e.trim());
-
-        if (!emoji1 || !emoji2) {
-            return reply("❌ Please provide two emojis separated by a comma.");
-        }
-
-        let imageUrl = await fetchEmix(emoji1, emoji2);
-
-        if (!imageUrl) {
-            return reply("❌ Could not generate emoji mix. Try different emojis.");
-        }
-
-        let buffer = await getBuffer(imageUrl);
-        let sticker = new Sticker(buffer, {
-            pack: "Emoji Mix",
-            author: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
-            type: StickerTypes.FULL,
-            categories: ["🤩", "🎉"],
-            quality: 75,
-            background: "transparent",
-        });
-
-        const stickerBuffer = await sticker.toBuffer();
-        await conn.sendMessage(mek.chat, { sticker: stickerBuffer }, { quoted: mek });
-
-    } catch (e) {
-        console.error("Error in .emix command:", e.message);
-        reply(`❌ Could not generate emoji mix: ${e.message}`);
-    }
-});
-
-cmd({
-  pattern: "ship",
-  alias: ["match", "love"],
-  react: "❤️",
-  filename: __filename
-}, async (conn, m, store, { from, isGroup, groupMetadata, reply, sender }) => {
-  try {
-    if (!isGroup) return reply("❌ This command can only be used in groups.");
-
-    const specialNumber = config.DEV ? `${config.DEV}@s.whatsapp.net` : null;
-    const participants = groupMetadata.participants.map(user => user.id);
-    
-    let randomPair;
-
-    if (specialNumber && participants.includes(specialNumber) && sender !== specialNumber) {
-      randomPair = specialNumber;
-    } else {
-      do {
-        randomPair = participants[Math.floor(Math.random() * participants.length)];
-      } while (randomPair === sender);
-    }
-
-    const message = `💘 *Match Found!* 💘\n❤️ @${sender.split("@")[0]} + @${randomPair.split("@")[0]}\n💖 Congratulations! 🎉`;
-
-    await conn.sendMessage(from, {
-      text: message,
-      contextInfo: {
-        mentionedJid: [sender, randomPair],
-        forwardingScore: 999,
-        isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: "120363400240662312@newsletter",
-          newsletterName: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
-          serverMessageId: 143
-        }
-      }
-    });
-
-  } catch (error) {
-    console.error("❌ Error in ship command:", error);
-    reply("⚠️ An error occurred while processing the command. Please try again.");
-  }
 });
 
 cmd({
@@ -1062,6 +830,162 @@ async (conn, mek, m, { from, isGroup, reply }) => {
         console.error("Error in .shapar command:", e);
         reply("An error occurred while processing the command. Please try again.");
     }
+});
+
+cmd({
+  pattern: "sends",
+  filename: __filename
+}, async (conn, m, store, { args, reply, senderNumber }) => {
+  try {
+    const botOwner = conn.user.id.split(":")[0];
+
+    if (senderNumber !== botOwner) {
+      return reply("❎ Only the bot owner can use this command.");
+    }
+
+    if (!args[0]) {
+      return reply("✳️ Use this command like:\n *Example:* .send 10,I love you");
+    }
+
+    const [countStr, ...messageParts] = args.join(" ").split(",");
+    const count = parseInt(countStr.trim());
+    const message = messageParts.join(",").trim();
+
+    if (isNaN(count) || count <= 0 || count > 100) {
+      return reply("❎ Please specify a valid number between 1 and 100.");
+    }
+
+    if (!message) {
+      return reply("❎ Please provide a message to send.");
+    }
+
+    reply(`⏳ Sending "${message}" ${count} times. This may take a while...`);
+
+    for (let i = 0; i < count; i++) {
+      await conn.sendMessage(m.from, { text: message }, { quoted: m });
+      await sleep(1000);
+    }
+
+    reply(`✅ Successfully sent the message ${count} times.`);
+  } catch (error) {
+    console.error("❌ Error in ask command:", error);
+    reply("❎ An error occurred while processing your request.");
+  }
+});
+
+cmd({
+    pattern: "emix",
+    react: "😃",
+    use: ".emix 😂,🙂",
+    filename: __filename,
+}, async (conn, mek, m, { args, q, reply }) => {
+    try {
+        if (!q.includes(",")) {
+            return reply("❌ *Usage:* .emix 😂,🙂\n_Send two emojis separated by a comma._");
+        }
+
+        let [emoji1, emoji2] = q.split(",").map(e => e.trim());
+
+        if (!emoji1 || !emoji2) {
+            return reply("❌ Please provide two emojis separated by a comma.");
+        }
+
+        let imageUrl = await fetchEmix(emoji1, emoji2);
+
+        if (!imageUrl) {
+            return reply("❌ Could not generate emoji mix. Try different emojis.");
+        }
+
+        let buffer = await getBuffer(imageUrl);
+        let sticker = new Sticker(buffer, {
+            pack: "Emoji Mix",
+            author: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
+            type: StickerTypes.FULL,
+            categories: ["🤩", "🎉"],
+            quality: 75,
+            background: "transparent",
+        });
+
+        const stickerBuffer = await sticker.toBuffer();
+        await conn.sendMessage(mek.chat, { sticker: stickerBuffer }, { quoted: mek });
+
+    } catch (e) {
+        console.error("Error in .emix command:", e.message);
+        reply(`❌ Could not generate emoji mix: ${e.message}`);
+    }
+});
+
+cmd({
+    pattern: "lovetest",
+    react: "❤️",
+    filename: __filename,
+    use: "@tag1 @tag2"
+}, async (conn, mek, m, { args, reply }) => {
+    if (args.length < 2) return reply("Tag two users! Example: .lovetest @user1 @user2");
+
+    let user1 = args[0].replace("@", "") + "@s.whatsapp.net";
+    let user2 = args[1].replace("@", "") + "@s.whatsapp.net";
+
+    let lovePercent = Math.floor(Math.random() * 100) + 1;
+
+    let messages = [
+        { range: [90, 100], text: "💖 *A match made in heaven!* True love exists!" },
+        { range: [75, 89], text: "😍 *Strong connection!* This love is deep and meaningful." },
+        { range: [50, 74], text: "😊 *Good compatibility!* You both can make it work." },
+        { range: [30, 49], text: "🤔 *It’s complicated!* Needs effort, but possible!" },
+        { range: [10, 29], text: "😅 *Not the best match!* Maybe try being just friends?" },
+        { range: [1, 9], text: "💔 *Uh-oh!* This love is as real as a Bollywood breakup!" }
+    ];
+
+    let loveMessage = messages.find(msg => lovePercent >= msg.range[0] && lovePercent <= msg.range[1]).text;
+
+    let message = `💘 *Love Compatibility Test* 💘\n\n❤️ *@${user1.split("@")[0]}* + *@${user2.split("@")[0]}* = *${lovePercent}%*\n${loveMessage}`;
+
+    await conn.sendMessage(mek.chat, { text: message, mentions: [user1, user2] }, { quoted: mek });
+});
+
+cmd({
+  pattern: "ship",
+  alias: ["match", "love"],
+  react: "❤️",
+  filename: __filename
+}, async (conn, m, store, { from, isGroup, groupMetadata, reply, sender }) => {
+  try {
+    if (!isGroup) return reply("❌ This command can only be used in groups.");
+
+    const specialNumber = config.DEV ? `${config.DEV}@s.whatsapp.net` : null;
+    const participants = groupMetadata.participants.map(user => user.id);
+    
+    let randomPair;
+
+    if (specialNumber && participants.includes(specialNumber) && sender !== specialNumber) {
+      randomPair = specialNumber;
+    } else {
+      do {
+        randomPair = participants[Math.floor(Math.random() * participants.length)];
+      } while (randomPair === sender);
+    }
+
+    const message = `💘 *Match Found!* 💘\n❤️ @${sender.split("@")[0]} + @${randomPair.split("@")[0]}\n💖 Congratulations! 🎉`;
+
+    await conn.sendMessage(from, {
+      text: message,
+      contextInfo: {
+        mentionedJid: [sender, randomPair],
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: "120363400240662312@newsletter",
+          newsletterName: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
+          serverMessageId: 143
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error("❌ Error in ship command:", error);
+    reply("⚠️ An error occurred while processing the command. Please try again.");
+  }
 });
 
 cmd({
@@ -1114,59 +1038,6 @@ async (conn, mek, m, { from, isGroup, text, reply }) => {
     } catch (e) {
         console.error("Error in character command:", e);
         reply("An error occurred while processing the command. Please try again.");
-    }
-});
-
-cmd({
-    pattern: "hack",
-    filename: __filename
-},
-async (conn, mek, m, { 
-    from, quoted, body, isCmd, command, args, q, isGroup, senderNumber, reply 
-}) => {
-    try {
-        const botOwner = conn.user.id.split(":")[0];
-        if (senderNumber !== botOwner) {
-            return reply("Only the bot owner can use this command.");
-        }
-
-        const steps = [
-            '💻 *HACK STARTING...* 💻',
-            
-            '*Initializing hacking tools...* 🛠️',
-            '*Connecting to remote servers...* 🌐',
-            
-            '```[██████████] 10%``` ⏳'                                            ,
-            '```[███████████████████] 20%``` ⏳'                                   ,
-            '```[███████████████████████] 30%``` ⏳'                               ,
-            '```[██████████████████████████] 40%``` ⏳'                            ,
-            '```[███████████████████████████████] 50%``` ⏳'                       ,
-            '```[█████████████████████████████████████] 60%``` ⏳'                 ,
-            '```[██████████████████████████████████████████] 70%``` ⏳'            ,
-            '```[██████████████████████████████████████████████] 80%``` ⏳'        ,
-            '```[██████████████████████████████████████████████████] 90%``` ⏳'    ,
-            '```[████████████████████████████████████████████████████] 100%``` ✅',
-            
-            '🔒 *System Breach: Successful!* 🔓',
-            '🚀 *Command Execution: Complete!* 🎯',
-            
-            '*📡 Transmitting data...* 📤',
-            '_🕵️‍♂️ Ensuring stealth..._ 🤫',
-            '*🔧 Finalizing operations...* 🏁',
-            
-            '⚠️ *Note:* All actions are for demonstration purposes only.',
-            '⚠️ *Reminder:* Ethical hacking is the only way to ensure security.',
-            
-            '> *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 HACKING-COMPLETE ☣*'
-        ];
-
-        for (const line of steps) {
-            await conn.sendMessage(from, { text: line }, { quoted: mek });
-            await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-    } catch (e) {
-        console.error(e);
-        reply(`❌ *Error:* ${e.message}`);
     }
 });
 
@@ -1237,3 +1108,132 @@ cmd(
         }
     }
 );
+
+cmd({
+    pattern: "compliment",
+    react: "😊",
+    filename: __filename,
+    use: "@tag (optional)"
+}, async (conn, mek, m, { reply }) => {
+    let compliments = [
+        "You're amazing just the way you are! 💖",
+        "You light up every room you walk into! 🌟",
+        "Your smile is contagious! 😊",
+        "You're a genius in your own way! 🧠",
+        "You bring happiness to everyone around you! 🥰",
+        "You're like a human sunshine! ☀️",
+        "Your kindness makes the world a better place! ❤️",
+        "You're unique and irreplaceable! ✨",
+        "You're a great listener and a wonderful friend! 🤗",
+        "Your positive vibes are truly inspiring! 💫",
+        "You're stronger than you think! 💪",
+        "Your creativity is beyond amazing! 🎨",
+        "You make life more fun and interesting! 🎉",
+        "Your energy is uplifting to everyone around you! 🔥",
+        "You're a true leader, even if you don’t realize it! 🏆",
+        "Your words have the power to make people smile! 😊",
+        "You're so talented, and the world needs your skills! 🎭",
+        "You're a walking masterpiece of awesomeness! 🎨",
+        "You're proof that kindness still exists in the world! 💕",
+        "You make even the hardest days feel a little brighter! ☀️"
+    ];
+
+    let randomCompliment = compliments[Math.floor(Math.random() * compliments.length)];
+    let sender = `@${mek.sender.split("@")[0]}`;
+    let mentionedUser = m.mentionedJid[0] || (mek.quoted && mek.quoted.sender);
+    let target = mentionedUser ? `@${mentionedUser.split("@")[0]}` : "";
+
+    let message = mentionedUser 
+        ? `${sender} complimented ${target}:\n😊 *${randomCompliment}*`
+        : `${sender}, you forgot to tag someone! But hey, here's a compliment for you:\n😊 *${randomCompliment}*`;
+
+    await conn.sendMessage(mek.chat, { text: message, mentions: [mek.sender, mentionedUser].filter(Boolean) }, { quoted: mek });
+});
+
+cmd({
+    pattern: "hack",
+    filename: __filename
+},
+async (conn, mek, m, { 
+    from, quoted, body, isCmd, command, args, q, isGroup, senderNumber, reply 
+}) => {
+    try {
+        const botOwner = conn.user.id.split(":")[0];
+        if (senderNumber !== botOwner) {
+            return reply("Only the bot owner can use this command.");
+        }
+
+        const steps = [
+            '💻 *HACK STARTING...* 💻',
+            
+            '*Initializing hacking tools...* 🛠️',
+            '*Connecting to remote servers...* 🌐',
+            
+            '```[██████████] 10%``` ⏳'                                            ,
+            '```[███████████████████] 20%``` ⏳'                                   ,
+            '```[███████████████████████] 30%``` ⏳'                               ,
+            '```[██████████████████████████] 40%``` ⏳'                            ,
+            '```[███████████████████████████████] 50%``` ⏳'                       ,
+            '```[█████████████████████████████████████] 60%``` ⏳'                 ,
+            '```[██████████████████████████████████████████] 70%``` ⏳'            ,
+            '```[██████████████████████████████████████████████] 80%``` ⏳'        ,
+            '```[██████████████████████████████████████████████████] 90%``` ⏳'    ,
+            '```[████████████████████████████████████████████████████] 100%``` ✅',
+            
+            '🔒 *System Breach: Successful!* 🔓',
+            '🚀 *Command Execution: Complete!* 🎯',
+            
+            '*📡 Transmitting data...* 📤',
+            '_🕵️‍♂️ Ensuring stealth..._ 🤫',
+            '*🔧 Finalizing operations...* 🏁',
+            
+            '⚠️ *Note:* All actions are for demonstration purposes only.',
+            '⚠️ *Reminder:* Ethical hacking is the only way to ensure security.',
+            
+            '> *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 HACKING-COMPLETE ☣*'
+        ];
+
+        for (const line of steps) {
+            await conn.sendMessage(from, { text: line }, { quoted: mek });
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    } catch (e) {
+        console.error(e);
+        reply(`❌ *Error:* ${e.message}`);
+    }
+});
+
+cmd({
+    pattern: "nikal",
+    react: "🗿",
+    filename: __filename
+},
+async (conn, mek, m, { from, reply }) => {
+    try {
+        const loadingMessage = await conn.sendMessage(from, { text: 'KHANX-AI🗿' });
+        
+        const asciiMessages = [
+            "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀⠀     ⢳⡀⠀⡏⠀⠀⠀   ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀⠀  ⠀    ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲     ⣿  ⣸   Nikal   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀      ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀⠀__⠀   ⠀   ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀⠀  ⠀  ⢳⡀⠀⡏⠀⠀⠀   ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀⠀       ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲     ⣿  ⣸   Lavde   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀      ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀|__|⠀⠀   ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀     ⠀   ⢳⡀⠀⡏⠀⠀    ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀⠀⠀      ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲    ⣿  ⣸   Pehli   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀     ⣿  ⢹⠀           ⡇\n  ⠙⢿⣯⠄⠀⠀(P)⠀⠀     ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀     ⠀   ⢳⡀⠀⡏⠀⠀    ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀   ⠀     ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲    ⣿  ⣸  Fursat  ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀        ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀⠀__ ⠀  ⠀   ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀⠀      ⢳⡀⠀⡏⠀⠀    ⠀  ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀⠀ ⠀      ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲    ⣿  ⣸  Meeee   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀⠀       ⣿  ⢹⠀          ⡇\n  ⠙⢿⣯⠄⠀⠀|__| ⠀    ⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`", "⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀   ⠀  ⠀⢳⡀⠀⡏⠀⠀       ⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀   ⣧⠀⢸⠀  ⠀       ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲   ⣿  ⣸   Nikal   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀       ⣿  ⢹⠀           ⡇\n  ⠙⢿⣯⠄⠀⠀lodu⠀⠀   ⡿ ⠀⡇⠀⠀⠀⠀   ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀  ⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀"
+        ];
+
+        for (const asciiMessage of asciiMessages) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await conn.relayMessage(
+                from,
+                {
+                    protocolMessage: {
+                        key: loadingMessage.key,
+                        type: 14,
+                        editedMessage: {
+                            conversation: asciiMessage,
+                        },
+                    },
+                },
+                {}
+            );
+        }
+    } catch (e) {
+        console.log(e);
+        reply(`❌ *Error!* ${e.message}`);
+    }
+});

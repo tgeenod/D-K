@@ -12,7 +12,6 @@ var descgs = "It gives details of given anime name."
 const { fetchGif, gifToVideo } = require('../lib/fetchGif');
 const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
 const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('../lib/functions');
-
 function formatBytes(bytes) {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
@@ -20,7 +19,6 @@ function formatBytes(bytes) {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
-
 function formatBytes(bytes) {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
@@ -28,7 +26,6 @@ function formatBytes(bytes) {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
-
 async function uploadToCatbox(fileBuffer) {
   const form = new FormData();
   form.append("reqtype", "fileupload");
@@ -39,6 +36,127 @@ async function uploadToCatbox(fileBuffer) {
   });
   return res.data;
 }
+
+cmd({
+    pattern: "awoo",
+    alias: ["imgawoo"],
+    react: '😎',
+    use: '.awoo',
+    filename: __filename
+},
+async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+try{
+let res = await axios.get('https://api.waifu.pics/sfw/awoo')
+let wm = `😎 Random awoo image
+
+©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+await conn.sendMessage(from, { image: { url: res.data.url }, caption: wm}, { quoted: mek })
+} catch (e) {
+reply(cants)
+console.log(e)
+}
+})
+
+cmd({
+    pattern: "neko",
+    alias: ["imgneko"],
+    react: '💫',
+    use: '.neko',
+    filename: __filename
+},
+async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+try{
+let res = await axios.get('https://api.waifu.pics/sfw/neko')
+let wm = `🩷 Random neko image
+
+©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+await conn.sendMessage(from, { image: { url: res.data.url  }, caption: wm}, { quoted: mek })
+} catch (e) {
+reply(cants)
+console.log(e)
+}
+})
+
+cmd({
+    pattern: "waifu",
+    alias: ["imgwaifu"],
+    react: '💫',
+    use: '.waifu',
+    filename: __filename
+},
+async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+try{
+let res = await axios.get('https://api.waifu.pics/sfw/waifu')
+let wm = `🩵 Random Waifu image
+
+©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+await conn.sendMessage(from, { image: { url: res.data.url }, caption: wm}, { quoted: mek })
+} catch (e) {
+reply(cants)
+console.log(e)
+}
+})
+
+cmd({
+    pattern: "megumin",
+    alias: ["imgmegumin"],
+    react: '💕',
+    use: '.megumin',
+    filename: __filename
+},
+async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+try{
+let res = await axios.get('https://api.waifu.pics/sfw/megumin')
+let wm = `❤️‍🔥Random megumin image
+
+©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+await conn.sendMessage(from, { image: { url: res.data.url }, caption: wm}, { quoted: mek })
+} catch (e) {
+reply(cants)
+console.log(e)
+}
+})
+
+cmd({
+    pattern: "maid",
+    alias: ["imgmaid"],
+    react: '💫',
+    use: '.maid',
+    filename: __filename
+},
+async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+try{
+let res = await axios.get('https://api.waifu.im/search/?included_tags=maid')
+let wm = `😎 Random maid image
+
+©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+await conn.sendMessage(from, { image: { url: res.data.images[0].url  }, caption: wm}, { quoted: mek })
+} catch (e) {
+reply(cants)
+console.log(e)
+}
+})
+
+cmd({
+    pattern: "garl",
+    alias: ["imgloli"],
+    react: '😎',
+    use: '.loli',
+    filename: __filename
+},
+async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+try{
+
+let res = await axios.get('https://api.lolicon.app/setu/v2?num=1&r18=0&tag=lolicon')
+let wm = `😎 Random Garl image
+
+©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+await conn.sendMessage(from, { image: { url: res.data.data[0].urls.original }, caption: wm}, { quoted: mek })
+} catch (e) {
+reply(cants)
+console.log(e)
+}
+})
 
 cmd({
     pattern: "dog",
@@ -163,325 +281,6 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
     } catch (e) {
         console.log(e);
         reply(`*Error Fetching Anime Girl image*: ${e.message}`);
-    }
-});
-
-cmd({
-    pattern: "awoo",
-    alias: ["imgawoo"],
-    react: '😎',
-    use: '.awoo',
-    filename: __filename
-},
-async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-try{
-let res = await axios.get('https://api.waifu.pics/sfw/awoo')
-let wm = `😎 Random awoo image
-
-©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
-await conn.sendMessage(from, { image: { url: res.data.url }, caption: wm}, { quoted: mek })
-} catch (e) {
-reply(cants)
-console.log(e)
-}
-})
-
-cmd({
-    pattern: "neko",
-    alias: ["imgneko"],
-    react: '💫',
-    use: '.neko',
-    filename: __filename
-},
-async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-try{
-let res = await axios.get('https://api.waifu.pics/sfw/neko')
-let wm = `🩷 Random neko image
-
-©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
-await conn.sendMessage(from, { image: { url: res.data.url  }, caption: wm}, { quoted: mek })
-} catch (e) {
-reply(cants)
-console.log(e)
-}
-})
-
-cmd({
-    pattern: "waifu",
-    alias: ["imgwaifu"],
-    react: '💫',
-    use: '.waifu',
-    filename: __filename
-},
-async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-try{
-let res = await axios.get('https://api.waifu.pics/sfw/waifu')
-let wm = `🩵 Random Waifu image
-
-©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
-await conn.sendMessage(from, { image: { url: res.data.url }, caption: wm}, { quoted: mek })
-} catch (e) {
-reply(cants)
-console.log(e)
-}
-})
-
-cmd({
-    pattern: "megumin",
-    alias: ["imgmegumin"],
-    react: '💕',
-    use: '.megumin',
-    filename: __filename
-},
-async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-try{
-let res = await axios.get('https://api.waifu.pics/sfw/megumin')
-let wm = `❤️‍🔥Random megumin image
-
-©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
-await conn.sendMessage(from, { image: { url: res.data.url }, caption: wm}, { quoted: mek })
-} catch (e) {
-reply(cants)
-console.log(e)
-}
-})
-
-cmd({
-    pattern: "maid",
-    alias: ["imgmaid"],
-    react: '💫',
-    use: '.maid',
-    filename: __filename
-},
-async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-try{
-let res = await axios.get('https://api.waifu.im/search/?included_tags=maid')
-let wm = `😎 Random maid image
-
-©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
-await conn.sendMessage(from, { image: { url: res.data.images[0].url  }, caption: wm}, { quoted: mek })
-} catch (e) {
-reply(cants)
-console.log(e)
-}
-})
-
-cmd({
-    pattern: "garl",
-    alias: ["imgloli"],
-    react: '😎',
-    use: '.loli',
-    filename: __filename
-},
-async(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-try{
-
-let res = await axios.get('https://api.lolicon.app/setu/v2?num=1&r18=0&tag=lolicon')
-let wm = `😎 Random Garl image
-
-©ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
-await conn.sendMessage(from, { image: { url: res.data.data[0].urls.original }, caption: wm}, { quoted: mek })
-} catch (e) {
-reply(cants)
-console.log(e)
-}
-})
-
-cmd({
-    pattern: "anime5",
-    react: "🧚‍♀️",
-    filename: __filename
-},
-async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-try{
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/-ABlAvr.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ ' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/HNEg0-Q.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/3x~ovC6.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/brv-GJu.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/FWE8ggD.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-}catch(e){
-console.log(e)
-reply(`${e}`)
-}
-})
-
-cmd({
-    pattern: "anime1",
-    react: "🧚‍♀️",
-    filename: __filename
-},
-async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-try{
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/aD7t0Bc.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/PQO5wPN.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/5At1P4A.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/MjtH3Ha.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/QQW7VKy.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-}catch(e){
-console.log(e)
-reply(`${e}`)
-}
-})
-
-cmd({
-    pattern: "anime2",
-    react: "🧚‍♀️",
-    filename: __filename
-},
-async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-try{
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/0r1Bn88.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/2Xdpuov.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/0hx-3AP.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/q054x0_.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/4lyqRvd.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-}catch(e){
-console.log(e)
-reply(`${e}`)
-}
-})
-
-cmd({
-    pattern: "anime4",
-    react: "🧚‍♀️",
-    filename: __filename
-},
-async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-try{
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/aGgUm80.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/i~RQhRD.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/94LH-aU.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/V8hvqfK.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/lMiXE7j.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-}catch(e){
-console.log(e)
-reply(`${e}`)
-}
-})
-
-cmd({
-    pattern: "anime3",
-    react: "🧚‍♀️",
-    filename: __filename
-},
-async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-try{
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/gnpc_Lr.jpeg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/P6X-ph6.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/~p5W9~k.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/7Apu5C9.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/OTRfON6.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
-
-}catch(e){
-console.log(e)
-reply(`${e}`)
-}
-})
-
-cmd({
-    pattern: "anime",
-    react: "⛱️",
-    filename: __filename
-},
-
-async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-try{
-
-let dec = `> 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ANIME IMGS*`
-await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/b26f27aa5daaada031b90.jpg`},caption:dec},{quoted:mek});
-await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/51b44e4b086667361061b.jpg`},caption:dec},{quoted:mek});
-await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/7d165d73f914985542537.jpg`},caption:dec},{quoted:mek});
-await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/3d9732d2657d2d72dc102.jpg`},caption:dec},{quoted:mek});
-await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/8daf7e432a646f3ebe7eb.jpg`},caption:dec},{quoted:mek});
-await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/7514b18ea89da924e7496.jpg`},caption:dec},{quoted:mek});
-await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/ce9cb5acd2cec7693d76b.jpg`},caption:dec},{quoted:mek});
-
-}catch(e){
-console.log(e)
-reply(`${e}`)
-}
-});
-
-cmd({
-  pattern: "rw",
-  alias: ["randomwall", "wallpaper"],
-  react: "🌌",
-  use: ".rw <keyword>",
-  filename: __filename
-}, async (conn, m, store, { from, args, reply }) => {
-  try {
-    const query = args.join(" ") || "random";
-    const apiUrl = `https://pikabotzapi.vercel.app/random/randomwall/?apikey=anya-md&query=${encodeURIComponent(query)}`;
-
-    const { data } = await axios.get(apiUrl);
-    
-    if (data.status && data.imgUrl) {
-      const caption = `🌌 *Random Wallpaper: ${query}*\n\n> *© Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
-      await conn.sendMessage(from, { image: { url: data.imgUrl }, caption }, { quoted: m });
-    } else {
-      reply(`❌ No wallpaper found for *"${query}"*.`);
-    }
-  } catch (error) {
-    console.error("Wallpaper Error:", error);
-    reply("❌ An error occurred while fetching the wallpaper. Please try again.");
-  }
-});
-
-cmd({
-    pattern: "valorant",
-    react: "🎨",
-    filename: __filename
-}, async (conn, mek, m, { from, quoted, prefix, args, reply }) => {
-    try {
-        if (args.length < 3) {
-            return reply(`❌ Please provide 3 text inputs. Example:\n${prefix}valorant Text1 Text2 Text3`);
-        }
-
-        const text1 = args[0];
-        const text2 = args[1];
-        const text3 = args.slice(2).join(" ");
-
-        const apiUrl = `https://api.nexoracle.com/ephoto360/valorant-youtube-banner?apikey=MepwBcqIM0jYN0okD&text1=${encodeURIComponent(text1)}&text2=${encodeURIComponent(text2)}&text3=${encodeURIComponent(text3)}`;
-
-        const buffer = await getBuffer(apiUrl);
-
-        const options = quoted ? { quoted: mek } : {};
-
-        await conn.sendMessage(from, {
-            image: buffer, 
-            caption: "Here is your Valorant YouTube banner!"
-        }, options);
-    } catch (e) {
-        return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
     }
 });
 
@@ -793,6 +592,31 @@ cmd({
     } catch (e) {
         return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
     }
+});
+
+cmd({
+  pattern: "rw",
+  alias: ["randomwall", "wallpaper"],
+  react: "🌌",
+  use: ".rw <keyword>",
+  filename: __filename
+}, async (conn, m, store, { from, args, reply }) => {
+  try {
+    const query = args.join(" ") || "random";
+    const apiUrl = `https://pikabotzapi.vercel.app/random/randomwall/?apikey=anya-md&query=${encodeURIComponent(query)}`;
+
+    const { data } = await axios.get(apiUrl);
+    
+    if (data.status && data.imgUrl) {
+      const caption = `🌌 *Random Wallpaper: ${query}*\n\n> *© Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
+      await conn.sendMessage(from, { image: { url: data.imgUrl }, caption }, { quoted: m });
+    } else {
+      reply(`❌ No wallpaper found for *"${query}"*.`);
+    }
+  } catch (error) {
+    console.error("Wallpaper Error:", error);
+    reply("❌ An error occurred while fetching the wallpaper. Please try again.");
+  }
 });
 
 cmd({
@@ -1635,6 +1459,269 @@ cmd({
   }
 });
 
+cmd({
+    pattern: "valorant",
+    react: "🎨",
+    filename: __filename
+}, async (conn, mek, m, { from, quoted, prefix, args, reply }) => {
+    try {
+        if (args.length < 3) {
+            return reply(`❌ Please provide 3 text inputs. Example:\n${prefix}valorant Text1 Text2 Text3`);
+        }
+
+        const text1 = args[0];
+        const text2 = args[1];
+        const text3 = args.slice(2).join(" ");
+
+        const apiUrl = `https://api.nexoracle.com/ephoto360/valorant-youtube-banner?apikey=MepwBcqIM0jYN0okD&text1=${encodeURIComponent(text1)}&text2=${encodeURIComponent(text2)}&text3=${encodeURIComponent(text3)}`;
+
+        const buffer = await getBuffer(apiUrl);
+
+        const options = quoted ? { quoted: mek } : {};
+
+        await conn.sendMessage(from, {
+            image: buffer, 
+            caption: "Here is your Valorant YouTube banner!"
+        }, options);
+    } catch (e) {
+        return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
+    }
+});
+
+cmd({
+  'pattern': "couplepp",
+  'react': '💑',
+  'use': ".couplepp",
+  'filename': __filename
+}, async (conn, m, store, {
+  from,
+  args,
+  reply
+}) => {
+  try {
+    reply("*💑 Fetching couple profile pictures...*");
+    
+    const response = await axios.get("https://api.davidcyriltech.my.id/couplepp");
+
+    if (!response.data || !response.data.success) {
+      return reply("❌ Failed to fetch couple profile pictures. Please try again later.");
+    }
+
+    const malePp = response.data.male;
+    const femalePp = response.data.female;
+
+    if (malePp) {
+      await conn.sendMessage(from, {
+        'image': { 'url': malePp },
+        'caption': "👨 Male Couple Profile Picture"
+      }, { 'quoted': m });
+    }
+
+    if (femalePp) {
+      await conn.sendMessage(from, {
+        'image': { 'url': femalePp },
+        'caption': "👩 Female Couple Profile Picture"
+      }, { 'quoted': m });
+    }
+
+  } catch (error) {
+    console.error(error);
+    reply("❌ An error occurred while fetching the couple profile pictures.");
+  }
+});
+
+cmd({
+  pattern: "rw2",
+  alias: ["randomwall2", "wallpaper2"],
+  react: "🌌",
+  use: ".rw2 <keyword>",
+  filename: __filename
+}, async (conn, m, store, { from, args, reply }) => {
+  try {
+    const query = args.join(" ") || "random";
+    const apiUrl = `https://lance-frank-asta.onrender.com/api/wallpaperV2?text=${encodeURIComponent(query)}`;
+
+    const { data } = await axios.get(apiUrl);
+
+    if (!data.status || !data.result || data.result.length === 0) {
+      return reply(`❌ No wallpapers found for *"${query}"*.`);
+    }
+
+    const randomWall = data.result[Math.floor(Math.random() * data.result.length)];
+
+    const caption = `🌌 *Wallpaper for:* ${query}\n🖼️ *Type:* ${randomWall.type || "Unknown"}\n\n> *© Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
+
+    await conn.sendMessage(
+      from,
+      {
+        image: { url: randomWall.image },
+        caption
+      },
+      { quoted: m }
+    );
+
+  } catch (error) {
+    console.error("Wallpaper Error:", error);
+    reply("❌ An error occurred while fetching the wallpaper. Please try again later.");
+  }
+});
+
+cmd({
+    pattern: "anime5",
+    react: "🧚‍♀️",
+    filename: __filename
+},
+async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+try{
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/-ABlAvr.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ ' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/HNEg0-Q.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/3x~ovC6.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/brv-GJu.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/FWE8ggD.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+}catch(e){
+console.log(e)
+reply(`${e}`)
+}
+})
+
+cmd({
+  pattern: "topixel",
+  alias: ["pixel"],
+  use: ".topixel <size>",
+  filename: __filename
+}, async (conn, mek, m, { from, q, reply }) => {
+  try {
+    const quoted = m.quoted ? m.quoted : m
+    const mime = (quoted.msg || quoted).mimetype || ""
+
+    if (!mime.startsWith("image/")) return reply("🖼️ *Reply to an image!*")
+
+    let pixelSize = parseInt(q) || 32
+    if (pixelSize < 8) pixelSize = 8
+    if (pixelSize > 1024) pixelSize = 1024
+
+    reply(`⏳ Pixelating... (size ${pixelSize})`)
+
+    const media = await quoted.download()
+    if (!media) return reply("❌ Failed to download image")
+
+    const image = await Jimp.read(media)
+    const small = image.clone().resize(pixelSize, pixelSize, Jimp.RESIZE_NEAREST_NEIGHBOR)
+    const pixelated = small.resize(image.bitmap.width, image.bitmap.height, Jimp.RESIZE_NEAREST_NEIGHBOR)
+    const buffer = await pixelated.getBufferAsync(Jimp.MIME_JPEG)
+
+    await conn.sendMessage(
+      from,
+      { image: buffer, caption: `✅ Pixelated (size: ${pixelSize})` },
+      { quoted: m }
+    )
+  } catch (e) {
+    reply(`❌ Error: ${e.message}`)
+  }
+})
+
+cmd({
+    pattern: "anime1",
+    react: "🧚‍♀️",
+    filename: __filename
+},
+async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+try{
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/aD7t0Bc.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/PQO5wPN.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/5At1P4A.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/MjtH3Ha.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/QQW7VKy.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+}catch(e){
+console.log(e)
+reply(`${e}`)
+}
+})
+
+cmd({
+    pattern: "anime2",
+    react: "🧚‍♀️",
+    filename: __filename
+},
+async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+try{
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/0r1Bn88.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/2Xdpuov.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/0hx-3AP.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/q054x0_.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/4lyqRvd.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+}catch(e){
+console.log(e)
+reply(`${e}`)
+}
+})
+
+cmd({
+    pattern: "anime4",
+    react: "🧚‍♀️",
+    filename: __filename
+},
+async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+try{
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/aGgUm80.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/i~RQhRD.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/94LH-aU.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/V8hvqfK.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/lMiXE7j.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+}catch(e){
+console.log(e)
+reply(`${e}`)
+}
+})
+
+cmd({
+    pattern: "anime3",
+    react: "🧚‍♀️",
+    filename: __filename
+},
+async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+try{
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/gnpc_Lr.jpeg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/P6X-ph6.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/~p5W9~k.png` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/7Apu5C9.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+await conn.sendMessage(from,{image :{ url: `https://i.waifu.pics/OTRfON6.jpg` },caption: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳' },{quoted:mek});
+
+}catch(e){
+console.log(e)
+reply(`${e}`)
+}
+})
+
 cmd(
     {
         pattern: "lick",
@@ -1739,76 +1826,28 @@ cmd({
 });
 
 cmd({
-  pattern: "rw2",
-  alias: ["randomwall2", "wallpaper2"],
-  react: "🌌",
-  use: ".rw2 <keyword>",
-  filename: __filename
-}, async (conn, m, store, { from, args, reply }) => {
-  try {
-    const query = args.join(" ") || "random";
-    const apiUrl = `https://lance-frank-asta.onrender.com/api/wallpaperV2?text=${encodeURIComponent(query)}`;
+    pattern: "anime",
+    react: "⛱️",
+    filename: __filename
+},
 
-    const { data } = await axios.get(apiUrl);
+async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+try{
 
-    if (!data.status || !data.result || data.result.length === 0) {
-      return reply(`❌ No wallpapers found for *"${query}"*.`);
-    }
+let dec = `> 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ANIME IMGS*`
+await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/b26f27aa5daaada031b90.jpg`},caption:dec},{quoted:mek});
+await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/51b44e4b086667361061b.jpg`},caption:dec},{quoted:mek});
+await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/7d165d73f914985542537.jpg`},caption:dec},{quoted:mek});
+await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/3d9732d2657d2d72dc102.jpg`},caption:dec},{quoted:mek});
+await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/8daf7e432a646f3ebe7eb.jpg`},caption:dec},{quoted:mek});
+await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/7514b18ea89da924e7496.jpg`},caption:dec},{quoted:mek});
+await conn.sendMessage(from,{image:{url: `https://telegra.ph/file/ce9cb5acd2cec7693d76b.jpg`},caption:dec},{quoted:mek});
 
-    const randomWall = data.result[Math.floor(Math.random() * data.result.length)];
-
-    const caption = `🌌 *Wallpaper for:* ${query}\n🖼️ *Type:* ${randomWall.type || "Unknown"}\n\n> *© Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
-
-    await conn.sendMessage(
-      from,
-      {
-        image: { url: randomWall.image },
-        caption
-      },
-      { quoted: m }
-    );
-
-  } catch (error) {
-    console.error("Wallpaper Error:", error);
-    reply("❌ An error occurred while fetching the wallpaper. Please try again later.");
-  }
+}catch(e){
+console.log(e)
+reply(`${e}`)
+}
 });
-
-cmd({
-  pattern: "topixel",
-  alias: ["pixel"],
-  use: ".topixel <size>",
-  filename: __filename
-}, async (conn, mek, m, { from, q, reply }) => {
-  try {
-    const quoted = m.quoted ? m.quoted : m
-    const mime = (quoted.msg || quoted).mimetype || ""
-
-    if (!mime.startsWith("image/")) return reply("🖼️ *Reply to an image!*")
-
-    let pixelSize = parseInt(q) || 32
-    if (pixelSize < 8) pixelSize = 8
-    if (pixelSize > 1024) pixelSize = 1024
-
-    reply(`⏳ Pixelating... (size ${pixelSize})`)
-
-    const media = await quoted.download()
-    if (!media) return reply("❌ Failed to download image")
-
-    const image = await Jimp.read(media)
-    const small = image.clone().resize(pixelSize, pixelSize, Jimp.RESIZE_NEAREST_NEIGHBOR)
-    const pixelated = small.resize(image.bitmap.width, image.bitmap.height, Jimp.RESIZE_NEAREST_NEIGHBOR)
-    const buffer = await pixelated.getBufferAsync(Jimp.MIME_JPEG)
-
-    await conn.sendMessage(
-      from,
-      { image: buffer, caption: `✅ Pixelated (size: ${pixelSize})` },
-      { quoted: m }
-    )
-  } catch (e) {
-    reply(`❌ Error: ${e.message}`)
-  }
-})
 
 cmd(
     {
@@ -2645,48 +2684,6 @@ cmd(
         }
     }
 );
-
-cmd({
-  'pattern': "couplepp",
-  'react': '💑',
-  'use': ".couplepp",
-  'filename': __filename
-}, async (conn, m, store, {
-  from,
-  args,
-  reply
-}) => {
-  try {
-    reply("*💑 Fetching couple profile pictures...*");
-    
-    const response = await axios.get("https://api.davidcyriltech.my.id/couplepp");
-
-    if (!response.data || !response.data.success) {
-      return reply("❌ Failed to fetch couple profile pictures. Please try again later.");
-    }
-
-    const malePp = response.data.male;
-    const femalePp = response.data.female;
-
-    if (malePp) {
-      await conn.sendMessage(from, {
-        'image': { 'url': malePp },
-        'caption': "👨 Male Couple Profile Picture"
-      }, { 'quoted': m });
-    }
-
-    if (femalePp) {
-      await conn.sendMessage(from, {
-        'image': { 'url': femalePp },
-        'caption': "👩 Female Couple Profile Picture"
-      }, { 'quoted': m });
-    }
-
-  } catch (error) {
-    console.error(error);
-    reply("❌ An error occurred while fetching the couple profile pictures.");
-  }
-});
 
 cmd(
     {

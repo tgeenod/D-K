@@ -288,70 +288,6 @@ cmd({
 });
 
 cmd({
-    pattern: "ping2",
-    use: '.ping',
-    react: "🍂",
-    filename: __filename
-},
-async (conn, mek, m, { from, quoted, sender, reply }) => {
-    try {
-        const start = new Date().getTime();
-
-        const reactionEmojis = ['🔥', '⚡', '🚀', '💨', '🎯', '🎉', '🌟', '💥', '🕐', '🔹'];
-        const textEmojis = ['💎', '🏆', '⚡️', '🚀', '🎶', '🌠', '🌀', '🔱', '🛡️', '✨'];
-
-        const reactionEmoji = reactionEmojis[Math.floor(Math.random() * reactionEmojis.length)];
-        let textEmoji = textEmojis[Math.floor(Math.random() * textEmojis.length)];
-
-        while (textEmoji === reactionEmoji) {
-            textEmoji = textEmojis[Math.floor(Math.random() * textEmojis.length)];
-        }
-
-        await conn.sendMessage(from, {
-            react: { text: textEmoji, key: mek.key }
-        });
-
-        const end = new Date().getTime();
-        const responseTime = (end - start) / 1000;
-
-        const text = `> *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 SPEED: ${responseTime.toFixed(2)}ms ${reactionEmoji}*`;
-
-        const FakeVCard = {
-      key: {
-        fromMe: false,
-        participant: '0@s.whatsapp.net',
-        remoteJid: "status@broadcast"
-      },
-      message: {
-        contactMessage: {
-          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-          vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃\nORG:dark;\nTEL;type=CELL;type=VOICE;waid=254700000000:+254 700 000000\nEND:VCARD",
-          jpegThumbnail: Buffer.from([])
-        }
-      }
-    };
-        
-        await conn.sendMessage(from, {
-            text,
-            contextInfo: {
-                mentionedJid: [sender],
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363400240662312@newsletter',
-                    newsletterName: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
-                    serverMessageId: 143
-                }
-            }
-        }, { quoted: FakeVCard });
-
-    } catch (e) {
-        console.error("Error in ping command:", e);
-        reply(`An error occurred: ${e.message}`);
-    }
-});
-
-cmd({
     pattern: "owner",
     react: "✅", 
     filename: __filename
@@ -417,171 +353,6 @@ async (conn, mek, m, { from }) => {
         console.error(error);
         reply(`An error occurred: ${error.message}`);
     }
-});
-
-cmd({
-    pattern: "support",
-    alias : "version",
-    react: "🫅",
-    filename: __filename
-}, 
-async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
-
-let dec = `    
-⟣───────────────⟢
-▧ *ᴄʀᴇᴀᴛᴏʀ* : *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*
-▧ *ᴍᴏᴅᴇ* : *${config.MODE}*
-▧ *ᴘʀᴇғɪx* : *${config.PREFIX}*
-▧ *ʀᴀᴍ* : ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(require('os').totalmem / 1024 / 1024)}MB
-▧ *ᴠᴇʀsɪᴏɴ* : *V.2* ⚡
-▧ *ᴜᴘᴛɪᴍᴇ* : ${runtime(process.uptime())}
-
-⟣───────────────⟢
-
-> ☣️ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️ 
-
-⟣───────────────⟢
-
-*CHANNEL 🛠️*
-https://whatsapp.com/channel/0029VbAM4eo3AzNQZ1WleW3e
-
-*GROUP 👥*
-https://chat.whatsapp.com/IGgPW6pTrH14oAWCJALYR5
-
-*𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-owner🧑‍💻*
-https://wa.me/+94771825192?text=Support!
-
-⟣───────────────⟢
-
-`;
-
-        const FakeVCard = {
-      key: {
-        fromMe: false,
-        participant: "0@s.whatsapp.net",
-        remoteJid: "status@broadcast"
-      },
-      message: {
-        contactMessage: {
-          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
-        }
-      }
-    };
-        
-        await conn.sendMessage(
-            from,
-            {
-                image: { url: config.ALIVE_IMG },
-                caption: dec,
-                contextInfo: {
-                    mentionedJid: [m.sender],
-                    forwardingScore: 999,
-                    isForwarded: true,
-                    forwardedNewsletterMessageInfo: {
-                        newsletterJid: '120363400240662312@newsletter',
-                        newsletterName: '𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳',
-                        serverMessageId: 143
-                    }
-                }
-            },
-            { quoted: FakeVCard });
-        
-    } catch (e) {
-        console.log(e);
-        reply(`${e}`);
-    }
-});
-
-cmd({
-  pattern: 'version',
-  react: '🚀',
-  filename: __filename
-}, async (conn, mek, m, {
-  from, sender, pushname, reply
-}) => {
-  try {
-    const localVersionPath = path.join(__dirname, '../lib/version.json');
-    let localVersion = 'Unknown';
-    let changelog = 'No changelog available.';
-    if (fs.existsSync(localVersionPath)) {
-      const localData = JSON.parse(fs.readFileSync(localVersionPath));
-      localVersion = localData.version;
-      changelog = localData.changelog;
-    }
-
-    const rawVersionUrl = 'https://raw.githubusercontent.com/bot-deploy-main/DARK-KNIGHT-XMD/main/data/version.json';
-    let latestVersion = 'Unknown';
-    let latestChangelog = 'No changelog available.';
-    try {
-      const { data } = await axios.get(rawVersionUrl);
-      latestVersion = data.version;
-      latestChangelog = data.changelog;
-    } catch (error) {
-      console.error('Failed to fetch latest version:', error);
-    }
-
-    const pluginPath = path.join(__dirname, '../plugins');
-    const pluginCount = fs.readdirSync(pluginPath).filter(file => file.endsWith('.js')).length;
-
-    const totalCommands = commands.length;
-
-    const uptime = runtime(process.uptime());
-    const ramUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
-    const totalRam = (os.totalmem() / 1024 / 1024).toFixed(2);
-    const hostName = os.hostname();
-    const lastUpdate = fs.statSync(localVersionPath).mtime.toLocaleString();
-
-    const githubRepo = 'https://github.com/DARK-KNIGHT/DARK-KNIGHT-XMD';
-
-    let updateMessage = `✅ Your 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 bot is up-to-date!`;
-    if (localVersion !== latestVersion) {
-      updateMessage = `🚀 Your 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 bot is outdated!
-🔹 *Current Version:* ${localVersion}
-🔹 *Latest Version:* ${latestVersion}
-
-Use *.update* to update.`;
-    }
-
-    const statusMessage = `🌟 *Good ${new Date().getHours() < 12 ? 'Morning' : 'Night'}, ${pushname}!* 🌟\n\n` +
-      `📌 *Bot Name:* 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳\n🔖 *Current Version:* ${localVersion}\n📢 *Latest Version:* ${latestVersion}\n📂 *Total Plugins:* ${pluginCount}\n🔢 *Total Commands:* ${totalCommands}\n\n` +
-      `💾 *System Info:*\n⏳ *Uptime:* ${uptime}\n📟 *RAM Usage:* ${ramUsage}MB / ${totalRam}MB\n⚙️ *Host Name:* ${hostName}\n📅 *Last Update:* ${lastUpdate}\n\n` +
-      `📝 *Changelog:*\n${latestChangelog}\n\n` +
-      `⭐ *GitHub Repo:* ${githubRepo}\n👤 *Owner:* [𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃](https://github.com/DARK-KNIGHT/)\n\n${updateMessage}\n\n🚀 *Hey! Don't forget to fork & star the repo!*`;
-
-        const FakeVCard = {
-      key: {
-        fromMe: false,
-        participant: "0@s.whatsapp.net",
-        remoteJid: "status@broadcast"
-      },
-      message: {
-        contactMessage: {
-          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
-        }
-      }
-    };
-    
-    await conn.sendMessage(from, {
-      image: { url: config.ALIVE_IMG },
-      caption: statusMessage,
-      contextInfo: {
-        mentionedJid: [m.sender],
-        forwardingScore: 999,
-        isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: '120363400240662312@newsletter',
-          newsletterName: '𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳',
-          serverMessageId: 143
-        }
-      }
-    }, { quoted: FakeVCard });
-  } catch (error) {
-    console.error('Error fetching version info:', error);
-    reply('❌ An error occurred while checking the bot version.');
-  }
 });
 
 cmd({
@@ -694,6 +465,145 @@ cmd({
     } catch (error) {
         console.error(error);
         reply("❌ *An error occurred while fetching the Bible list. Please try again.*");
+    }
+});
+
+cmd({
+    pattern: "ping2",
+    use: '.ping',
+    react: "🍂",
+    filename: __filename
+},
+async (conn, mek, m, { from, quoted, sender, reply }) => {
+    try {
+        const start = new Date().getTime();
+
+        const reactionEmojis = ['🔥', '⚡', '🚀', '💨', '🎯', '🎉', '🌟', '💥', '🕐', '🔹'];
+        const textEmojis = ['💎', '🏆', '⚡️', '🚀', '🎶', '🌠', '🌀', '🔱', '🛡️', '✨'];
+
+        const reactionEmoji = reactionEmojis[Math.floor(Math.random() * reactionEmojis.length)];
+        let textEmoji = textEmojis[Math.floor(Math.random() * textEmojis.length)];
+
+        while (textEmoji === reactionEmoji) {
+            textEmoji = textEmojis[Math.floor(Math.random() * textEmojis.length)];
+        }
+
+        await conn.sendMessage(from, {
+            react: { text: textEmoji, key: mek.key }
+        });
+
+        const end = new Date().getTime();
+        const responseTime = (end - start) / 1000;
+
+        const text = `> *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 SPEED: ${responseTime.toFixed(2)}ms ${reactionEmoji}*`;
+
+        const FakeVCard = {
+      key: {
+        fromMe: false,
+        participant: '0@s.whatsapp.net',
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃\nORG:dark;\nTEL;type=CELL;type=VOICE;waid=254700000000:+254 700 000000\nEND:VCARD",
+          jpegThumbnail: Buffer.from([])
+        }
+      }
+    };
+        
+        await conn.sendMessage(from, {
+            text,
+            contextInfo: {
+                mentionedJid: [sender],
+                forwardingScore: 999,
+                isForwarded: true,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: '120363400240662312@newsletter',
+                    newsletterName: "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳",
+                    serverMessageId: 143
+                }
+            }
+        }, { quoted: FakeVCard });
+
+    } catch (e) {
+        console.error("Error in ping command:", e);
+        reply(`An error occurred: ${e.message}`);
+    }
+});
+
+cmd({
+    pattern: "support",
+    alias : "version",
+    react: "🫅",
+    filename: __filename
+}, 
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+
+let dec = `    
+⟣───────────────⟢
+▧ *ᴄʀᴇᴀᴛᴏʀ* : *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*
+▧ *ᴍᴏᴅᴇ* : *${config.MODE}*
+▧ *ᴘʀᴇғɪx* : *${config.PREFIX}*
+▧ *ʀᴀᴍ* : ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(require('os').totalmem / 1024 / 1024)}MB
+▧ *ᴠᴇʀsɪᴏɴ* : *V.2* ⚡
+▧ *ᴜᴘᴛɪᴍᴇ* : ${runtime(process.uptime())}
+
+⟣───────────────⟢
+
+> ☣️ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️ 
+
+⟣───────────────⟢
+
+*CHANNEL 🛠️*
+https://whatsapp.com/channel/0029VbAM4eo3AzNQZ1WleW3e
+
+*GROUP 👥*
+https://chat.whatsapp.com/IGgPW6pTrH14oAWCJALYR5
+
+*𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-owner🧑‍💻*
+https://wa.me/+94771825192?text=Support!
+
+⟣───────────────⟢
+
+`;
+
+        const FakeVCard = {
+      key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
+        }
+      }
+    };
+        
+        await conn.sendMessage(
+            from,
+            {
+                image: { url: config.ALIVE_IMG },
+                caption: dec,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363400240662312@newsletter',
+                        newsletterName: '𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳',
+                        serverMessageId: 143
+                    }
+                }
+            },
+            { quoted: FakeVCard });
+        
+    } catch (e) {
+        console.log(e);
+        reply(`${e}`);
     }
 });
 
@@ -826,6 +736,96 @@ ${config.DESCRIPTION}`;
         console.error("Uptime Error:", e);
         reply(`❌ Error: ${e.message}`);
     }
+});
+
+cmd({
+  pattern: 'version',
+  react: '🚀',
+  filename: __filename
+}, async (conn, mek, m, {
+  from, sender, pushname, reply
+}) => {
+  try {
+    const localVersionPath = path.join(__dirname, '../lib/version.json');
+    let localVersion = 'Unknown';
+    let changelog = 'No changelog available.';
+    if (fs.existsSync(localVersionPath)) {
+      const localData = JSON.parse(fs.readFileSync(localVersionPath));
+      localVersion = localData.version;
+      changelog = localData.changelog;
+    }
+
+    const rawVersionUrl = 'https://raw.githubusercontent.com/bot-deploy-main/DARK-KNIGHT-XMD/main/data/version.json';
+    let latestVersion = 'Unknown';
+    let latestChangelog = 'No changelog available.';
+    try {
+      const { data } = await axios.get(rawVersionUrl);
+      latestVersion = data.version;
+      latestChangelog = data.changelog;
+    } catch (error) {
+      console.error('Failed to fetch latest version:', error);
+    }
+
+    const pluginPath = path.join(__dirname, '../plugins');
+    const pluginCount = fs.readdirSync(pluginPath).filter(file => file.endsWith('.js')).length;
+
+    const totalCommands = commands.length;
+
+    const uptime = runtime(process.uptime());
+    const ramUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
+    const totalRam = (os.totalmem() / 1024 / 1024).toFixed(2);
+    const hostName = os.hostname();
+    const lastUpdate = fs.statSync(localVersionPath).mtime.toLocaleString();
+
+    const githubRepo = 'https://github.com/DARK-KNIGHT/DARK-KNIGHT-XMD';
+
+    let updateMessage = `✅ Your 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 bot is up-to-date!`;
+    if (localVersion !== latestVersion) {
+      updateMessage = `🚀 Your 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 bot is outdated!
+🔹 *Current Version:* ${localVersion}
+🔹 *Latest Version:* ${latestVersion}
+
+Use *.update* to update.`;
+    }
+
+    const statusMessage = `🌟 *Good ${new Date().getHours() < 12 ? 'Morning' : 'Night'}, ${pushname}!* 🌟\n\n` +
+      `📌 *Bot Name:* 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳\n🔖 *Current Version:* ${localVersion}\n📢 *Latest Version:* ${latestVersion}\n📂 *Total Plugins:* ${pluginCount}\n🔢 *Total Commands:* ${totalCommands}\n\n` +
+      `💾 *System Info:*\n⏳ *Uptime:* ${uptime}\n📟 *RAM Usage:* ${ramUsage}MB / ${totalRam}MB\n⚙️ *Host Name:* ${hostName}\n📅 *Last Update:* ${lastUpdate}\n\n` +
+      `📝 *Changelog:*\n${latestChangelog}\n\n` +
+      `⭐ *GitHub Repo:* ${githubRepo}\n👤 *Owner:* [𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃](https://github.com/DARK-KNIGHT/)\n\n${updateMessage}\n\n🚀 *Hey! Don't forget to fork & star the repo!*`;
+
+        const FakeVCard = {
+      key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
+        }
+      }
+    };
+    
+    await conn.sendMessage(from, {
+      image: { url: config.ALIVE_IMG },
+      caption: statusMessage,
+      contextInfo: {
+        mentionedJid: [m.sender],
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: '120363400240662312@newsletter',
+          newsletterName: '𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳',
+          serverMessageId: 143
+        }
+      }
+    }, { quoted: FakeVCard });
+  } catch (error) {
+    console.error('Error fetching version info:', error);
+    reply('❌ An error occurred while checking the bot version.');
+  }
 });
 
 cmd({

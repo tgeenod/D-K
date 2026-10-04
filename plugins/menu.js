@@ -6,7 +6,6 @@ const config = require('../config');
 const { cmd, commands } = require('../command');
 const { Sticker, StickerTypes } = require('wa-sticker-formatter');
 const { fetchJson, getBuffer, runtime } = require('../lib/functions');
-
 function waitForReply(conn, from, sender, targetId) {
     return new Promise((resolve) => {
         const handler = (update) => {
@@ -57,87 +56,6 @@ cmd({
     } catch (e) {
         console.error(e);
         reply("❌ Error: " + e.message);
-    }
-});
-
-cmd({
-    pattern: "movie",
-    alias: ["mv"],
-    react: "🎬",
-    filename: __filename,
-}, async (conn, mek, m, { from, q, reply, sender }) => {
-    try {
-        if (!q) return reply("❗ කරුණාකර සෙවිය යුතු ෆිල්ම් එකේ නම ලබා දෙන්න.");
-
-        const posterUrl = "https://files.catbox.moe/ajfxoo.jpg";
-
-        let menu = `
- 🎬 𝐀𝐋𝐋 𝐂𝐈𝐍𝐄𝐌𝐀 𝐒𝐄𝐀𝐑𝐂𝐇 🎬
- ━━━━━━━━━━━━━━━━
- 
- 🔍 𝐘𝐎𝐔𝐑 𝐒𝐄𝐀𝐑𝐂𝐇 : ${q.toUpperCase()}
-  
- 🔢 𝑹𝒆𝒑𝒍𝒚 𝑩𝒆𝒍𝒐𝒘 𝑵𝒖𝒎𝒃𝒆𝒓
-
- 1️⃣ 𝑪𝑰𝑵𝑬𝑺𝑼𝑩𝒁 𝑆𝐸𝐴𝐑𝐶𝐻
- 2️⃣ 𝑺𝑰𝑵𝑯𝑨𝑳𝑨𝑺𝑼𝑩 𝑆𝐸𝐴𝐑𝐶𝐻    
- 3️⃣ 𝑩𝑨𝑰𝑺𝑬𝑪𝑶𝑷𝑬𝑺 𝑆𝐸𝐴𝐑𝐶𝐻 
- 4️⃣ 𝑪𝑯𝑰𝑻𝑯𝑹𝑨𝑷𝑨𝑻𝑨 𝑺𝑬𝑨𝑹𝑪𝑯         
- 5️⃣ 𝑺𝑼𝑩𝒁𝑳𝑲 𝑆𝐸𝐴𝐑𝐶𝐻
- 6️⃣ 𝐌𝐎𝐕𝐈𝐄𝐏𝐑𝐎 𝑆𝐸𝐴𝐑𝐶𝐻
- 7️⃣ 𝐏𝐔𝐏𝐈𝐋𝐕𝐈𝐃𝐄𝐎 𝑆𝐸𝐴𝐑𝐶𝐻
-
- 8️⃣ 𝑪𝑰𝑵𝑬𝑺𝑼𝑩𝒁 𝐓𝐕 𝑆𝐸𝐴𝐑𝐶𝐻
- 
- © Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳
- `;
-
-        const listMsg = await conn.sendMessage(from, { 
-            image: { url: posterUrl }, 
-            caption: menu 
-        }, { quoted: m });
-
-        const startFlow = async () => {
-            while (true) {
-            const selection = await waitForReply(conn, from, sender, listMsg.key.id);
-              if (!selection) break;
-
-                (async () => {
-                    let targetPattern = "";
-                    const selText = selection.text;
-
-                    if (selText === '1') targetPattern = "cinesubz";
-                    else if (selText === '2') targetPattern = "sinhalasub";
-                    else if (selText === '3') targetPattern = "baiscopes";
-                    else if (selText === '4') targetPattern = "chithrapata";
-                    else if (selText === '5') targetPattern = "subzlk";
-                    else if (selText === '6') targetPattern = "moviepro";
-                    else if (selText === '7') targetPattern = "pupilvideo";
-                    else if (selText === '8') targetPattern = "cinesubztv";
-                     
-                    if (targetPattern) {
-                        await conn.sendMessage(from, { react: { text: "🔍", key: selection.msg.key } });
-                        
-                        const selectedCmd = commands.find((c) => c.pattern === targetPattern);
-                        if (selectedCmd) {
-                            await selectedCmd.function(conn, selection.msg, selection.msg, { 
-                                from, 
-                                q: q, 
-                                reply, 
-                                isGroup: m.isGroup, 
-                                sender: m.sender, 
-                                pushname: m.pushname 
-                            });
-                        }
-                    }
-                })();
-            }
-        };
-
-        startFlow();
-
-    } catch (e) {
-        console.error("Movie Engine Error:", e);
     }
 });
 
@@ -221,6 +139,87 @@ async (conn, mek, m, { from }) => {
 
     } catch (e) {
         console.log(e);
+    }
+});
+
+cmd({
+    pattern: "movie",
+    alias: ["mv"],
+    react: "🎬",
+    filename: __filename,
+}, async (conn, mek, m, { from, q, reply, sender }) => {
+    try {
+        if (!q) return reply("❗ කරුණාකර සෙවිය යුතු ෆිල්ම් එකේ නම ලබා දෙන්න.");
+
+        const posterUrl = "https://files.catbox.moe/ajfxoo.jpg";
+
+        let menu = `
+ 🎬 𝐀𝐋𝐋 𝐂𝐈𝐍𝐄𝐌𝐀 𝐒𝐄𝐀𝐑𝐂𝐇 🎬
+ ━━━━━━━━━━━━━━━━
+ 
+ 🔍 𝐘𝐎𝐔𝐑 𝐒𝐄𝐀𝐑𝐂𝐇 : ${q.toUpperCase()}
+  
+ 🔢 𝑹𝒆𝒑𝒍𝒚 𝑩𝒆𝒍𝒐𝒘 𝑵𝒖𝒎𝒃𝒆𝒓
+
+ 1️⃣ 𝑪𝑰𝑵𝑬𝑺𝑼𝑩𝒁 𝑆𝐸𝐴𝐑𝐶𝐻
+ 2️⃣ 𝑺𝑰𝑵𝑯𝑨𝑳𝑨𝑺𝑼𝑩 𝑆𝐸𝐴𝐑𝐶𝐻    
+ 3️⃣ 𝑩𝑨𝑰𝑺𝑬𝑪𝑶𝑷𝑬𝑺 𝑆𝐸𝐴𝐑𝐶𝐻 
+ 4️⃣ 𝑪𝑯𝑰𝑻𝑯𝑹𝑨𝑷𝑨𝑻𝑨 𝑺𝑬𝑨𝑹𝑪𝑯         
+ 5️⃣ 𝑺𝑼𝑩𝒁𝑳𝑲 𝑆𝐸𝐴𝐑𝐶𝐻
+ 6️⃣ 𝐌𝐎𝐕𝐈𝐄𝐏𝐑𝐎 𝑆𝐸𝐴𝐑𝐶𝐻
+ 7️⃣ 𝐏𝐔𝐏𝐈𝐋𝐕𝐈𝐃𝐄𝐎 𝑆𝐸𝐴𝐑𝐶𝐻
+
+ 8️⃣ 𝑪𝑰𝑵𝑬𝑺𝑼𝑩𝒁 𝐓𝐕 𝑆𝐸𝐴𝐑𝐶𝐻
+ 
+ © Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳
+ `;
+
+        const listMsg = await conn.sendMessage(from, { 
+            image: { url: posterUrl }, 
+            caption: menu 
+        }, { quoted: m });
+
+        const startFlow = async () => {
+            while (true) {
+            const selection = await waitForReply(conn, from, sender, listMsg.key.id);
+              if (!selection) break;
+
+                (async () => {
+                    let targetPattern = "";
+                    const selText = selection.text;
+
+                    if (selText === '1') targetPattern = "cinesubz";
+                    else if (selText === '2') targetPattern = "sinhalasub";
+                    else if (selText === '3') targetPattern = "baiscopes";
+                    else if (selText === '4') targetPattern = "chithrapata";
+                    else if (selText === '5') targetPattern = "subzlk";
+                    else if (selText === '6') targetPattern = "moviepro";
+                    else if (selText === '7') targetPattern = "pupilvideo";
+                    else if (selText === '8') targetPattern = "cinesubztv";
+                     
+                    if (targetPattern) {
+                        await conn.sendMessage(from, { react: { text: "🔍", key: selection.msg.key } });
+                        
+                        const selectedCmd = commands.find((c) => c.pattern === targetPattern);
+                        if (selectedCmd) {
+                            await selectedCmd.function(conn, selection.msg, selection.msg, { 
+                                from, 
+                                q: q, 
+                                reply, 
+                                isGroup: m.isGroup, 
+                                sender: m.sender, 
+                                pushname: m.pushname 
+                            });
+                        }
+                    }
+                })();
+            }
+        };
+
+        startFlow();
+
+    } catch (e) {
+        console.error("Movie Engine Error:", e);
     }
 });
 
@@ -310,176 +309,6 @@ cmd({
 
     } catch (e) {
         console.log("Listener Error:", e);
-    }
-});
-
-cmd({
-    pattern: "settings",
-    alias: ["setting"],
-    react: "⚙️",
-    filename: __filename
-},
-async (conn, mek, m, { from, isOwner, quoted, reply }) => {
-    if (!isOwner) return reply("❌ You are not the owner!");
-
-    try {
-        let desc = `*` + "`「 🛡️ DARK-KNIGHT-XMD SETTINGS 🛡️ 」`" + `*
-
-*🔢 Reply with the number to change settings*
-
-*` + "`[01] MODE SETTINGS`" + `*
-*🔸 1.1* 》◦ *PUBLIC* 🧬
-*🔸 1.2* 》◦ *PRIVATE* 🧬
-*🔸 1.3* 》◦ *GROUPS* 🧬
-*🔸 1.4* 》◦ *INBOX* 🧬
-
-*` + "`[02] STATUS SETTINGS`" + `*
-*🔸 2.1* 》◦ *AUTO STATUS SEEN: TRUE* ✅
-*🔸 2.2* 》◦ *AUTO STATUS SEEN: FALSE* ❌
-*🔸 2.3* 》◦ *AUTO STATUS REPLY: TRUE* ✅
-*🔸 2.4* 》◦ *AUTO STATUS REPLY: FALSE* ❌
-*🔸 2.5* 》◦ *AUTO STATUS REACT: TRUE* ✅
-*🔸 2.6* 》◦ *AUTO STATUS REACT: FALSE* ❌
-
-*` + "`[03] PROTECTION (ANTI)`" + `*
-*🔸 3.1* 》◦ *ANTI LINK: TRUE* ✅
-*🔸 3.2* 》◦ *ANTI LINK: FALSE* ❌
-*🔸 3.3* 》◦ *ANTI LINK KICK: TRUE* ✅
-*🔸 3.4* 》◦ *ANTI LINK KICK: FALSE* ❌
-*🔸 3.5* 》◦ *DELETE LINKS: TRUE* ✅
-*🔸 3.6* 》◦ *DELETE LINKS: FALSE* ❌
-*🔸 3.7* 》◦ *ANTI BAD: TRUE* ✅
-*🔸 3.8* 》◦ *ANTI BAD: FALSE* ❌
-*🔸 3.9* 》◦ *ANTI VV: TRUE* ✅
-*🔸 3.10* 》◦ *ANTI VV: FALSE* ❌
-*🔸 3.11* 》◦ *ANTI DELETE: TRUE* ✅
-*🔸 3.12* 》◦ *ANTI DELETE: FALSE* ❌
-
-*` + "`[04] AUTO ACTIONS`" + `*
-*🔸 4.1* 》◦ *AUTO REACT: TRUE* ✅
-*🔸 4.2* 》◦ *AUTO REACT: FALSE* ❌
-*🔸 4.3* 》◦ *CUSTOM REACT: TRUE* ✅
-*🔸 4.4* 》◦ *CUSTOM REACT: FALSE* ❌
-*🔸 4.5* 》◦ *HEART REACT: TRUE* ✅
-*🔸 4.6* 》◦ *HEART REACT: FALSE* ❌
-
-*` + "`[05] AUTO MEDIA & REPLY`" + `*
-*🔸 5.1* 》◦ *AUTO VOICE: TRUE* ✅
-*🔸 5.2* 》◦ *AUTO VOICE: FALSE* ❌
-*🔸 5.3* 》◦ *AUTO STICKER: TRUE* ✅
-*🔸 5.4* 》◦ *AUTO STICKER: FALSE* ❌
-*🔸 5.5* 》◦ *AUTO REPLY: TRUE* ✅
-*🔸 5.6* 》◦ *AUTO REPLY: FALSE* ❌
-*🔸 5.7* 》◦ *MENTION REPLY: TRUE* ✅
-*🔸 5.8* 》◦ *MENTION REPLY: FALSE* ❌
-*🔸 5.9* 》◦ *CHAT BOT: TRUE* ✅
-*🔸 5.10* 》◦ *CHAT BOT: FALSE* ❌
-
-*` + "`[06] PRESENCE SETTINGS`" + `*
-*🔸 6.1* 》◦ *ALWAYS ONLINE: TRUE* ✅
-*🔸 6.2* 》◦ *ALWAYS ONLINE: FALSE* ❌
-*🔸 6.3* 》◦ *AUTO TYPING: TRUE* ✅
-*🔸 6.4* 》◦ *AUTO TYPING: FALSE* ❌
-*🔸 6.5* 》◦ *AUTO RECORDING: TRUE* ✅
-*🔸 6.6* 》◦ *AUTO RECORDING: FALSE* ❌
-
-*` + "`[07] SYSTEM SETTINGS`" + `*
-*🔸 7.1* 》◦ *WELCOME: TRUE* ✅
-*🔸 7.2* 》◦ *WELCOME: FALSE* ❌
-*🔸 7.3* 》◦ *ADMIN EVENTS: TRUE* ✅
-*🔸 7.4* 》◦ *ADMIN EVENTS: FALSE* ❌
-*🔸 7.5* 》◦ *READ MESSAGE: TRUE* ✅
-*🔸 7.6* 》◦ *READ MESSAGE: FALSE* ❌
-*🔸 7.7* 》◦ *READ CMD: TRUE* ✅
-*🔸 7.8* 》◦ *READ CMD: FALSE* ❌
-
-> *© ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
-
-        const vv = await conn.sendMessage(from, { image: { url: config.MENU_IMAGE_URL }, caption: desc }, { quoted: mek });
-
-        conn.ev.on('messages.upsert', async (msgUpdate) => {
-            const msg = msgUpdate.messages[0];
-            if (!msg.message || !msg.message.extendedTextMessage) return;
-
-            const selectedOption = msg.message.extendedTextMessage.text.trim();
-            const isReplyToBot = msg.message.extendedTextMessage.contextInfo && msg.message.extendedTextMessage.contextInfo.stanzaId === vv.key.id;
-
-            if (isReplyToBot) {
-                if (!isOwner) return reply("❌ You are not the owner!");
-
-                let successMsg = "";
-                switch (selectedOption) {
-                    case '1.1': config.MODE = "public"; successMsg = "Mode: PUBLIC"; break;
-                    case '1.2': config.MODE = "private"; successMsg = "Mode: PRIVATE"; break;
-                    case '1.3': config.MODE = "group"; successMsg = "Mode: GROUPS"; break;
-                    case '1.4': config.MODE = "inbox"; successMsg = "Mode: INBOX"; break;
-
-                    case '2.1': config.AUTO_STATUS_SEEN = "true"; successMsg = "Auto Status Seen: ON"; break;
-                    case '2.2': config.AUTO_STATUS_SEEN = "false"; successMsg = "Auto Status Seen: OFF"; break;
-                    case '2.3': config.AUTO_STATUS_REPLY = "true"; successMsg = "Auto Status Reply: ON"; break;
-                    case '2.4': config.AUTO_STATUS_REPLY = "false"; successMsg = "Auto Status Reply: OFF"; break;
-                    case '2.5': config.AUTO_STATUS_REACT = "true"; successMsg = "Auto Status React: ON"; break;
-                    case '2.6': config.AUTO_STATUS_REACT = "false"; successMsg = "Auto Status React: OFF"; break;
-
-                    case '3.1': config.ANTI_LINK = "true"; successMsg = "Anti Link: ON"; break;
-                    case '3.2': config.ANTI_LINK = "false"; successMsg = "Anti Link: OFF"; break;
-                    case '3.3': config.ANTI_LINK_KICK = "true"; successMsg = "Anti Link Kick: ON"; break;
-                    case '3.4': config.ANTI_LINK_KICK = "false"; successMsg = "Anti Link Kick: OFF"; break;
-                    case '3.5': config.DELETE_LINKS = "true"; successMsg = "Delete Links: ON"; break;
-                    case '3.6': config.DELETE_LINKS = "false"; successMsg = "Delete Links: OFF"; break;
-                    case '3.7': config.ANTI_BAD = "true"; successMsg = "Anti Bad: ON"; break;
-                    case '3.8': config.ANTI_BAD = "false"; successMsg = "Anti Bad: OFF"; break;
-                    case '3.9': config.ANTI_VV = "true"; successMsg = "Anti Once View: ON"; break;
-                    case '3.10': config.ANTI_VV = "false"; successMsg = "Anti Once View: OFF"; break;
-                    case '3.11': config.ANTI_DELETE = "true"; successMsg = "Anti Delete: ON"; break;
-                    case '3.12': config.ANTI_DELETE = "false"; successMsg = "Anti Delete: OFF"; break;
-
-                    case '4.1': config.AUTO_REACT = "true"; successMsg = "Auto React: ON"; break;
-                    case '4.2': config.AUTO_REACT = "false"; successMsg = "Auto React: OFF"; break;
-                    case '4.3': config.CUSTOM_REACT = "true"; successMsg = "Custom React: ON"; break;
-                    case '4.4': config.CUSTOM_REACT = "false"; successMsg = "Custom React: OFF"; break;
-                    case '4.5': config.HEART_REACT = "true"; successMsg = "Heart React: ON"; break;
-                    case '4.6': config.HEART_REACT = "false"; successMsg = "Heart React: OFF"; break;
-
-                    case '5.1': config.AUTO_VOICE = "true"; successMsg = "Auto Voice: ON"; break;
-                    case '5.2': config.AUTO_VOICE = "false"; successMsg = "Auto Voice: OFF"; break;
-                    case '5.3': config.AUTO_STICKER = "true"; successMsg = "Auto Sticker: ON"; break;
-                    case '5.4': config.AUTO_STICKER = "false"; successMsg = "Auto Sticker: OFF"; break;
-                    case '5.5': config.AUTO_REPLY = "true"; successMsg = "Auto Reply: ON"; break;
-                    case '5.6': config.AUTO_REPLY = "false"; successMsg = "Auto Reply: OFF"; break;
-                    case '5.7': config.MENTION_REPLY = "true"; successMsg = "Mention Reply: ON"; break;
-                    case '5.8': config.MENTION_REPLY = "false"; successMsg = "Mention Reply: OFF"; break;
-                    case '5.9': config.CHAT_BOT = "true"; successMsg = "Chat Bot: ON"; break;
-                    case '5.10': config.CHAT_BOT = "false"; successMsg = "Chat Bot: OFF"; break;
-                    
-                    case '6.1': config.ALWAYS_ONLINE = "true"; successMsg = "Always Online: ON"; break;
-                    case '6.2': config.ALWAYS_ONLINE = "false"; successMsg = "Always Online: OFF"; break;
-                    case '6.3': config.AUTO_TYPING = "true"; successMsg = "Auto Typing: ON"; break;
-                    case '6.4': config.AUTO_TYPING = "false"; successMsg = "Auto Typing: OFF"; break;
-                    case '6.5': config.AUTO_RECORDING = "true"; successMsg = "Auto Recording: ON"; break;
-                    case '6.6': config.AUTO_RECORDING = "false"; successMsg = "Auto Recording: OFF"; break;
-
-                    case '7.1': config.WELCOME = "true"; successMsg = "Welcome: ON"; break;
-                    case '7.2': config.WELCOME = "false"; successMsg = "Welcome: OFF"; break;
-                    case '7.3': config.ADMIN_EVENTS = "true"; successMsg = "Admin Events: ON"; break;
-                    case '7.4': config.ADMIN_EVENTS = "false"; successMsg = "Admin Events: OFF"; break;
-                    case '7.5': config.READ_MESSAGE = "true"; successMsg = "Read Message: ON"; break;
-                    case '7.6': config.READ_MESSAGE = "false"; successMsg = "Read Message: OFF"; break;
-                    case '7.7': config.READ_CMD = "true"; successMsg = "Read Command: ON"; break;
-                    case '7.8': config.READ_CMD = "false"; successMsg = "Read Command: OFF"; break;
-                    default: return;
-                }
-
-                if (successMsg) {
-                    await conn.sendMessage(from, { react: { text: '✅', key: msg.key } });
-                    return reply(`✅ *SETTING UPDATED*\n\n${successMsg}`);
-                }
-            }
-        });
-
-    } catch (e) {
-        console.error(e);
-        reply('An error occurred.');
     }
 });
 
@@ -942,6 +771,176 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
     } catch (e) {
         console.log(e);
         reply(`❌ Error: ${e}`);
+    }
+});
+
+cmd({
+    pattern: "settings",
+    alias: ["setting"],
+    react: "⚙️",
+    filename: __filename
+},
+async (conn, mek, m, { from, isOwner, quoted, reply }) => {
+    if (!isOwner) return reply("❌ You are not the owner!");
+
+    try {
+        let desc = `*` + "`「 🛡️ DARK-KNIGHT-XMD SETTINGS 🛡️ 」`" + `*
+
+*🔢 Reply with the number to change settings*
+
+*` + "`[01] MODE SETTINGS`" + `*
+*🔸 1.1* 》◦ *PUBLIC* 🧬
+*🔸 1.2* 》◦ *PRIVATE* 🧬
+*🔸 1.3* 》◦ *GROUPS* 🧬
+*🔸 1.4* 》◦ *INBOX* 🧬
+
+*` + "`[02] STATUS SETTINGS`" + `*
+*🔸 2.1* 》◦ *AUTO STATUS SEEN: TRUE* ✅
+*🔸 2.2* 》◦ *AUTO STATUS SEEN: FALSE* ❌
+*🔸 2.3* 》◦ *AUTO STATUS REPLY: TRUE* ✅
+*🔸 2.4* 》◦ *AUTO STATUS REPLY: FALSE* ❌
+*🔸 2.5* 》◦ *AUTO STATUS REACT: TRUE* ✅
+*🔸 2.6* 》◦ *AUTO STATUS REACT: FALSE* ❌
+
+*` + "`[03] PROTECTION (ANTI)`" + `*
+*🔸 3.1* 》◦ *ANTI LINK: TRUE* ✅
+*🔸 3.2* 》◦ *ANTI LINK: FALSE* ❌
+*🔸 3.3* 》◦ *ANTI LINK KICK: TRUE* ✅
+*🔸 3.4* 》◦ *ANTI LINK KICK: FALSE* ❌
+*🔸 3.5* 》◦ *DELETE LINKS: TRUE* ✅
+*🔸 3.6* 》◦ *DELETE LINKS: FALSE* ❌
+*🔸 3.7* 》◦ *ANTI BAD: TRUE* ✅
+*🔸 3.8* 》◦ *ANTI BAD: FALSE* ❌
+*🔸 3.9* 》◦ *ANTI VV: TRUE* ✅
+*🔸 3.10* 》◦ *ANTI VV: FALSE* ❌
+*🔸 3.11* 》◦ *ANTI DELETE: TRUE* ✅
+*🔸 3.12* 》◦ *ANTI DELETE: FALSE* ❌
+
+*` + "`[04] AUTO ACTIONS`" + `*
+*🔸 4.1* 》◦ *AUTO REACT: TRUE* ✅
+*🔸 4.2* 》◦ *AUTO REACT: FALSE* ❌
+*🔸 4.3* 》◦ *CUSTOM REACT: TRUE* ✅
+*🔸 4.4* 》◦ *CUSTOM REACT: FALSE* ❌
+*🔸 4.5* 》◦ *HEART REACT: TRUE* ✅
+*🔸 4.6* 》◦ *HEART REACT: FALSE* ❌
+
+*` + "`[05] AUTO MEDIA & REPLY`" + `*
+*🔸 5.1* 》◦ *AUTO VOICE: TRUE* ✅
+*🔸 5.2* 》◦ *AUTO VOICE: FALSE* ❌
+*🔸 5.3* 》◦ *AUTO STICKER: TRUE* ✅
+*🔸 5.4* 》◦ *AUTO STICKER: FALSE* ❌
+*🔸 5.5* 》◦ *AUTO REPLY: TRUE* ✅
+*🔸 5.6* 》◦ *AUTO REPLY: FALSE* ❌
+*🔸 5.7* 》◦ *MENTION REPLY: TRUE* ✅
+*🔸 5.8* 》◦ *MENTION REPLY: FALSE* ❌
+*🔸 5.9* 》◦ *CHAT BOT: TRUE* ✅
+*🔸 5.10* 》◦ *CHAT BOT: FALSE* ❌
+
+*` + "`[06] PRESENCE SETTINGS`" + `*
+*🔸 6.1* 》◦ *ALWAYS ONLINE: TRUE* ✅
+*🔸 6.2* 》◦ *ALWAYS ONLINE: FALSE* ❌
+*🔸 6.3* 》◦ *AUTO TYPING: TRUE* ✅
+*🔸 6.4* 》◦ *AUTO TYPING: FALSE* ❌
+*🔸 6.5* 》◦ *AUTO RECORDING: TRUE* ✅
+*🔸 6.6* 》◦ *AUTO RECORDING: FALSE* ❌
+
+*` + "`[07] SYSTEM SETTINGS`" + `*
+*🔸 7.1* 》◦ *WELCOME: TRUE* ✅
+*🔸 7.2* 》◦ *WELCOME: FALSE* ❌
+*🔸 7.3* 》◦ *ADMIN EVENTS: TRUE* ✅
+*🔸 7.4* 》◦ *ADMIN EVENTS: FALSE* ❌
+*🔸 7.5* 》◦ *READ MESSAGE: TRUE* ✅
+*🔸 7.6* 》◦ *READ MESSAGE: FALSE* ❌
+*🔸 7.7* 》◦ *READ CMD: TRUE* ✅
+*🔸 7.8* 》◦ *READ CMD: FALSE* ❌
+
+> *© ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`;
+
+        const vv = await conn.sendMessage(from, { image: { url: config.MENU_IMAGE_URL }, caption: desc }, { quoted: mek });
+
+        conn.ev.on('messages.upsert', async (msgUpdate) => {
+            const msg = msgUpdate.messages[0];
+            if (!msg.message || !msg.message.extendedTextMessage) return;
+
+            const selectedOption = msg.message.extendedTextMessage.text.trim();
+            const isReplyToBot = msg.message.extendedTextMessage.contextInfo && msg.message.extendedTextMessage.contextInfo.stanzaId === vv.key.id;
+
+            if (isReplyToBot) {
+                if (!isOwner) return reply("❌ You are not the owner!");
+
+                let successMsg = "";
+                switch (selectedOption) {
+                    case '1.1': config.MODE = "public"; successMsg = "Mode: PUBLIC"; break;
+                    case '1.2': config.MODE = "private"; successMsg = "Mode: PRIVATE"; break;
+                    case '1.3': config.MODE = "group"; successMsg = "Mode: GROUPS"; break;
+                    case '1.4': config.MODE = "inbox"; successMsg = "Mode: INBOX"; break;
+
+                    case '2.1': config.AUTO_STATUS_SEEN = "true"; successMsg = "Auto Status Seen: ON"; break;
+                    case '2.2': config.AUTO_STATUS_SEEN = "false"; successMsg = "Auto Status Seen: OFF"; break;
+                    case '2.3': config.AUTO_STATUS_REPLY = "true"; successMsg = "Auto Status Reply: ON"; break;
+                    case '2.4': config.AUTO_STATUS_REPLY = "false"; successMsg = "Auto Status Reply: OFF"; break;
+                    case '2.5': config.AUTO_STATUS_REACT = "true"; successMsg = "Auto Status React: ON"; break;
+                    case '2.6': config.AUTO_STATUS_REACT = "false"; successMsg = "Auto Status React: OFF"; break;
+
+                    case '3.1': config.ANTI_LINK = "true"; successMsg = "Anti Link: ON"; break;
+                    case '3.2': config.ANTI_LINK = "false"; successMsg = "Anti Link: OFF"; break;
+                    case '3.3': config.ANTI_LINK_KICK = "true"; successMsg = "Anti Link Kick: ON"; break;
+                    case '3.4': config.ANTI_LINK_KICK = "false"; successMsg = "Anti Link Kick: OFF"; break;
+                    case '3.5': config.DELETE_LINKS = "true"; successMsg = "Delete Links: ON"; break;
+                    case '3.6': config.DELETE_LINKS = "false"; successMsg = "Delete Links: OFF"; break;
+                    case '3.7': config.ANTI_BAD = "true"; successMsg = "Anti Bad: ON"; break;
+                    case '3.8': config.ANTI_BAD = "false"; successMsg = "Anti Bad: OFF"; break;
+                    case '3.9': config.ANTI_VV = "true"; successMsg = "Anti Once View: ON"; break;
+                    case '3.10': config.ANTI_VV = "false"; successMsg = "Anti Once View: OFF"; break;
+                    case '3.11': config.ANTI_DELETE = "true"; successMsg = "Anti Delete: ON"; break;
+                    case '3.12': config.ANTI_DELETE = "false"; successMsg = "Anti Delete: OFF"; break;
+
+                    case '4.1': config.AUTO_REACT = "true"; successMsg = "Auto React: ON"; break;
+                    case '4.2': config.AUTO_REACT = "false"; successMsg = "Auto React: OFF"; break;
+                    case '4.3': config.CUSTOM_REACT = "true"; successMsg = "Custom React: ON"; break;
+                    case '4.4': config.CUSTOM_REACT = "false"; successMsg = "Custom React: OFF"; break;
+                    case '4.5': config.HEART_REACT = "true"; successMsg = "Heart React: ON"; break;
+                    case '4.6': config.HEART_REACT = "false"; successMsg = "Heart React: OFF"; break;
+
+                    case '5.1': config.AUTO_VOICE = "true"; successMsg = "Auto Voice: ON"; break;
+                    case '5.2': config.AUTO_VOICE = "false"; successMsg = "Auto Voice: OFF"; break;
+                    case '5.3': config.AUTO_STICKER = "true"; successMsg = "Auto Sticker: ON"; break;
+                    case '5.4': config.AUTO_STICKER = "false"; successMsg = "Auto Sticker: OFF"; break;
+                    case '5.5': config.AUTO_REPLY = "true"; successMsg = "Auto Reply: ON"; break;
+                    case '5.6': config.AUTO_REPLY = "false"; successMsg = "Auto Reply: OFF"; break;
+                    case '5.7': config.MENTION_REPLY = "true"; successMsg = "Mention Reply: ON"; break;
+                    case '5.8': config.MENTION_REPLY = "false"; successMsg = "Mention Reply: OFF"; break;
+                    case '5.9': config.CHAT_BOT = "true"; successMsg = "Chat Bot: ON"; break;
+                    case '5.10': config.CHAT_BOT = "false"; successMsg = "Chat Bot: OFF"; break;
+                    
+                    case '6.1': config.ALWAYS_ONLINE = "true"; successMsg = "Always Online: ON"; break;
+                    case '6.2': config.ALWAYS_ONLINE = "false"; successMsg = "Always Online: OFF"; break;
+                    case '6.3': config.AUTO_TYPING = "true"; successMsg = "Auto Typing: ON"; break;
+                    case '6.4': config.AUTO_TYPING = "false"; successMsg = "Auto Typing: OFF"; break;
+                    case '6.5': config.AUTO_RECORDING = "true"; successMsg = "Auto Recording: ON"; break;
+                    case '6.6': config.AUTO_RECORDING = "false"; successMsg = "Auto Recording: OFF"; break;
+
+                    case '7.1': config.WELCOME = "true"; successMsg = "Welcome: ON"; break;
+                    case '7.2': config.WELCOME = "false"; successMsg = "Welcome: OFF"; break;
+                    case '7.3': config.ADMIN_EVENTS = "true"; successMsg = "Admin Events: ON"; break;
+                    case '7.4': config.ADMIN_EVENTS = "false"; successMsg = "Admin Events: OFF"; break;
+                    case '7.5': config.READ_MESSAGE = "true"; successMsg = "Read Message: ON"; break;
+                    case '7.6': config.READ_MESSAGE = "false"; successMsg = "Read Message: OFF"; break;
+                    case '7.7': config.READ_CMD = "true"; successMsg = "Read Command: ON"; break;
+                    case '7.8': config.READ_CMD = "false"; successMsg = "Read Command: OFF"; break;
+                    default: return;
+                }
+
+                if (successMsg) {
+                    await conn.sendMessage(from, { react: { text: '✅', key: msg.key } });
+                    return reply(`✅ *SETTING UPDATED*\n\n${successMsg}`);
+                }
+            }
+        });
+
+    } catch (e) {
+        console.error(e);
+        reply('An error occurred.');
     }
 });
 

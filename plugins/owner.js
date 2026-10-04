@@ -15,19 +15,16 @@ const OWNER_PATH = path.join(__dirname, "../lib/sudo.json");
 const { S_WHATSAPP_NET } = require('@whiskeysockets/baileys');
 const { setCommitHash, getCommitHash } = require('../lib/updateDB');
 const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson, runtime } = require('../lib/functions');
-
 const SAFETY = {
   MAX_JIDS: 50,
   BASE_DELAY: 2000,
   EXTRA_DELAY: 4000,
 };
-
 const ensureOwnerFile = () => {
   if (!fs.existsSync(OWNER_PATH)) {
     fs.writeFileSync(OWNER_PATH, JSON.stringify([]));
   }
 };
-
 const stylizedChars = {
     a: '🅐', b: '🅑', c: '🅒', d: '🅓', e: '🅔', f: '🅕', g: '🅖',
     h: '🅗', i: '🅘', j: '🅙', k: '🅚', l: '🅛', m: '🅜', n: '🅝',
@@ -36,7 +33,6 @@ const stylizedChars = {
     '0': '⓿', '1': '➊', '2': '➋', '3': '➌', '4': '➍',
     '5': '➎', '6': '➏', '7': '➐', '8': '➑', '9': '➒'
 };
-
 function copyFolderSync(source, target) {
     if (!fs.existsSync(target)) {
         fs.mkdirSync(target, { recursive: true });
@@ -59,7 +55,6 @@ function copyFolderSync(source, target) {
         }
     }
 }
-
 const linkPatterns = [
   /https?:\/\/(?:chat\.whatsapp\.com|wa\.me)\/\S+/gi,
   /^https?:\/\/(www\.)?whatsapp\.com\/channel\/([a-zA-Z0-9_-]+)$/,
@@ -104,16 +99,6 @@ async (conn, mek, m, { from, body, isOwner }) => {
    );
 
 cmd({
-    pattern: "shutdown",
-    react: "🛑",
-    filename: __filename
-},
-async (conn, mek, m, { from, isOwner, reply }) => {
-    if (!isOwner) return reply("❌ You are not the owner!");
-    reply("🛑 Shutting down...").then(() => process.exit());
-});
-
-cmd({
   on: "body"
 }, async (conn, mek, m, { from }) => {
   try {
@@ -123,6 +108,16 @@ cmd({
   } catch (e) {
     console.error("[Presence Error]", e);
   }
+});
+
+cmd({
+    pattern: "shutdown",
+    react: "🛑",
+    filename: __filename
+},
+async (conn, mek, m, { from, isOwner, reply }) => {
+    if (!isOwner) return reply("❌ You are not the owner!");
+    reply("🛑 Shutting down...").then(() => process.exit());
 });
 
 cmd({
@@ -153,35 +148,28 @@ cmd({
 });
 
 cmd({
-    pattern: "setprefix",
-    alias: ["prefix"],
-    react: "🔧",
-    filename: __filename,
-}, async (conn, mek, m, { from, args, isCreator, reply }) => {
-    if (!isCreator) return reply("*📛 Only the owner can use this command!*");
-
-    const newPrefix = args[0];
-    if (!newPrefix) return reply("❌ Please provide a new prefix. Example: `.setprefix !`");
-
-    config.PREFIX = newPrefix;
-
-    return reply(`✅ Prefix successfully changed to *${newPrefix}*`);
-});
-
-cmd({
-    pattern: "broadcast",
-    react: "📢",
-    filename: __filename
-},
-async (conn, mek, m, { from, isOwner, args, reply }) => {
-    if (!isOwner) return reply("❌ You are not the owner!");
-    if (args.length === 0) return reply("📢 Please provide a message to broadcast.");
-    const message = args.join(' ');
-    const groups = Object.keys(await conn.groupFetchAllParticipating());
-    for (const groupId of groups) {
-        await conn.sendMessage(groupId, { text: message }, { quoted: mek });
+  on: 'body'
+}, async (conn, m, store, {
+  from,
+  body,
+  sender,
+  isGroup,
+  isAdmins,
+  isBotAdmins
+}) => {
+  try {
+    if (!isGroup || isAdmins || !isBotAdmins) {
+      return;
     }
-    reply("📢 Message broadcasted to all groups.");
+
+    const containsLink = linkPatterns.some(pattern => pattern.test(body));
+
+    if (containsLink && config.DELETE_LINKS === 'true') {
+      await conn.sendMessage(from, { delete: m.key }, { quoted: m });
+    }
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 cmd({
@@ -202,37 +190,19 @@ async (conn, mek, m, { from, body, isOwner }) => {
 });
 
 cmd({
-    pattern: "auto-typing",
-    description: "Enable or disable auto-typing feature.",
-    filename: __filename
-},    
-async (conn, mek, m, { from, args, isCreator, reply }) => {
-    if (!isCreator) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
+    pattern: "setprefix",
+    alias: ["prefix"],
+    react: "🔧",
+    filename: __filename,
+}, async (conn, mek, m, { from, args, isCreator, reply }) => {
+    if (!isCreator) return reply("*📛 Only the owner can use this command!*");
 
-    const status = args[0]?.toLowerCase();
-    if (!["on", "off"].includes(status)) {
-        return reply("*🫟 ᴇxᴀᴍᴘʟᴇ:  .ᴀᴜᴛᴏ-ᴛʏᴘɪɴɢ ᴏɴ*");
-    }
+    const newPrefix = args[0];
+    if (!newPrefix) return reply("❌ Please provide a new prefix. Example: `.setprefix !`");
 
-    config.AUTO_TYPING = status === "on" ? "true" : "false";
-    return reply(`Auto typing has been turned ${status}.`);
-});
+    config.PREFIX = newPrefix;
 
-cmd({
-    pattern: "setpp",
-    react: "🖼️",
-    filename: __filename
-},
-async (conn, mek, m, { from, isOwner, quoted, reply }) => {
-    if (!isOwner) return reply("❌ You are not the owner!");
-    if (!quoted || !quoted.message.imageMessage) return reply("❌ Please reply to an image.");
-    try {
-        const media = await conn.downloadMediaMessage(quoted);
-        await conn.updateProfilePicture(conn.user.jid, { url: media });
-        reply("🖼️ Profile picture updated successfully!");
-    } catch (error) {
-        reply(`❌ Error updating profile picture: ${error.message}`);
-    }
+    return reply(`✅ Prefix successfully changed to *${newPrefix}*`);
 });
 
 cmd({
@@ -254,21 +224,56 @@ async (conn, mek, m, { from, isOwner, reply }) => {
 });
 
 cmd({
-    pattern: "updatebio",
-    react: "🥏",
-    use: '.updatebio',
+    pattern: "auto-typing",
+    description: "Enable or disable auto-typing feature.",
+    filename: __filename
+},    
+async (conn, mek, m, { from, args, isCreator, reply }) => {
+    if (!isCreator) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
+
+    const status = args[0]?.toLowerCase();
+    if (!["on", "off"].includes(status)) {
+        return reply("*🫟 ᴇxᴀᴍᴘʟᴇ:  .ᴀᴜᴛᴏ-ᴛʏᴘɪɴɢ ᴏɴ*");
+    }
+
+    config.AUTO_TYPING = status === "on" ? "true" : "false";
+    return reply(`Auto typing has been turned ${status}.`);
+});
+
+cmd({
+    pattern: "broadcast",
+    react: "📢",
     filename: __filename
 },
-async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
-        if (!isOwner) return reply('🚫 *You must be an Owner to use this command*');
-        if (!q) return reply('❓ *Enter the New Bio*');
-        if (q.length > 139) return reply('❗ *Sorry! Character limit exceeded*');
-        await conn.updateProfileStatus(q);
-        await conn.sendMessage(from, { text: "✔️ *New Bio Added Successfully*" }, { quoted: mek });
-    } catch (e) {
-        reply('🚫 *An error occurred!*\n\n' + e);
-        l(e);
+async (conn, mek, m, { from, isOwner, args, reply }) => {
+    if (!isOwner) return reply("❌ You are not the owner!");
+    if (args.length === 0) return reply("📢 Please provide a message to broadcast.");
+    const message = args.join(' ');
+    const groups = Object.keys(await conn.groupFetchAllParticipating());
+    for (const groupId of groups) {
+        await conn.sendMessage(groupId, { text: message }, { quoted: mek });
+    }
+    reply("📢 Message broadcasted to all groups.");
+});
+
+cmd({
+    pattern: "chatbot",
+    alias: ["chatb"],
+    react: "🎊",
+    filename: __filename
+},
+async (conn, mek, m, { from, args, isCreator, reply }) => {
+    if (!isCreator) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
+
+    const status = args[0]?.toLowerCase();
+    if (status === "on") {
+        config.CHAT_BOT = "true";
+        return reply("✅ Chat-Bot are now enabled.");
+    } else if (status === "off") {
+        config.CHAT_BOT = "false";
+        return reply("❌ Chat-Bot are now disabled.");
+    } else {
+        return reply(`Example: .chatbot on`);
     }
 });
 
@@ -289,6 +294,23 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
         return reply("❌ Welcome messages are now disabled.");
     } else {
         return reply(`Example: .welcome on`);
+    }
+});
+
+cmd({
+    pattern: "setpp",
+    react: "🖼️",
+    filename: __filename
+},
+async (conn, mek, m, { from, isOwner, quoted, reply }) => {
+    if (!isOwner) return reply("❌ You are not the owner!");
+    if (!quoted || !quoted.message.imageMessage) return reply("❌ Please reply to an image.");
+    try {
+        const media = await conn.downloadMediaMessage(quoted);
+        await conn.updateProfilePicture(conn.user.jid, { url: media });
+        reply("🖼️ Profile picture updated successfully!");
+    } catch (error) {
+        reply(`❌ Error updating profile picture: ${error.message}`);
     }
 });
 
@@ -390,6 +412,34 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
     } else {
         return reply(`_example:  .readmessage on_`);
     }
+});
+
+cmd({
+  pattern: 'jid2',
+  filename: __filename
+}, async (conn, mek, m, { q, quoted, sender, reply }) => {
+  try {
+    let targetJid;
+    
+    if (m.quoted) {
+      targetJid = m.quoted.sender;
+    } 
+    else if (q) {
+      let number = q.replace(/[^0-9]/g, '');
+      if (!number) {
+        return reply("❌ Please provide a valid number.");
+      }
+      targetJid = number + '@s.whatsapp.net';
+    } 
+    else {
+      targetJid = sender;
+    }
+    
+    await reply(`User JID: ${targetJid}`);
+  } catch (error) {
+    console.error("Error in getjid command:", error);
+    await reply(`❌ Error: ${error}`);
+  }
 });
 
 cmd({
@@ -513,27 +563,6 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
 });
 
 cmd({
-    pattern: "chatbot",
-    alias: ["chatb"],
-    react: "🎊",
-    filename: __filename
-},
-async (conn, mek, m, { from, args, isCreator, reply }) => {
-    if (!isCreator) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
-
-    const status = args[0]?.toLowerCase();
-    if (status === "on") {
-        config.CHAT_BOT = "true";
-        return reply("✅ Chat-Bot are now enabled.");
-    } else if (status === "off") {
-        config.CHAT_BOT = "false";
-        return reply("❌ Chat-Bot are now disabled.");
-    } else {
-        return reply(`Example: .chatbot on`);
-    }
-});
-
-cmd({
     pattern: "heartreact",
     react: "💖",
     alias: ["heart"],
@@ -551,231 +580,6 @@ cmd({
         return reply("💔 Heart react is now disabled.");
     } else {
         return reply("*🔥 Example: .heartreact on* or *[.heartreact off]*");
-    }
-});
-
-cmd({
-  on: 'body'
-}, async (conn, m, store, {
-  from,
-  body,
-  sender,
-  isGroup,
-  isAdmins,
-  isBotAdmins
-}) => {
-  try {
-    if (!isGroup || isAdmins || !isBotAdmins) {
-      return;
-    }
-
-    const containsLink = linkPatterns.some(pattern => pattern.test(body));
-
-    if (containsLink && config.DELETE_LINKS === 'true') {
-      await conn.sendMessage(from, { delete: m.key }, { quoted: m });
-    }
-  } catch (error) {
-    console.error(error);
-  }
-});
-
-cmd({
-  'on': "body"
-}, async (conn, m, store, {
-  from,
-  body,
-  isGroup,
-  isAdmins,
-  isBotAdmins,
-  reply,
-  sender
-}) => {
-  try {
-    const badWords = ["wtf", "mia", "xxx", "fuck", 'sex', "huththa", "pakaya", 'ponnaya', "hutto"];
-
-    if (!isGroup || isAdmins || !isBotAdmins) {
-      return;
-    }
-
-    const messageText = body.toLowerCase();
-    const containsBadWord = badWords.some(word => messageText.includes(word));
-
-    if (containsBadWord && config.ANTI_BAD_WORD === "true") {
-      await conn.sendMessage(from, { 'delete': m.key }, { 'quoted': m });
-      await conn.sendMessage(from, { 'text': "🚫 ⚠️ BAD WORDS NOT ALLOWED ⚠️ 🚫" }, { 'quoted': m });
-    }
-  } catch (error) {
-    console.error(error);
-    reply("An error occurred while processing the message.");
-  }
-});
-
-cmd({
-  'on': "body"
-}, async (conn, m, store, {
-  from,
-  body,
-  sender,
-  isGroup,
-  isAdmins,
-  isBotAdmins,
-  reply
-}) => {
-  try {
-    if (!isGroup || isAdmins || !isBotAdmins) {
-      return;
-    }
-
-    const containsLink = linkPatterns.some(pattern => pattern.test(body));
-
-    if (containsLink && config.ANTI_LINK_KICK === 'true') {
-      await conn.sendMessage(from, { 'delete': m.key }, { 'quoted': m });
-      await conn.sendMessage(from, {
-        'text': `⚠️ Links are not allowed in this group.\n@${sender.split('@')[0]} has been removed. 🚫`,
-        'mentions': [sender]
-      }, { 'quoted': m });
-
-      await conn.groupParticipantsUpdate(from, [sender], "remove");
-    }
-  } catch (error) {
-    console.error(error);
-    reply("An error occurred while processing the message.");
-  }
-});
-
-cmd({
-    pattern: "channelreact",
-    alias: ["creact"],
-    react: "🔤",
-    use: '.chr <channel-link> <text>',
-    filename: __filename
-},
-async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
-        if (!isCreator) return reply("❌ Owner only command");
-        if (!q) return reply(`Usage:\n${command} https://whatsapp.com/channel/1234567890 hello`);
-
-        const [link, ...textParts] = q.split(' ');
-        if (!link.includes("whatsapp.com/channel/")) return reply("Invalid channel link format");
-        
-        const inputText = textParts.join(' ').toLowerCase();
-        if (!inputText) return reply("Please provide text to convert");
-
-        const emoji = inputText
-            .split('')
-            .map(char => {
-                if (char === ' ') return '―';
-                return stylizedChars[char] || char;
-            })
-            .join('');
-
-        const channelId = link.split('/')[4];
-        const messageId = link.split('/')[5];
-        if (!channelId || !messageId) return reply("Invalid link - missing IDs");
-
-        const channelMeta = await conn.newsletterMetadata("invite", channelId);
-        await conn.newsletterReactMessage(channelMeta.id, messageId, emoji);
-
-        return reply(`
-╭━━〔 *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 〕┈⊷
-┃▸ *Success!* Reaction sent
-┃▸ *Channel:* ${channelMeta.name}
-┃▸ *Reaction:* ${emoji}
-╰─────┈⊷
-> *© Pᴏᴡᴇʀᴇᴅ Bʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`);
-    } catch (e) {
-        console.error(e);
-        reply(`❎ Error: ${e.message || "Failed to send reaction"}`);
-    }
-});
-
-cmd({
-    pattern: "mention-reply",
-    alias: ["menetionreply", "mee"],
-    description: "Set bot status to always online or offline.",
-    filename: __filename
-},    
-async (conn, mek, m, { from, args, isCreator, reply }) => {
-    if (!isCreator) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
-
-    const status = args[0]?.toLowerCase();
-    if (args[0] === "on") {
-        config.MENTION_REPLY = "true";
-        return reply("Mention Reply feature is now enabled.");
-    } else if (args[0] === "off") {
-        config.MENTION_REPLY = "false";
-        return reply("Mention Reply feature is now disabled.");
-    } else {
-        return reply(`_example:  .mee on_`);
-    }
-});
-
-cmd({
-    pattern: "setonline",
-    react: "🔐",
-    filename: __filename
-}, 
-async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    if (!isOwner) return reply("❌ You are not the owner!");
-
-    try {
-        const value = args[0] || 'all'; 
-        const validValues = ['all', 'match_last_seen'];
-        
-        if (!validValues.includes(value)) {
-            return reply("❌ Invalid option. Valid options are: 'all', 'match_last_seen'.");
-        }
-
-        await conn.updateOnlinePrivacy(value);
-        reply(`✅ Online privacy updated to: ${value}`);
-    } catch (e) {
-        return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
-    }
-});
-
-cmd({
-    pattern: "groupsprivacy",
-    react: "🔐",
-    filename: __filename
-}, 
-async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    if (!isOwner) return reply("❌ You are not the owner!");
-
-    try {
-        const value = args[0] || 'all'; 
-        const validValues = ['all', 'contacts', 'contact_blacklist', 'none'];
-        
-        if (!validValues.includes(value)) {
-            return reply("❌ Invalid option. Valid options are: 'all', 'contacts', 'contact_blacklist', 'none'.");
-        }
-
-        await conn.updateGroupsAddPrivacy(value);
-        reply(`✅ Group add privacy updated to: ${value}`);
-    } catch (e) {
-        return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
-    }
-});
-
-cmd({
-    pattern: "setppall",
-    react: "🔐",
-    filename: __filename
-}, 
-async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    if (!isOwner) return reply("❌ You are not the owner!");
-    
-    try {
-        const value = args[0] || 'all'; 
-        const validValues = ['all', 'contacts', 'contact_blacklist', 'none'];  
-        
-        if (!validValues.includes(value)) {
-            return reply("❌ Invalid option. Valid options are: 'all', 'contacts', 'contact_blacklist', 'none'.");
-        }
-        
-        await conn.updateProfilePicturePrivacy(value);
-        reply(`✅ Profile picture privacy updated to: ${value}`);
-    } catch (e) {
-        return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
     }
 });
 
@@ -804,6 +608,48 @@ cmd({
 });
 
 cmd({
+    pattern: "customreact",
+    react: "💖",
+    alias: ["creact"],
+    filename: __filename,
+}, async (conn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
+
+    const option = args[0]?.toLowerCase();
+    
+    if (option === "on" || option === "true") {
+        config.CUSTOM_REACT = "true";
+        return reply("❤️ Custom react is now enabled.");
+    } else if (option === "off" || option === "false") {
+        config.CUSTOM_REACT = "false";
+        return reply("💔 Custom react is now disabled.");
+    } else {
+        return reply("*🔥 Example: .customreact on* or *[.customreact off]*");
+    }
+});
+
+cmd({
+    pattern: "mention-reply",
+    alias: ["menetionreply", "mee"],
+    description: "Set bot status to always online or offline.",
+    filename: __filename
+},    
+async (conn, mek, m, { from, args, isCreator, reply }) => {
+    if (!isCreator) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
+
+    const status = args[0]?.toLowerCase();
+    if (args[0] === "on") {
+        config.MENTION_REPLY = "true";
+        return reply("Mention Reply feature is now enabled.");
+    } else if (args[0] === "off") {
+        config.MENTION_REPLY = "false";
+        return reply("Mention Reply feature is now disabled.");
+    } else {
+        return reply(`_example:  .mee on_`);
+    }
+});
+
+cmd({
 pattern: "delete",
 react: "❌",
 alias: ["del"],
@@ -828,26 +674,29 @@ reply('successful..👨‍💻✅')
 })
 
 cmd({
-    pattern: "auto-recording",
-    alias: ["autorecoding"],
-    description: "Enable or disable auto-recording feature.",
+    pattern: "blocklist",
+    react: "📋",
     filename: __filename
-},    
-async (conn, mek, m, { from, args, isCreator, reply }) => {
-    if (!isCreator) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
+},
+async (conn, mek, m, { from, isOwner, reply }) => {
+    if (!isOwner) return reply("*📛 You are not the owner!*");
 
-    const status = args[0]?.toLowerCase();
-    if (!["on", "off"].includes(status)) {
-        return reply("*🫟 ᴇxᴀᴍᴘʟᴇ: .ᴀᴜᴛᴏ-ʀᴇᴄᴏʀᴅɪɴɢ ᴏɴ*");
-    }
+    try {
+        const blockedUsers = await conn.fetchBlocklist();
 
-    config.AUTO_RECORDING = status === "on" ? "true" : "false";
-    if (status === "on") {
-        await conn.sendPresenceUpdate("recording", from);
-        return reply("Auto recording is now enabled. Bot is recording...");
-    } else {
-        await conn.sendPresenceUpdate("available", from);
-        return reply("Auto recording has been disabled.");
+        if (blockedUsers.length === 0) {
+            return reply("📋 Your block list is empty.");
+        }
+
+        const list = blockedUsers
+            .map((user, i) => `🚧 BLOCKED ${user.split('@')[0]}`)
+            .join('\n');
+
+        const count = blockedUsers.length;
+        reply(`📋 Blocked Users (${count}):\n\n${list}`);
+    } catch (err) {
+        console.error(err);
+        reply(`❌ Failed to fetch block list: ${err.message}`);
     }
 });
 
@@ -952,83 +801,33 @@ cmd({
 });
 
 cmd({
-    pattern: "setpp",
-    react: "🖼️",
-    filename: __filename
-},
-async (conn, mek, m, { from, isOwner, quoted, reply }) => {
-    if (!isOwner) return reply("❌ You are not the owner!");
-    if (!quoted || !quoted.message.imageMessage) return reply("❌ Please reply to an image.");
-    try {
-        const stream = await downloadContentFromMessage(quoted.message.imageMessage, 'image');
-        let buffer = Buffer.from([]);
-        for await (const chunk of stream) {
-            buffer = Buffer.concat([buffer, chunk]);
-        }
-
-        const mediaPath = path.join(__dirname, `${Date.now()}.jpg`);
-        fs.writeFileSync(mediaPath, buffer);
-
-        await conn.updateProfilePicture(conn.user.jid, { url: `file://${mediaPath}` });
-        reply("🖼️ Profile picture updated successfully!");
-    } catch (error) {
-        console.error("Error updating profile picture:", error);
-        reply(`❌ Error updating profile picture: ${error.message}`);
-    }
-});
-
-cmd({
-    pattern: "blocklist",
-    react: "📋",
-    filename: __filename
-},
-async (conn, mek, m, { from, isOwner, reply }) => {
-    if (!isOwner) return reply("*📛 You are not the owner!*");
-
-    try {
-        const blockedUsers = await conn.fetchBlocklist();
-
-        if (blockedUsers.length === 0) {
-            return reply("📋 Your block list is empty.");
-        }
-
-        const list = blockedUsers
-            .map((user, i) => `🚧 BLOCKED ${user.split('@')[0]}`)
-            .join('\n');
-
-        const count = blockedUsers.length;
-        reply(`📋 Blocked Users (${count}):\n\n${list}`);
-    } catch (err) {
-        console.error(err);
-        reply(`❌ Failed to fetch block list: ${err.message}`);
-    }
-});
-
-cmd({
-  pattern: 'jid2',
-  filename: __filename
-}, async (conn, mek, m, { q, quoted, sender, reply }) => {
+  'on': "body"
+}, async (conn, m, store, {
+  from,
+  body,
+  isGroup,
+  isAdmins,
+  isBotAdmins,
+  reply,
+  sender
+}) => {
   try {
-    let targetJid;
-    
-    if (m.quoted) {
-      targetJid = m.quoted.sender;
-    } 
-    else if (q) {
-      let number = q.replace(/[^0-9]/g, '');
-      if (!number) {
-        return reply("❌ Please provide a valid number.");
-      }
-      targetJid = number + '@s.whatsapp.net';
-    } 
-    else {
-      targetJid = sender;
+    const badWords = ["wtf", "mia", "xxx", "fuck", 'sex', "huththa", "pakaya", 'ponnaya', "hutto"];
+
+    if (!isGroup || isAdmins || !isBotAdmins) {
+      return;
     }
-    
-    await reply(`User JID: ${targetJid}`);
+
+    const messageText = body.toLowerCase();
+    const containsBadWord = badWords.some(word => messageText.includes(word));
+
+    if (containsBadWord && config.ANTI_BAD_WORD === "true") {
+      await conn.sendMessage(from, { 'delete': m.key }, { 'quoted': m });
+      await conn.sendMessage(from, { 'text': "🚫 ⚠️ BAD WORDS NOT ALLOWED ⚠️ 🚫" }, { 'quoted': m });
+    }
   } catch (error) {
-    console.error("Error in getjid command:", error);
-    await reply(`❌ Error: ${error}`);
+    console.error(error);
+    reply("An error occurred while processing the message.");
   }
 });
 
@@ -1061,30 +860,78 @@ async (conn, mek, m, { from, isOwner, reply, args }) => {
 });
 
 cmd({
-    pattern: "getprivacy",
-    use: '.getprivacy',
+    pattern: "updatebio",
+    react: "🥏",
+    use: '.updatebio',
     filename: __filename
 },
 async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
     try {
         if (!isOwner) return reply('🚫 *You must be an Owner to use this command*');
-        const duka = await conn.fetchPrivacySettings?.(true);
-        if (!duka) return reply('🚫 *Failed to fetch privacy settings*');
-        
-        let puka = `
-╭───「 𝙿𝚁𝙸𝚅𝙰𝙲𝚈  」───◆  
-│ ∘ 𝚁𝚎𝚊𝚍 𝚁𝚎𝚌𝚎𝚒𝚙𝚝: ${duka.readreceipts}  
-│ ∘ 𝙿𝚛𝚘𝚏𝚒𝚕𝚎 𝙿𝚒𝚌𝚝𝚞𝚛𝚎: ${duka.profile}  
-│ ∘ 𝚂𝚝𝚊𝚝𝚞𝚜: ${duka.status}  
-│ ∘ 𝙾𝚗𝚕𝚒𝚗𝚎: ${duka.online}  
-│ ∘ 𝙻𝚊𝚜𝚝 𝚂𝚎𝚎𝚗: ${duka.last}  
-│ ∘ 𝙶𝚛𝚘𝚞𝚙 𝙿𝚛𝚒𝚟𝚊𝚌𝚢: ${duka.groupadd}  
-│ ∘ 𝙲𝚊𝚕𝚕 𝙿𝚛𝚒𝚟𝚊𝚌𝚢: ${duka.calladd}  
-╰────────────────────`;
-        await conn.sendMessage(from, { text: puka }, { quoted: mek });
+        if (!q) return reply('❓ *Enter the New Bio*');
+        if (q.length > 139) return reply('❗ *Sorry! Character limit exceeded*');
+        await conn.updateProfileStatus(q);
+        await conn.sendMessage(from, { text: "✔️ *New Bio Added Successfully*" }, { quoted: mek });
     } catch (e) {
         reply('🚫 *An error occurred!*\n\n' + e);
         l(e);
+    }
+});
+
+cmd({
+  'on': "body"
+}, async (conn, m, store, {
+  from,
+  body,
+  sender,
+  isGroup,
+  isAdmins,
+  isBotAdmins,
+  reply
+}) => {
+  try {
+    if (!isGroup || isAdmins || !isBotAdmins) {
+      return;
+    }
+
+    const containsLink = linkPatterns.some(pattern => pattern.test(body));
+
+    if (containsLink && config.ANTI_LINK_KICK === 'true') {
+      await conn.sendMessage(from, { 'delete': m.key }, { 'quoted': m });
+      await conn.sendMessage(from, {
+        'text': `⚠️ Links are not allowed in this group.\n@${sender.split('@')[0]} has been removed. 🚫`,
+        'mentions': [sender]
+      }, { 'quoted': m });
+
+      await conn.groupParticipantsUpdate(from, [sender], "remove");
+    }
+  } catch (error) {
+    console.error(error);
+    reply("An error occurred while processing the message.");
+  }
+});
+
+cmd({
+    pattern: "auto-recording",
+    alias: ["autorecoding"],
+    description: "Enable or disable auto-recording feature.",
+    filename: __filename
+},    
+async (conn, mek, m, { from, args, isCreator, reply }) => {
+    if (!isCreator) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
+
+    const status = args[0]?.toLowerCase();
+    if (!["on", "off"].includes(status)) {
+        return reply("*🫟 ᴇxᴀᴍᴘʟᴇ: .ᴀᴜᴛᴏ-ʀᴇᴄᴏʀᴅɪɴɢ ᴏɴ*");
+    }
+
+    config.AUTO_RECORDING = status === "on" ? "true" : "false";
+    if (status === "on") {
+        await conn.sendPresenceUpdate("recording", from);
+        return reply("Auto recording is now enabled. Bot is recording...");
+    } else {
+        await conn.sendPresenceUpdate("available", from);
+        return reply("Auto recording has been disabled.");
     }
 });
 
@@ -1114,6 +961,29 @@ cmd({
     } catch (err) {
         console.error(err);
         reply("❌ Error: " + err.message);
+    }
+});
+
+cmd({
+    pattern: "setonline",
+    react: "🔐",
+    filename: __filename
+}, 
+async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    if (!isOwner) return reply("❌ You are not the owner!");
+
+    try {
+        const value = args[0] || 'all'; 
+        const validValues = ['all', 'match_last_seen'];
+        
+        if (!validValues.includes(value)) {
+            return reply("❌ Invalid option. Valid options are: 'all', 'match_last_seen'.");
+        }
+
+        await conn.updateOnlinePrivacy(value);
+        reply(`✅ Online privacy updated to: ${value}`);
+    } catch (e) {
+        return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
     }
 });
 
@@ -1149,6 +1019,192 @@ cmd({
 });
 
 cmd({
+    pattern: "groupsprivacy",
+    react: "🔐",
+    filename: __filename
+}, 
+async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    if (!isOwner) return reply("❌ You are not the owner!");
+
+    try {
+        const value = args[0] || 'all'; 
+        const validValues = ['all', 'contacts', 'contact_blacklist', 'none'];
+        
+        if (!validValues.includes(value)) {
+            return reply("❌ Invalid option. Valid options are: 'all', 'contacts', 'contact_blacklist', 'none'.");
+        }
+
+        await conn.updateGroupsAddPrivacy(value);
+        reply(`✅ Group add privacy updated to: ${value}`);
+    } catch (e) {
+        return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
+    }
+});
+
+cmd({
+    pattern: "setppall",
+    react: "🔐",
+    filename: __filename
+}, 
+async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    if (!isOwner) return reply("❌ You are not the owner!");
+    
+    try {
+        const value = args[0] || 'all'; 
+        const validValues = ['all', 'contacts', 'contact_blacklist', 'none'];  
+        
+        if (!validValues.includes(value)) {
+            return reply("❌ Invalid option. Valid options are: 'all', 'contacts', 'contact_blacklist', 'none'.");
+        }
+        
+        await conn.updateProfilePicturePrivacy(value);
+        reply(`✅ Profile picture privacy updated to: ${value}`);
+    } catch (e) {
+        return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
+    }
+});
+
+cmd({
+    pattern: "setpp",
+    react: "🖼️",
+    filename: __filename
+},
+async (conn, mek, m, { from, isOwner, quoted, reply }) => {
+    if (!isOwner) return reply("❌ You are not the owner!");
+    if (!quoted || !quoted.message.imageMessage) return reply("❌ Please reply to an image.");
+    try {
+        const stream = await downloadContentFromMessage(quoted.message.imageMessage, 'image');
+        let buffer = Buffer.from([]);
+        for await (const chunk of stream) {
+            buffer = Buffer.concat([buffer, chunk]);
+        }
+
+        const mediaPath = path.join(__dirname, `${Date.now()}.jpg`);
+        fs.writeFileSync(mediaPath, buffer);
+
+        await conn.updateProfilePicture(conn.user.jid, { url: `file://${mediaPath}` });
+        reply("🖼️ Profile picture updated successfully!");
+    } catch (error) {
+        console.error("Error updating profile picture:", error);
+        reply(`❌ Error updating profile picture: ${error.message}`);
+    }
+});
+
+cmd({
+    pattern: "block",
+    react: "🚫",
+    filename: __filename
+},
+async (conn, m, { reply, q, react }) => {
+    const botOwner = conn.user.id.split(":")[0] + "@s.whatsapp.net";
+    
+    if (m.sender !== botOwner) {
+        await react("❌");
+        return reply("Only the bot owner can use this command.");
+    }
+
+    let jid;
+    if (m.quoted) {
+        jid = m.quoted.sender;
+    } else if (m.mentionedJid.length > 0) {
+        jid = m.mentionedJid[0];
+    } else if (q && q.includes("@")) {
+        jid = q.replace(/[@\s]/g, '') + "@s.whatsapp.net";
+    } else {
+        await react("❌");
+        return reply("Please mention a user or reply to their message.");
+    }
+
+    try {
+        await conn.updateBlockStatus(jid, "block");
+        await react("✅");
+        reply(`Successfully blocked @${jid.split("@")[0]}`, { mentions: [jid] });
+    } catch (error) {
+        console.error("Block command error:", error);
+        await react("❌");
+        reply("Failed to block the user.");
+    }
+});
+
+cmd({
+    pattern: "fullpp",
+    alias: ["pp"],
+    filename: __filename
+},
+async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+
+try {
+  let ig = await m.quoted.download();
+  
+  const jimp = await Jimp.read(ig),
+    min = jimp.getWidth(),
+    max = jimp.getHeight(),
+    cropped = jimp.crop(0, 0, min, max);
+  
+  const img = await cropped.scaleToFit(720, 720).getBufferAsync(Jimp.MIME_JPEG);
+  const preview = await cropped.normalize().getBufferAsync(Jimp.MIME_JPEG);
+
+  await conn.query({
+    tag: 'iq',
+    attrs: {
+      to: S_WHATSAPP_NET,
+      type: 'set',
+      xmlns: 'w:profile:picture',
+    },
+    content: [
+      {
+        tag: 'picture',
+        attrs: { type: 'image' },
+        content: img,
+      },
+    ],
+  });
+  
+  return m.reply( "done");
+} catch (err) {
+  console.error('Error:', err);
+  return err;
+}
+
+})
+
+cmd({
+    pattern: "unblock",
+    react: "🔓",
+    filename: __filename
+},
+async (conn, m, { reply, q, react }) => {
+    const botOwner = conn.user.id.split(":")[0] + "@s.whatsapp.net";
+
+    if (m.sender !== botOwner) {
+        await react("❌");
+        return reply("Only the bot owner can use this command.");
+    }
+
+    let jid;
+    if (m.quoted) {
+        jid = m.quoted.sender;
+    } else if (m.mentionedJid.length > 0) {
+        jid = m.mentionedJid[0];
+    } else if (q && q.includes("@")) {
+        jid = q.replace(/[@\s]/g, '') + "@s.whatsapp.net";
+    } else {
+        await react("❌");
+        return reply("Please mention a user or reply to their message.");
+    }
+
+    try {
+        await conn.updateBlockStatus(jid, "unblock");
+        await react("✅");
+        reply(`Successfully unblocked @${jid.split("@")[0]}`, { mentions: [jid] });
+    } catch (error) {
+        console.error("Unblock command error:", error);
+        await react("❌");
+        reply("Failed to unblock the user.");
+    }
+});
+
+cmd({
   pattern: "broadcast",
   filename: __filename,
   use: "<text for broadcast.>"
@@ -1178,39 +1234,6 @@ cmd({
   } catch (err) {
     await m.error(`❌ Error: ${err}\n\nCommand: broadcast`, err);
   }
-});
-
-cmd({
-    pattern: "antidelete",
-    filename: __filename
-},
-async (conn, mek, m, { from, reply, text, isCreator }) => {
-    if (!isCreator) return reply('This command is only for the bot owner');
-    
-    try {
-        const currentStatus = await getAnti();
-        
-        if (!text || text.toLowerCase() === 'status') {
-            return reply(`*AntiDelete Status:* ${currentStatus ? '✅ ON' : '❌ OFF'}\n\nUsage:\n• .antidelete on - Enable\n• .antidelete off - Disable`);
-        }
-        
-        const action = text.toLowerCase().trim();
-        
-        if (action === 'on') {
-            await setAnti(true);
-            return reply('✅ Anti-delete has been enabled');
-        } 
-        else if (action === 'off') {
-            await setAnti(false);
-            return reply('❌ Anti-delete has been disabled');
-        } 
-        else {
-            return reply('Invalid command. Usage:\n• .antidelete on\n• .antidelete off\n• .antidelete status');
-        }
-    } catch (e) {
-        console.error("Error in antidelete command:", e);
-        return reply("An error occurred while processing your request.");
-    }
 });
 
 cmd({
@@ -1284,6 +1307,67 @@ cmd({
 });
 
 cmd({
+    pattern: "getprivacy",
+    use: '.getprivacy',
+    filename: __filename
+},
+async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+        if (!isOwner) return reply('🚫 *You must be an Owner to use this command*');
+        const duka = await conn.fetchPrivacySettings?.(true);
+        if (!duka) return reply('🚫 *Failed to fetch privacy settings*');
+        
+        let puka = `
+╭───「 𝙿𝚁𝙸𝚅𝙰𝙲𝚈  」───◆  
+│ ∘ 𝚁𝚎𝚊𝚍 𝚁𝚎𝚌𝚎𝚒𝚙𝚝: ${duka.readreceipts}  
+│ ∘ 𝙿𝚛𝚘𝚏𝚒𝚕𝚎 𝙿𝚒𝚌𝚝𝚞𝚛𝚎: ${duka.profile}  
+│ ∘ 𝚂𝚝𝚊𝚝𝚞𝚜: ${duka.status}  
+│ ∘ 𝙾𝚗𝚕𝚒𝚗𝚎: ${duka.online}  
+│ ∘ 𝙻𝚊𝚜𝚝 𝚂𝚎𝚎𝚗: ${duka.last}  
+│ ∘ 𝙶𝚛𝚘𝚞𝚙 𝙿𝚛𝚒𝚟𝚊𝚌𝚢: ${duka.groupadd}  
+│ ∘ 𝙲𝚊𝚕𝚕 𝙿𝚛𝚒𝚟𝚊𝚌𝚢: ${duka.calladd}  
+╰────────────────────`;
+        await conn.sendMessage(from, { text: puka }, { quoted: mek });
+    } catch (e) {
+        reply('🚫 *An error occurred!*\n\n' + e);
+        l(e);
+    }
+});
+
+cmd({
+    pattern: "antidelete",
+    filename: __filename
+},
+async (conn, mek, m, { from, reply, text, isCreator }) => {
+    if (!isCreator) return reply('This command is only for the bot owner');
+    
+    try {
+        const currentStatus = await getAnti();
+        
+        if (!text || text.toLowerCase() === 'status') {
+            return reply(`*AntiDelete Status:* ${currentStatus ? '✅ ON' : '❌ OFF'}\n\nUsage:\n• .antidelete on - Enable\n• .antidelete off - Disable`);
+        }
+        
+        const action = text.toLowerCase().trim();
+        
+        if (action === 'on') {
+            await setAnti(true);
+            return reply('✅ Anti-delete has been enabled');
+        } 
+        else if (action === 'off') {
+            await setAnti(false);
+            return reply('❌ Anti-delete has been disabled');
+        } 
+        else {
+            return reply('Invalid command. Usage:\n• .antidelete on\n• .antidelete off\n• .antidelete status');
+        }
+    } catch (e) {
+        console.error("Error in antidelete command:", e);
+        return reply("An error occurred while processing your request.");
+    }
+});
+
+cmd({
     pattern: "delsudo",
     alias: ["delowner", "deletesudo"],
     react: "🫩",
@@ -1315,78 +1399,6 @@ cmd({
     } catch (err) {
         console.error(err);
         reply("❌ Error: " + err.message);
-    }
-});
-
-cmd({
-    pattern: "block",
-    react: "🚫",
-    filename: __filename
-},
-async (conn, m, { reply, q, react }) => {
-    const botOwner = conn.user.id.split(":")[0] + "@s.whatsapp.net";
-    
-    if (m.sender !== botOwner) {
-        await react("❌");
-        return reply("Only the bot owner can use this command.");
-    }
-
-    let jid;
-    if (m.quoted) {
-        jid = m.quoted.sender;
-    } else if (m.mentionedJid.length > 0) {
-        jid = m.mentionedJid[0];
-    } else if (q && q.includes("@")) {
-        jid = q.replace(/[@\s]/g, '') + "@s.whatsapp.net";
-    } else {
-        await react("❌");
-        return reply("Please mention a user or reply to their message.");
-    }
-
-    try {
-        await conn.updateBlockStatus(jid, "block");
-        await react("✅");
-        reply(`Successfully blocked @${jid.split("@")[0]}`, { mentions: [jid] });
-    } catch (error) {
-        console.error("Block command error:", error);
-        await react("❌");
-        reply("Failed to block the user.");
-    }
-});
-
-cmd({
-    pattern: "unblock",
-    react: "🔓",
-    filename: __filename
-},
-async (conn, m, { reply, q, react }) => {
-    const botOwner = conn.user.id.split(":")[0] + "@s.whatsapp.net";
-
-    if (m.sender !== botOwner) {
-        await react("❌");
-        return reply("Only the bot owner can use this command.");
-    }
-
-    let jid;
-    if (m.quoted) {
-        jid = m.quoted.sender;
-    } else if (m.mentionedJid.length > 0) {
-        jid = m.mentionedJid[0];
-    } else if (q && q.includes("@")) {
-        jid = q.replace(/[@\s]/g, '') + "@s.whatsapp.net";
-    } else {
-        await react("❌");
-        return reply("Please mention a user or reply to their message.");
-    }
-
-    try {
-        await conn.updateBlockStatus(jid, "unblock");
-        await react("✅");
-        reply(`Successfully unblocked @${jid.split("@")[0]}`, { mentions: [jid] });
-    } catch (error) {
-        console.error("Unblock command error:", error);
-        await react("❌");
-        reply("Failed to unblock the user.");
     }
 });
 
@@ -1423,45 +1435,6 @@ cmd({
     } catch (err) {
         console.error(err);
         reply("❌ Error: " + err.message);
-    }
-});
-
-cmd({
-    pattern: 'savecontact',
-    alias: ["vcf","scontact","savecontacts"],
-    filename: __filename
-}, async (conn, mek, m, { from, quoted, body, isCmd, command, args, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
-        if (!isGroup) return reply("This command is for groups only.");
-        if (!isOwner) return reply("*_This command is for the owner only_*");
-
-        let card = quoted || m;
-        let cmiggc = groupMetadata;
-        const { participants } = groupMetadata;
-        
-        let orgiggc = participants.map(a => a.id);
-        let vcard = '';
-        let noPort = 0;
-        
-        for (let a of cmiggc.participants) {
-            vcard += `BEGIN:VCARD\nVERSION:3.0\nFN:[${noPort++}] +${a.id.split("@")[0]}\nTEL;type=CELL;type=VOICE;waid=${a.id.split("@")[0]}:+${a.id.split("@")[0]}\nEND:VCARD\n`;
-        }
-
-        let nmfilect = './contacts.vcf';
-        reply('Saving ' + cmiggc.participants.length + ' participants contact');
-
-        fs.writeFileSync(nmfilect, vcard.trim());
-        await sleep(2000);
-
-        await conn.sendMessage(from, {
-            document: fs.readFileSync(nmfilect), 
-            mimetype: 'text/vcard', 
-            fileName: 'DARK-KNIGHT.vcf', 
-            caption: `\nDone saving.\nGroup Name: *${cmiggc.subject}*\nContacts: *${cmiggc.participants.length}*\n> ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`}, { quoted: mek });
-
-        fs.unlinkSync(nmfilect);
-    } catch (err) {
-        reply(err.toString());
     }
 });
 
@@ -1503,165 +1476,6 @@ cmd({
     } catch (error) {
         console.error(error);
         reply("An error occurred while processing your report.");
-    }
-});
-
-cmd({
-    pattern: "fullpp",
-    alias: ["pp"],
-    filename: __filename
-},
-async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-
-try {
-  let ig = await m.quoted.download();
-  
-  const jimp = await Jimp.read(ig),
-    min = jimp.getWidth(),
-    max = jimp.getHeight(),
-    cropped = jimp.crop(0, 0, min, max);
-  
-  const img = await cropped.scaleToFit(720, 720).getBufferAsync(Jimp.MIME_JPEG);
-  const preview = await cropped.normalize().getBufferAsync(Jimp.MIME_JPEG);
-
-  await conn.query({
-    tag: 'iq',
-    attrs: {
-      to: S_WHATSAPP_NET,
-      type: 'set',
-      xmlns: 'w:profile:picture',
-    },
-    content: [
-      {
-        tag: 'picture',
-        attrs: { type: 'image' },
-        content: img,
-      },
-    ],
-  });
-  
-  return m.reply( "done");
-} catch (err) {
-  console.error('Error:', err);
-  return err;
-}
-
-})
-
-cmd({
-    pattern: "customreact",
-    react: "💖",
-    alias: ["creact"],
-    filename: __filename,
-}, async (conn, mek, m, { from, args, isOwner, reply }) => {
-    if (!isOwner) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
-
-    const option = args[0]?.toLowerCase();
-    
-    if (option === "on" || option === "true") {
-        config.CUSTOM_REACT = "true";
-        return reply("❤️ Custom react is now enabled.");
-    } else if (option === "off" || option === "false") {
-        config.CUSTOM_REACT = "false";
-        return reply("💔 Custom react is now disabled.");
-    } else {
-        return reply("*🔥 Example: .customreact on* or *[.customreact off]*");
-    }
-});
-
-cmd({
-  pattern: "fullpp2",
-  alias: ["setpp", "setdp"],
-  react: "🖼️",
-  filename: __filename
-}, async (client, message, match, { from, isCreator }) => {
-  try {
-    const botJid = client.user?.id || (client.user.id.split(":")[0] + "@s.whatsapp.net");
-    
-    if (message.sender !== botJid && !isCreator) {
-      return await client.sendMessage(from, {
-        text: "*📛 This command can only be used by the bot or its owner.*"
-      }, { quoted: message });
-    }
-
-    if (!message.quoted || !message.quoted.mtype || !message.quoted.mtype.includes("image")) {
-      return await client.sendMessage(from, {
-        text: "*⚠️ Please reply to an image to set as profile picture*"
-      }, { quoted: message });
-    }
-
-    await client.sendMessage(from, {
-      text: "*⏳ Processing image, please wait...*"
-    }, { quoted: message });
-
-    const imageBuffer = await message.quoted.download();
-    const image = await Jimp.read(imageBuffer);
-
-    const blurredBg = image.clone().cover(640, 640).blur(10);
-    const centeredImage = image.clone().contain(640, 640);
-    blurredBg.composite(centeredImage, 0, 0);
-    const finalImage = await blurredBg.getBufferAsync(Jimp.MIME_JPEG);
-
-    await client.updateProfilePicture(botJid, finalImage);
-
-    await client.sendMessage(from, {
-      text: "*✅ Bot's profile picture updated successfully!*"
-    }, { quoted: message });
-
-  } catch (error) {
-    console.error("fullpp Error:", error);
-    await client.sendMessage(from, {
-      text: `*❌ Error updating profile picture:*\n${error.message}`
-    }, { quoted: message });
-  }
-});
-
-cmd({
-    pattern: "update",
-    alias: ["upgrade", "sync"],
-    react: '🆕',
-    filename: __filename
-}, async (client, message, args, { reply, isOwner }) => {
-    if (!isOwner) return reply("This command is only for the bot owner.");
-
-    try {
-        await reply("🔍 Checking for 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 updates...");
-
-        const { data: commitData } = await axios.get("https://api.github.com/repos/tgeenod/D-K/commits/main");
-        const latestCommitHash = commitData.sha;
-
-        const currentHash = await getCommitHash();
-
-        if (latestCommitHash === currentHash) {
-            return reply("✅ Your 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 bot is already up-to-date!");
-        }
-
-        await reply("🚀 Updating 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 Bot...");
-
-        const zipPath = path.join(__dirname, "latest.zip");
-        const { data: zipData } = await axios.get("https://github.com/tgeenod/D-K/archive/main.zip", { responseType: "arraybuffer" });
-        fs.writeFileSync(zipPath, zipData);
-
-        await reply("📦 Extracting the latest code...");
-        const extractPath = path.join(__dirname, 'latest');
-        const zip = new AdmZip(zipPath);
-        zip.extractAllTo(extractPath, true);
-
-        await reply("🔄 Replacing files...");
-        const sourcePath = path.join(extractPath, "D-K-main");
-        const destinationPath = path.join(__dirname, '..');
-        copyFolderSync(sourcePath, destinationPath);
-
-        await setCommitHash(latestCommitHash);
-
-        fs.unlinkSync(zipPath);
-        fs.rmSync(extractPath, { recursive: true, force: true });
-
-        await reply("✅ Update complete! Restarting the bot...");
-        process.exit(0);
-    } catch (error) {
-        console.error("Update error:", error);
-        return reply("❌ Update failed. Please try manually.");
     }
 });
 
@@ -1778,6 +1592,92 @@ cmd({
 });
 
 cmd({
+  pattern: "fullpp2",
+  alias: ["setpp", "setdp"],
+  react: "🖼️",
+  filename: __filename
+}, async (client, message, match, { from, isCreator }) => {
+  try {
+    const botJid = client.user?.id || (client.user.id.split(":")[0] + "@s.whatsapp.net");
+    
+    if (message.sender !== botJid && !isCreator) {
+      return await client.sendMessage(from, {
+        text: "*📛 This command can only be used by the bot or its owner.*"
+      }, { quoted: message });
+    }
+
+    if (!message.quoted || !message.quoted.mtype || !message.quoted.mtype.includes("image")) {
+      return await client.sendMessage(from, {
+        text: "*⚠️ Please reply to an image to set as profile picture*"
+      }, { quoted: message });
+    }
+
+    await client.sendMessage(from, {
+      text: "*⏳ Processing image, please wait...*"
+    }, { quoted: message });
+
+    const imageBuffer = await message.quoted.download();
+    const image = await Jimp.read(imageBuffer);
+
+    const blurredBg = image.clone().cover(640, 640).blur(10);
+    const centeredImage = image.clone().contain(640, 640);
+    blurredBg.composite(centeredImage, 0, 0);
+    const finalImage = await blurredBg.getBufferAsync(Jimp.MIME_JPEG);
+
+    await client.updateProfilePicture(botJid, finalImage);
+
+    await client.sendMessage(from, {
+      text: "*✅ Bot's profile picture updated successfully!*"
+    }, { quoted: message });
+
+  } catch (error) {
+    console.error("fullpp Error:", error);
+    await client.sendMessage(from, {
+      text: `*❌ Error updating profile picture:*\n${error.message}`
+    }, { quoted: message });
+  }
+});
+
+cmd({
+    pattern: 'savecontact',
+    alias: ["vcf","scontact","savecontacts"],
+    filename: __filename
+}, async (conn, mek, m, { from, quoted, body, isCmd, command, args, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+        if (!isGroup) return reply("This command is for groups only.");
+        if (!isOwner) return reply("*_This command is for the owner only_*");
+
+        let card = quoted || m;
+        let cmiggc = groupMetadata;
+        const { participants } = groupMetadata;
+        
+        let orgiggc = participants.map(a => a.id);
+        let vcard = '';
+        let noPort = 0;
+        
+        for (let a of cmiggc.participants) {
+            vcard += `BEGIN:VCARD\nVERSION:3.0\nFN:[${noPort++}] +${a.id.split("@")[0]}\nTEL;type=CELL;type=VOICE;waid=${a.id.split("@")[0]}:+${a.id.split("@")[0]}\nEND:VCARD\n`;
+        }
+
+        let nmfilect = './contacts.vcf';
+        reply('Saving ' + cmiggc.participants.length + ' participants contact');
+
+        fs.writeFileSync(nmfilect, vcard.trim());
+        await sleep(2000);
+
+        await conn.sendMessage(from, {
+            document: fs.readFileSync(nmfilect), 
+            mimetype: 'text/vcard', 
+            fileName: 'DARK-KNIGHT.vcf', 
+            caption: `\nDone saving.\nGroup Name: *${cmiggc.subject}*\nContacts: *${cmiggc.participants.length}*\n> ᴘᴏᴡᴇʀᴇᴅ ʙʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`}, { quoted: mek });
+
+        fs.unlinkSync(nmfilect);
+    } catch (err) {
+        reply(err.toString());
+    }
+});
+
+cmd({
   pattern: "vv",
   react: '☢️',
   filename: __filename
@@ -1835,6 +1735,52 @@ cmd({
       text: "❌ Error fetching vv message:\n" + error.message
     }, { quoted: message });
   }
+});
+
+cmd({
+    pattern: "channelreact",
+    alias: ["creact"],
+    react: "🔤",
+    use: '.chr <channel-link> <text>',
+    filename: __filename
+},
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+        if (!isCreator) return reply("❌ Owner only command");
+        if (!q) return reply(`Usage:\n${command} https://whatsapp.com/channel/1234567890 hello`);
+
+        const [link, ...textParts] = q.split(' ');
+        if (!link.includes("whatsapp.com/channel/")) return reply("Invalid channel link format");
+        
+        const inputText = textParts.join(' ').toLowerCase();
+        if (!inputText) return reply("Please provide text to convert");
+
+        const emoji = inputText
+            .split('')
+            .map(char => {
+                if (char === ' ') return '―';
+                return stylizedChars[char] || char;
+            })
+            .join('');
+
+        const channelId = link.split('/')[4];
+        const messageId = link.split('/')[5];
+        if (!channelId || !messageId) return reply("Invalid link - missing IDs");
+
+        const channelMeta = await conn.newsletterMetadata("invite", channelId);
+        await conn.newsletterReactMessage(channelMeta.id, messageId, emoji);
+
+        return reply(`
+╭━━〔 *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* 〕┈⊷
+┃▸ *Success!* Reaction sent
+┃▸ *Channel:* ${channelMeta.name}
+┃▸ *Reaction:* ${emoji}
+╰─────┈⊷
+> *© Pᴏᴡᴇʀᴇᴅ Bʏ 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳*`);
+    } catch (e) {
+        console.error(e);
+        reply(`❎ Error: ${e.message || "Failed to send reaction"}`);
+    }
 });
 
 cmd({
@@ -1900,6 +1846,55 @@ cmd({
 });
 
 cmd({
+    pattern: "update",
+    alias: ["upgrade", "sync"],
+    react: '🆕',
+    filename: __filename
+}, async (client, message, args, { reply, isOwner }) => {
+    if (!isOwner) return reply("This command is only for the bot owner.");
+
+    try {
+        await reply("🔍 Checking for 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 updates...");
+
+        const { data: commitData } = await axios.get("https://api.github.com/repos/tgeenod/D-K/commits/main");
+        const latestCommitHash = commitData.sha;
+
+        const currentHash = await getCommitHash();
+
+        if (latestCommitHash === currentHash) {
+            return reply("✅ Your 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 bot is already up-to-date!");
+        }
+
+        await reply("🚀 Updating 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 Bot...");
+
+        const zipPath = path.join(__dirname, "latest.zip");
+        const { data: zipData } = await axios.get("https://github.com/tgeenod/D-K/archive/main.zip", { responseType: "arraybuffer" });
+        fs.writeFileSync(zipPath, zipData);
+
+        await reply("📦 Extracting the latest code...");
+        const extractPath = path.join(__dirname, 'latest');
+        const zip = new AdmZip(zipPath);
+        zip.extractAllTo(extractPath, true);
+
+        await reply("🔄 Replacing files...");
+        const sourcePath = path.join(extractPath, "D-K-main");
+        const destinationPath = path.join(__dirname, '..');
+        copyFolderSync(sourcePath, destinationPath);
+
+        await setCommitHash(latestCommitHash);
+
+        fs.unlinkSync(zipPath);
+        fs.rmSync(extractPath, { recursive: true, force: true });
+
+        await reply("✅ Update complete! Restarting the bot...");
+        process.exit(0);
+    } catch (error) {
+        console.error("Update error:", error);
+        return reply("❌ Update failed. Please try manually.");
+    }
+});
+
+cmd({
   pattern: "getpp",
   react: "🖼️",
   filename: __filename
@@ -1960,71 +1955,6 @@ async (conn, mek, m, { from, sender, reply, isGroup }) => {
     console.error("Error in getpp:", err);
     reply("❌ Failed to fetch profile picture.");
   }
-});
-
-cmd({
-    pattern: "getjs",
-    react: "📜",
-    filename: __filename
-},
-async (conn, mek, m, { from, args, reply, isOwner }) => {
-    try {
-        if (!isOwner) return reply("❌ You don't have permission to use this command!");
-        if (!args[0]) return reply("❌ Please provide a command name. Example: `.get alive`");
-
-        const commandName = args[0].toLowerCase();
-        const commandData = commands.find(cmd => cmd.pattern === commandName || (cmd.alias && cmd.alias.includes(commandName)));
-
-        if (!commandData) return reply("❌ Command not found!");
-
-        const commandPath = commandData.filename;
-
-        const fullCode = fs.readFileSync(commandPath, 'utf-8');
-
-        let truncatedCode = fullCode;
-        if (truncatedCode.length > 4000) {
-            truncatedCode = fullCode.substring(0, 4000) + "\n\n// Code too long, sending full file 📂";
-        }
-
-        const formattedCode = `⬤───〔 *📜 Command Source* 〕───⬤
-\`\`\`js
-${truncatedCode}
-\`\`\`
-╰──────────⊷  
-⚡ Full file sent below 📂  
-Powered By *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* ☣️`;
-
-        await conn.sendMessage(from, { 
-            image: { url: config.ALIVE_IMG },
-            caption: formattedCode,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363400240662312@newsletter',
-                    newsletterName: '𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳',
-                    serverMessageId: 143
-                }
-            }
-        }, { quoted: mek });
-
-        const fileName = `${commandName}.js`;
-        const tempPath = path.join(__dirname, fileName);
-        fs.writeFileSync(tempPath, fullCode);
-
-        await conn.sendMessage(from, { 
-            document: fs.readFileSync(tempPath),
-            mimetype: 'text/javascript',
-            fileName: fileName
-        }, { quoted: mek });
-
-        fs.unlinkSync(tempPath);
-
-    } catch (e) {
-        console.error("Error in .get command:", e);
-        reply(`❌ Error: ${e.message}`);
-    }
 });
 
 cmd({
@@ -2096,72 +2026,67 @@ cmd({
 });
 
 cmd({
-    pattern: "privacy",
-    alias: ["privacymenu"],
-    react: "🔐",
+    pattern: "getjs",
+    react: "📜",
     filename: __filename
-}, 
-async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+},
+async (conn, mek, m, { from, args, reply, isOwner }) => {
     try {
-        let privacyMenu = `╭━━〔 *Privacy Settings* 〕━━┈⊷
-┃◈╭─────────────·๏
-┃◈┃• blocklist - View blocked users
-┃◈┃• getbio - Get user's bio
-┃◈┃• setppall - Set profile pic privacy
-┃◈┃• setonline - Set online privacy
-┃◈┃• setpp - Change bot's profile pic
-┃◈┃• setmyname - Change bot's name
-┃◈┃• updatebio - Change bot's bio
-┃◈┃• groupsprivacy - Set group add privacy
-┃◈┃• getprivacy - View current privacy settings
-┃◈┃• getpp - Get user's profile picture
-┃◈┃
-┃◈┃ *Options for privacy commands:*
-┃◈┃• all - Everyone
-┃◈┃• contacts - My contacts only
-┃◈┃• contact_blacklist - Contacts except blocked
-┃◈┃• none - Nobody
-┃◈┃• match_last_seen - Match last seen
-┃◈└───────────┈⊷
-╰──────────────┈⊷
-*Note:* Most commands are owner-only`;
+        if (!isOwner) return reply("❌ You don't have permission to use this command!");
+        if (!args[0]) return reply("❌ Please provide a command name. Example: `.get alive`");
 
-        const FakeVCard = {
-      key: {
-        fromMe: false,
-        participant: "0@s.whatsapp.net",
-        remoteJid: "status@broadcast"
-      },
-      message: {
-        contactMessage: {
-          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
-          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
+        const commandName = args[0].toLowerCase();
+        const commandData = commands.find(cmd => cmd.pattern === commandName || (cmd.alias && cmd.alias.includes(commandName)));
+
+        if (!commandData) return reply("❌ Command not found!");
+
+        const commandPath = commandData.filename;
+
+        const fullCode = fs.readFileSync(commandPath, 'utf-8');
+
+        let truncatedCode = fullCode;
+        if (truncatedCode.length > 4000) {
+            truncatedCode = fullCode.substring(0, 4000) + "\n\n// Code too long, sending full file 📂";
         }
-      }
-    };       
-        
-        await conn.sendMessage(
-            from,
-            {
-                image: { url: config.ALIVE_IMG },
-                caption: privacyMenu,
-                contextInfo: {
-                    mentionedJid: [m.sender],
-                    forwardingScore: 999,
-                    isForwarded: true,
-                    forwardedNewsletterMessageInfo: {
-                        newsletterJid: '120363400240662312@newsletter',
-                        newsletterName: "Privacy Settings",
-                        serverMessageId: 143
-                    }
+
+        const formattedCode = `⬤───〔 *📜 Command Source* 〕───⬤
+\`\`\`js
+${truncatedCode}
+\`\`\`
+╰──────────⊷  
+⚡ Full file sent below 📂  
+Powered By *𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳* ☣️`;
+
+        await conn.sendMessage(from, { 
+            image: { url: config.ALIVE_IMG },
+            caption: formattedCode,
+            contextInfo: {
+                mentionedJid: [m.sender],
+                forwardingScore: 999,
+                isForwarded: true,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: '120363400240662312@newsletter',
+                    newsletterName: '𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳',
+                    serverMessageId: 143
                 }
-            },
-            { quoted: FakeVCard }
-        );
+            }
+        }, { quoted: mek });
+
+        const fileName = `${commandName}.js`;
+        const tempPath = path.join(__dirname, fileName);
+        fs.writeFileSync(tempPath, fullCode);
+
+        await conn.sendMessage(from, { 
+            document: fs.readFileSync(tempPath),
+            mimetype: 'text/javascript',
+            fileName: fileName
+        }, { quoted: mek });
+
+        fs.unlinkSync(tempPath);
 
     } catch (e) {
-        console.log(e);
-        reply(`Error: ${e.message}`);
+        console.error("Error in .get command:", e);
+        reply(`❌ Error: ${e.message}`);
     }
 });
 
@@ -2237,6 +2162,156 @@ async (conn, mek, m, { from, sender, reply, isGroup, args }) => {
   } catch (err) {
     console.error("Error in getpp:", err);
     reply("❌ Failed to fetch profile picture.");
+  }
+});
+
+cmd({
+    pattern: "privacy",
+    alias: ["privacymenu"],
+    react: "🔐",
+    filename: __filename
+}, 
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+        let privacyMenu = `╭━━〔 *Privacy Settings* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃• blocklist - View blocked users
+┃◈┃• getbio - Get user's bio
+┃◈┃• setppall - Set profile pic privacy
+┃◈┃• setonline - Set online privacy
+┃◈┃• setpp - Change bot's profile pic
+┃◈┃• setmyname - Change bot's name
+┃◈┃• updatebio - Change bot's bio
+┃◈┃• groupsprivacy - Set group add privacy
+┃◈┃• getprivacy - View current privacy settings
+┃◈┃• getpp - Get user's profile picture
+┃◈┃
+┃◈┃ *Options for privacy commands:*
+┃◈┃• all - Everyone
+┃◈┃• contacts - My contacts only
+┃◈┃• contact_blacklist - Contacts except blocked
+┃◈┃• none - Nobody
+┃◈┃• match_last_seen - Match last seen
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+*Note:* Most commands are owner-only`;
+
+        const FakeVCard = {
+      key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+      },
+      message: {
+        contactMessage: {
+          displayName: "© 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃",
+          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta\nORG:META AI;\nTEL;type=CELL;type=VOICE;waid=13135550002:+13135550002\nEND:VCARD`
+        }
+      }
+    };       
+        
+        await conn.sendMessage(
+            from,
+            {
+                image: { url: config.ALIVE_IMG },
+                caption: privacyMenu,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363400240662312@newsletter',
+                        newsletterName: "Privacy Settings",
+                        serverMessageId: 143
+                    }
+                }
+            },
+            { quoted: FakeVCard }
+        );
+
+    } catch (e) {
+        console.log(e);
+        reply(`Error: ${e.message}`);
+    }
+});
+
+cmd({
+  'on': "body"
+}, async (conn, m, store, {
+  from,
+  body,
+  sender,
+  isGroup,
+  isAdmins,
+  isBotAdmins,
+  reply
+}) => {
+  try {
+    if (!global.warnings) {
+      global.warnings = {};
+    }
+
+    if (!isGroup || isAdmins || !isBotAdmins) {
+      return;
+    }
+
+    const linkPatterns = [
+      /https?:\/\/(?:chat\.whatsapp\.com|wa\.me)\/\S+/gi,
+      /https?:\/\/(?:api\.whatsapp\.com|wa\.me)\/\S+/gi,
+      /wa\.me\/\S+/gi,
+      /https?:\/\/(?:t\.me|telegram\.me)\/\S+/gi,
+      /https?:\/\/(?:www\.)?\.com\/\S+/gi,
+      /https?:\/\/(?:www\.)?twitter\.com\/\S+/gi,
+      /https?:\/\/(?:www\.)?linkedin\.com\/\S+/gi,
+      /https?:\/\/(?:whatsapp\.com|channel\.me)\/\S+/gi,
+      /https?:\/\/(?:www\.)?reddit\.com\/\S+/gi,
+      /https?:\/\/(?:www\.)?discord\.com\/\S+/gi,
+      /https?:\/\/(?:www\.)?twitch\.tv\/\S+/gi,
+      /https?:\/\/(?:www\.)?vimeo\.com\/\S+/gi,
+      /https?:\/\/(?:www\.)?dailymotion\.com\/\S+/gi,
+      /https?:\/\/(?:www\.)?medium\.com\/\S+/gi
+    ];
+
+    const containsLink = linkPatterns.some(pattern => pattern.test(body));
+
+    if (containsLink && config.ANTI_LINK === 'true') {
+      console.log(`Link detected from ${sender}: ${body}`);
+
+      try {
+        await conn.sendMessage(from, {
+          delete: m.key
+        });
+        console.log(`Message deleted: ${m.key.id}`);
+      } catch (error) {
+        console.error("Failed to delete message:", error);
+      }
+
+      global.warnings[sender] = (global.warnings[sender] || 0) + 1;
+      const warningCount = global.warnings[sender];
+
+      if (warningCount < 4) {
+        await conn.sendMessage(from, {
+          text: `‎*⚠️LINKS ARE NOT ALLOWED⚠️*\n` +
+                `*╭────⬡ WARNING ⬡────*\n` +
+                `*├▢ USER :* @${sender.split('@')[0]}!\n` +
+                `*├▢ COUNT : ${warningCount}*\n` +
+                `*├▢ REASON : LINK SENDING*\n` +
+                `*├▢ WARN LIMIT : 3*\n` +
+                `*╰────────────────*`,
+          mentions: [sender]
+        });
+      } else {
+        await conn.sendMessage(from, {
+          text: `@${sender.split('@')[0]} *HAS BEEN REMOVED - WARN LIMIT EXCEEDED!*`,
+          mentions: [sender]
+        });
+        await conn.groupParticipantsUpdate(from, [sender], "remove");
+        delete global.warnings[sender];
+      }
+    }
+  } catch (error) {
+    console.error("Anti-link error:", error);
+    reply("❌ An error occurred while processing the message.");
   }
 });
 
@@ -2394,86 +2469,6 @@ To turn Off:
         console.error("Error in anticall command:", e);
         reply(`An error occurred while managing anti-call: ${e.message}`);
     }
-});
-
-cmd({
-  'on': "body"
-}, async (conn, m, store, {
-  from,
-  body,
-  sender,
-  isGroup,
-  isAdmins,
-  isBotAdmins,
-  reply
-}) => {
-  try {
-    if (!global.warnings) {
-      global.warnings = {};
-    }
-
-    if (!isGroup || isAdmins || !isBotAdmins) {
-      return;
-    }
-
-    const linkPatterns = [
-      /https?:\/\/(?:chat\.whatsapp\.com|wa\.me)\/\S+/gi,
-      /https?:\/\/(?:api\.whatsapp\.com|wa\.me)\/\S+/gi,
-      /wa\.me\/\S+/gi,
-      /https?:\/\/(?:t\.me|telegram\.me)\/\S+/gi,
-      /https?:\/\/(?:www\.)?\.com\/\S+/gi,
-      /https?:\/\/(?:www\.)?twitter\.com\/\S+/gi,
-      /https?:\/\/(?:www\.)?linkedin\.com\/\S+/gi,
-      /https?:\/\/(?:whatsapp\.com|channel\.me)\/\S+/gi,
-      /https?:\/\/(?:www\.)?reddit\.com\/\S+/gi,
-      /https?:\/\/(?:www\.)?discord\.com\/\S+/gi,
-      /https?:\/\/(?:www\.)?twitch\.tv\/\S+/gi,
-      /https?:\/\/(?:www\.)?vimeo\.com\/\S+/gi,
-      /https?:\/\/(?:www\.)?dailymotion\.com\/\S+/gi,
-      /https?:\/\/(?:www\.)?medium\.com\/\S+/gi
-    ];
-
-    const containsLink = linkPatterns.some(pattern => pattern.test(body));
-
-    if (containsLink && config.ANTI_LINK === 'true') {
-      console.log(`Link detected from ${sender}: ${body}`);
-
-      try {
-        await conn.sendMessage(from, {
-          delete: m.key
-        });
-        console.log(`Message deleted: ${m.key.id}`);
-      } catch (error) {
-        console.error("Failed to delete message:", error);
-      }
-
-      global.warnings[sender] = (global.warnings[sender] || 0) + 1;
-      const warningCount = global.warnings[sender];
-
-      if (warningCount < 4) {
-        await conn.sendMessage(from, {
-          text: `‎*⚠️LINKS ARE NOT ALLOWED⚠️*\n` +
-                `*╭────⬡ WARNING ⬡────*\n` +
-                `*├▢ USER :* @${sender.split('@')[0]}!\n` +
-                `*├▢ COUNT : ${warningCount}*\n` +
-                `*├▢ REASON : LINK SENDING*\n` +
-                `*├▢ WARN LIMIT : 3*\n` +
-                `*╰────────────────*`,
-          mentions: [sender]
-        });
-      } else {
-        await conn.sendMessage(from, {
-          text: `@${sender.split('@')[0]} *HAS BEEN REMOVED - WARN LIMIT EXCEEDED!*`,
-          mentions: [sender]
-        });
-        await conn.groupParticipantsUpdate(from, [sender], "remove");
-        delete global.warnings[sender];
-      }
-    }
-  } catch (error) {
-    console.error("Anti-link error:", error);
-    reply("❌ An error occurred while processing the message.");
-  }
 });
 
 cmd({

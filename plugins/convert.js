@@ -23,7 +23,6 @@ const stickerConverter = require('../lib/sticker-converter');
 const { fetchGif, fetchImage, gifToSticker } = require('../lib/sticker-utils');
 const { Sticker, createSticker, StickerTypes } = require('wa-sticker-formatter');
 const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep } = require('../lib/functions');
-
 function formatBytes(bytes) {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
@@ -31,7 +30,6 @@ function formatBytes(bytes) {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
-
 function formatBytes(bytes) {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
@@ -267,35 +265,40 @@ async (conn, mek, m, { from, quoted, isOwner, isAdmins, reply, args }) => {
     }
 });
 
-cmd(
-    {
-        pattern: 'sticker',
-        alias: ['s', 'stickergif'],
-        use: '<reply media or URL>',
-        filename: __filename,
-    },
-    async (conn, mek, m, { quoted, args, q, reply, from }) => {
-        if (!mek.quoted) return reply(`*Reply to any Image or Video, Sir.*`);
-        let mime = mek.quoted.mtype;
-        let pack = Config.STICKER_NAME || "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳";
-        
-        if (mime === "imageMessage" || mime === "stickerMessage") {
-            let media = await mek.quoted.download();
-            let sticker = new Sticker(media, {
-                pack: pack, 
-                type: StickerTypes.FULL,
-                categories: ["🤩", "🎉"], 
-                id: "12345",
-                quality: 75, 
-                background: 'transparent',
-            });
-            const buffer = await sticker.toBuffer();
-            return conn.sendMessage(mek.chat, { sticker: buffer }, { quoted: mek });
-        } else {
-            return reply("*Uhh, Please reply to an image.*");
-        }
+cmd({
+  pattern: "tts3",
+  react: "🔊",
+  filename: __filename
+},
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+  try {
+    if (!q) {
+      return reply("Please provide text for conversion! Usage: `.tts3 <text>`");
     }
-);
+
+    let voiceLanguage = 'en-US';
+
+    if (args[0] === "ur" || args[0] === "urdu") {
+      voiceLanguage = 'ur';
+    }
+
+    const url = googleTTS.getAudioUrl(q, {
+      lang: voiceLanguage,
+      slow: false,
+      host: 'https://translate.google.com'
+    });
+
+    await conn.sendMessage(from, { 
+      audio: { url: url }, 
+      mimetype: 'audio/mpeg', 
+      ptt: false
+    }, { quoted: mek });
+
+  } catch (error) {
+    console.error(error);
+    reply(`Error: ${error.message}`);
+  }
+});
 
 cmd({
     pattern: "fetch",
@@ -327,6 +330,36 @@ async (conn, mek, m, { from, quoted, body, args, reply }) => {
         reply(`❌ An error occurred:\n${e.message}`);
     }
 });
+
+cmd(
+    {
+        pattern: 'sticker',
+        alias: ['s', 'stickergif'],
+        use: '<reply media or URL>',
+        filename: __filename,
+    },
+    async (conn, mek, m, { quoted, args, q, reply, from }) => {
+        if (!mek.quoted) return reply(`*Reply to any Image or Video, Sir.*`);
+        let mime = mek.quoted.mtype;
+        let pack = Config.STICKER_NAME || "𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳";
+        
+        if (mime === "imageMessage" || mime === "stickerMessage") {
+            let media = await mek.quoted.download();
+            let sticker = new Sticker(media, {
+                pack: pack, 
+                type: StickerTypes.FULL,
+                categories: ["🤩", "🎉"], 
+                id: "12345",
+                quality: 75, 
+                background: 'transparent',
+            });
+            const buffer = await sticker.toBuffer();
+            return conn.sendMessage(mek.chat, { sticker: buffer }, { quoted: mek });
+        } else {
+            return reply("*Uhh, Please reply to an image.*");
+        }
+    }
+);
 
 cmd(
     {
@@ -391,78 +424,6 @@ async (conn, mek, m, { from, q, reply }) => {
     } catch (e) {
         console.log(e);
         return reply("⚠️ An error occurred data while translating the your text. Please try again later🤕");
-    }
-});
-
-cmd({
-  pattern: "tts3",
-  react: "🔊",
-  filename: __filename
-},
-async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-  try {
-    if (!q) {
-      return reply("Please provide text for conversion! Usage: `.tts3 <text>`");
-    }
-
-    let voiceLanguage = 'en-US';
-
-    if (args[0] === "ur" || args[0] === "urdu") {
-      voiceLanguage = 'ur';
-    }
-
-    const url = googleTTS.getAudioUrl(q, {
-      lang: voiceLanguage,
-      slow: false,
-      host: 'https://translate.google.com'
-    });
-
-    await conn.sendMessage(from, { 
-      audio: { url: url }, 
-      mimetype: 'audio/mpeg', 
-      ptt: false
-    }, { quoted: mek });
-
-  } catch (error) {
-    console.error(error);
-    reply(`Error: ${error.message}`);
-  }
-});
-
-cmd({
-    pattern: "topdf",
-    alias: ["pdf","topdf"],use: '.topdf',
-    react: "📄",
-    filename: __filename
-},
-async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
-        if (!q) return reply("Please provide the text you want to convert to PDF. *Eg* `.topdf` *English Language*");
-
-        const doc = new PDFDocument();
-        let buffers = [];
-        doc.on('data', buffers.push.bind(buffers));
-        doc.on('end', async () => {
-            const pdfData = Buffer.concat(buffers);
-
-            await conn.sendMessage(from, {
-                document: pdfData,
-                mimetype: 'application/pdf',
-                fileName: '𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳.pdf',
-                caption: `
-*📄 PDF created successully!*
-
-> © Created By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`
-            }, { quoted: mek });
-        });
-
-        doc.text(q);
-
-        doc.end();
-
-    } catch (e) {
-        console.error(e);
-        reply(`Error: ${e.message}`);
     }
 });
 
@@ -544,42 +505,39 @@ cmd(
 );
 
 cmd({
-    pattern: 'convert',
-    alias: ['sticker2img', 'stoimg', 'stickertoimage', 's2i'],
-    react: '🖼️',
+    pattern: "topdf",
+    alias: ["pdf","topdf"],use: '.topdf',
+    react: "📄",
     filename: __filename
-}, async (client, match, message, { from }) => {
-    if (!message.quoted) {
-        return await client.sendMessage(from, {
-            text: "✨ *Sticker Converter*\n\nPlease reply to a sticker message\n\nExample: `.convert` (reply to sticker)"
-        }, { quoted: message });
-    }
-
-    if (message.quoted.mtype !== 'stickerMessage') {
-        return await client.sendMessage(from, {
-            text: "❌ Only sticker messages can be converted"
-        }, { quoted: message });
-    }
-
-    await client.sendMessage(from, {
-        text: "🔄 Converting sticker to image..."
-    }, { quoted: message });
-
+},
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
     try {
-        const stickerBuffer = await message.quoted.download();
-        const imageBuffer = await stickerConverter.convertStickerToImage(stickerBuffer);
+        if (!q) return reply("Please provide the text you want to convert to PDF. *Eg* `.topdf` *English Language*");
 
-        await client.sendMessage(from, {
-            image: imageBuffer,
-            caption: "> Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️",
-            mimetype: 'image/png'
-        }, { quoted: message });
+        const doc = new PDFDocument();
+        let buffers = [];
+        doc.on('data', buffers.push.bind(buffers));
+        doc.on('end', async () => {
+            const pdfData = Buffer.concat(buffers);
 
-    } catch (error) {
-        console.error('Conversion error:', error);
-        await client.sendMessage(from, {
-            text: "❌ Please try with a different sticker."
-        }, { quoted: message });
+            await conn.sendMessage(from, {
+                document: pdfData,
+                mimetype: 'application/pdf',
+                fileName: '𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳.pdf',
+                caption: `
+*📄 PDF created successully!*
+
+> © Created By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️`
+            }, { quoted: mek });
+        });
+
+        doc.text(q);
+
+        doc.end();
+
+    } catch (e) {
+        console.error(e);
+        reply(`Error: ${e.message}`);
     }
 });
 
@@ -626,6 +584,46 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
     console.error(error);
     reply(`Error: ${error.message}`);
   }
+});
+
+cmd({
+    pattern: 'convert',
+    alias: ['sticker2img', 'stoimg', 'stickertoimage', 's2i'],
+    react: '🖼️',
+    filename: __filename
+}, async (client, match, message, { from }) => {
+    if (!message.quoted) {
+        return await client.sendMessage(from, {
+            text: "✨ *Sticker Converter*\n\nPlease reply to a sticker message\n\nExample: `.convert` (reply to sticker)"
+        }, { quoted: message });
+    }
+
+    if (message.quoted.mtype !== 'stickerMessage') {
+        return await client.sendMessage(from, {
+            text: "❌ Only sticker messages can be converted"
+        }, { quoted: message });
+    }
+
+    await client.sendMessage(from, {
+        text: "🔄 Converting sticker to image..."
+    }, { quoted: message });
+
+    try {
+        const stickerBuffer = await message.quoted.download();
+        const imageBuffer = await stickerConverter.convertStickerToImage(stickerBuffer);
+
+        await client.sendMessage(from, {
+            image: imageBuffer,
+            caption: "> Powered By 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳 ☣️",
+            mimetype: 'image/png'
+        }, { quoted: message });
+
+    } catch (error) {
+        console.error('Conversion error:', error);
+        await client.sendMessage(from, {
+            text: "❌ Please try with a different sticker."
+        }, { quoted: message });
+    }
 });
 
 cmd({
