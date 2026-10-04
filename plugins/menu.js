@@ -573,7 +573,7 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 ┃★│ • greyedit
 ┃★│ • invertedit
 ┃★│ • jailedit
-┃★│ • jokeedit
+┃★│ • jokedit
 ┃★│ • nokiaedit
 ┃★│ • wantededit
 ┃★│ • removebg
@@ -598,7 +598,7 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 ┃★│ • pat
 ┃★│ • poke
 ┃★│ • smug
-┃★│ • slay
+┃★│ • slap
 ┃★│ • smile
 ┃★│ • marige
 ┃★│ • wave
@@ -1306,7 +1306,7 @@ cmd({
 ┃★│ • greyedit
 ┃★│ • invertedit
 ┃★│ • jailedit
-┃★│ • jokeedit
+┃★│ • jokedit
 ┃★│ • nokiaedit
 ┃★│ • wantededit
 ┃★│ • removebg
@@ -1331,7 +1331,7 @@ cmd({
 ┃★│ • pat
 ┃★│ • poke
 ┃★│ • smug
-┃★│ • slay
+┃★│ • slap
 ┃★│ • smile
 ┃★│ • marige
 ┃★│ • wave
