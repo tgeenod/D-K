@@ -384,7 +384,7 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 ┃★│ • base64
 ┃★│ • unbase64
 ┃★│ • fetch
-┃★│ • recolor
+┃★│ • rcolor
 ┃★│ • readmore
 ┃★│ • sticker
 ┃★│ • stake
@@ -488,7 +488,7 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 ┃★│ • roll
 ┃★│ • ship
 ┃★│ • shapar
-┃★│ • turth
+┃★│ • truth
 ┃★╰──────────────
 ╰━━━━━━━━━━━━━━┈⊷
 
@@ -1101,7 +1101,7 @@ cmd({
 ┃★│ • base64
 ┃★│ • unbase64
 ┃★│ • fetch
-┃★│ • recolor
+┃★│ • rcolor
 ┃★│ • readmore
 ┃★│ • sticker
 ┃★│ • stake
@@ -1213,7 +1213,7 @@ cmd({
 ┃★│ • roll
 ┃★│ • ship
 ┃★│ • shapar
-┃★│ • turth
+┃★│ • truth
 ┃★╰──────────────
 ╰━━━━━━━━━━━━━━┈⊷
 > ${config.DESCRIPTION}`,
