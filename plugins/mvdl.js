@@ -221,7 +221,7 @@ cmd({
         }
 
         let info =
-          `🎬 *${movie.maintitle || movie.title}*\n\n` +
+          `🎬 *${movie.title}*\n\n` +
           `📅 *Date:* ${movie.date}\n` +
           `📂 *Type:* ${selected.type}\n` +
           `⭐ *Quality:* ${selected.quality}\n\n` +
@@ -358,7 +358,7 @@ cmd({
         }
 
         let info =
-          `🎬 *${movie.maintitle || movie.title}*\n\n` +
+          `🎬 *${movie.maintitle}*\n\n` +
           `📂 *Type:* ${selected.type}\n` +
           `📅 *Date:* ${movie.date || selected.year}\n` +
           `⭐ *Rating:* ${selected.rating}\n\n` +
@@ -369,7 +369,7 @@ cmd({
         });
         info += "\n🔢 *Reply with number to download.*";
 
-        const movieImage = movie.mainimage || selected.image;
+        const movieImage = movie.image || selected.image;
 
         const downloadMsg = await conn.sendMessage(from, {
           image: { url: movieImage },
@@ -495,7 +495,7 @@ cmd({
         }
 
         let info =
-          `🎬 *${movie.maintitle || movie.title}*\n\n` +
+          `🎬 *${movie.title}*\n\n` +
           `📅 *Date:* ${movie.date}\n` +
           `📂 *Type:* ${selected.type}\n` +
           `⭐ *Quality:* ${selected.quality}\n` +
@@ -930,7 +930,7 @@ cmd({
         }
 
         let info =
-          `🎬 *${movie.title || movie.maintitle}*\n\n` +
+          `🎬 *${movie.maintitle}*\n\n` +
           `📂 *Type:* ${selected.type}\n` +
           `📅 *Date:* ${movie.date}\n` +
           `🎥 *Quality:* ${selected.quality}\n` +
