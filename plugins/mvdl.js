@@ -1087,7 +1087,7 @@ cmd({
         }
 
         let tvInfo = 
-          `🎬 *Title:* *${tvData.title || tvData.maintitle || selected.title}*\n\n` +
+          `🎬 *Title:* *${tvData.maintitle}*\n\n` +
           `📅 *Date:* ${tvData.date || "N/A"}\n` +
           `📂 *Type:* ${selected.type}\n` +
           `🎥 *Quality:* WEBRip\n` +
@@ -1099,7 +1099,7 @@ cmd({
         });
         tvInfo += "\n🔢 *Reply with season number.*";
 
-        const cleanImage = (tvData.image || (tvData.images && tvData.images[0]) || selected.image || "").trim();
+        const cleanImage = (tvData.image || selected.image || "").trim();
 
         const seasonMsg = await conn.sendMessage(from, {
           image: cleanImage ? { url: cleanImage } : undefined,
@@ -1122,7 +1122,7 @@ cmd({
           const tvData = sessionData.tvData;
 
           let epInfo = 
-            `🎬 *Title:* *${tvData?.title || tvData?.maintitle || sessionData.selected.title}*\n\n` +
+            `🎬 *Title:* *${tvData?.maintitle}*\n\n` +
             `📅 *Date:* ${tvData?.date}\n\n` +
             `📺 *${chosenSeason.seasontitle} Episodes:* 🔻\n\n`;
 
@@ -1158,10 +1158,8 @@ cmd({
             return conn.sendMessage(from, { text: "*No download links available.*" }, { quoted: msg });
           }
 
-          const mainTitle = epData.maintitle || sessionData.tvData?.title || sessionData.selected.title;
-
           let dlInfo = 
-            `🎬 *Main Title:* *${mainTitle}*\n\n` +
+            `🎬 *Title:* *${epData.title}*\n\n` +
             `📌 *Episode:* ${chosenEp.title} (EpiNum ${chosenEp.epinum})\n` +
             `📅 *Date:* ${epData.date || chosenEp.date || "N/A"}\n\n` +
             `🎥 *𝑫𝒐𝒘𝒏𝒍𝒐𝒂𝒅 𝑳𝒊𝒏𝒌𝒔:* 📥\n\n`;
