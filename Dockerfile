@@ -5,7 +5,8 @@ WORKDIR /usr/src/app
 COPY package.json .
 
 RUN apk add --no-cache git && \
-    npm install
+    npm install && \
+    npm install -g pm2
 
 COPY . .
 
