@@ -1161,7 +1161,7 @@ cmd({
         await conn.sendMessage(from, {
           document: { url: finalDownloadUrl },
           mimetype: "video/mp4",
-          fileName: `${movie.title || selected.title} - ${chosen.title}.mp4`;,
+          fileName: `${movie.title || selected.title} - ${chosen.title}.mp4`,
           caption: `🎬 *${movie.title || selected.title}*\n🎥 *Quality:* ${chosen.title}\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝑇-𝚇𝙼𝙳`
         }, { quoted: msg });
       }
