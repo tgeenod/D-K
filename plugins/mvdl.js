@@ -1004,6 +1004,207 @@ cmd({
 });
 
 cmd({
+  pattern: "piratelk",
+  alias: ["pirate"],
+  react: "🎬",
+  filename: __filename
+}, async (conn, mek, m, { from, q }) => {
+
+  if (!q) {
+    return await conn.sendMessage(from, {
+      text: "Use: .piratelk <movie name>"
+    }, { quoted: mek });
+  }
+
+  try {
+    const cacheKey = `piratelk_${q.toLowerCase()}`;
+    let data = movieCache.get(cacheKey);
+
+    if (!data) {
+      const url = `https://m-api-five.vercel.app/movie/piratelk/search?text=${encodeURIComponent(q)}`;
+      const res = await axios.get(url);
+      data = res.data;
+
+      if (!data.status || !data.result?.length) {
+        throw new Error("No results found for your query.");
+      }
+
+      movieCache.set(cacheKey, data);
+    }
+
+    const movieList = data.result.map((item, i) => ({
+      number: i + 1,
+      title: item.title,
+      link: item.link,
+      image: item.image,
+      date: item.date,
+      views: item.views,
+      imdb: item.imdb
+    }));
+
+    let textList = "🔢 𝑅𝑒𝑝𝑙𝑦 𝐵𝑒𝑙𝑜𝑤 𝑁𝑢𝑚𝑏𝑒𝑟\n━━━━━━━━━━━━━━━━━\n\n";
+    movieList.forEach((item) => {
+      textList += `🔸 *${item.number}. ${item.title}*\n`;
+    });
+    textList += "\n💬 *Reply with movie number to view details.*";
+
+    const sentMsg = await conn.sendMessage(from, {
+      text: `*🔍 𝐏𝐈𝐑𝐀𝐓𝐄𝐋𝐊 𝐂𝐈𝐍𝐄𝐌𝐀 𝐒𝐄𝐀𝐑𝐂𝐇 🎥*\n\n${textList}\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+    }, { quoted: mek });
+
+    const movieMap = new Map();
+
+    const listener = async (update) => {
+      const msg = update.messages?.[0];
+      if (!msg?.message?.extendedTextMessage) return;
+
+      const replyText = msg.message.extendedTextMessage.text.trim();
+      const repliedId = msg.message.extendedTextMessage.contextInfo?.stanzaId;
+
+      if (replyText.toLowerCase() === "done") {
+        conn.ev.off("messages.upsert", listener);
+        return conn.sendMessage(from, { text: "✅ *Cancelled.*" }, { quoted: msg });
+      }
+
+      if (repliedId === sentMsg.key.id) {
+        const num = parseInt(replyText);
+        const selected = movieList.find(item => item.number === num);
+        if (!selected) {
+          return conn.sendMessage(from, { text: "*Invalid Movie Number.*" }, { quoted: msg });
+        }
+
+        await conn.sendMessage(from, { react: { text: "🎯", key: msg.key } });
+
+        const movieUrl = `https://m-api-five.vercel.app/movie/piratelk/details?url=${encodeURIComponent(selected.link)}`;
+        const movieRes = await axios.get(movieUrl);
+        const movie = movieRes.data?.result;
+
+        if (!movie) {
+          return conn.sendMessage(from, { text: "*Failed to fetch movie details.*" }, { quoted: msg });
+        }
+
+        const flatDownloads = [];
+
+        if (movie.downloads?.GoogleDrive?.length) {
+          movie.downloads.GoogleDrive.forEach(d => flatDownloads.push({ source: "GoogleDrive", title: d.title, url: d.url }));
+        }
+
+        if (movie.downloads?.Mega?.length) {
+          movie.downloads.Mega.forEach(d => flatDownloads.push({ source: "Mega", title: d.title, url: d.url }));
+        }
+
+        const subZip = movie.downloads?.subtitleZip;
+
+        if (!flatDownloads.length) {
+          return conn.sendMessage(from, { text: "*No movie download links available.*" }, { quoted: msg });
+        }
+
+        let info =
+          `🎬 *${movie.maintitle || movie.title}*\n\n` +
+          `📅 *Date:* ${movie.date || selected.date}\n` +
+          `👁️ *Views:* ${selected.views || "N/A"}\n` +
+          `⭐ *IMDb:* ${movie.imdb || selected.imdb || "N/A"}\n\n` +
+          `🎥 *𝑫𝒐𝒘𝒏𝒍𝒐𝒂𝒅 𝑳𝒊𝒏𝒌𝒔:* 📥\n\n`;
+
+        if (subZip) {
+          info += `🔹 0. *Sinhala Subtitle Zip* (${subZip.fileSize || "Zip"})\n\n`;
+        }
+
+        flatDownloads.forEach((d, i) => {
+          info += `♦️ ${i + 1}. [${d.source}] ${d.title}\n`;
+        });
+        info += "\n🔢 *Reply with number (or 0 for Subtitles) to download.*";
+
+        const movieImage = movie.image || selected.image;
+
+        const downloadMsg = await conn.sendMessage(from, {
+          image: { url: movieImage },
+          caption: info
+        }, { quoted: msg });
+
+        movieMap.set(downloadMsg.key.id, { selected, movie, downloads: flatDownloads, subZip });
+      }
+
+      else if (movieMap.has(repliedId)) {
+        const { selected, movie, downloads, subZip } = movieMap.get(repliedId);
+
+        if (replyText === "0") {
+          if (!subZip) {
+            return conn.sendMessage(from, { text: "*Subtitle file not available for this movie.*" }, { quoted: msg });
+          }
+
+          await conn.sendMessage(from, { react: { text: "📥", key: msg.key } });
+
+          return await conn.sendMessage(from, {
+            document: { url: subZip.url },
+            mimetype: "application/zip",
+            fileName: subZip.fileName || `${selected.title} Subtitle.zip`,
+            caption: `📜 *Title:* ${subZip.title || selected.title}\n📥 ${subZip.downloadCount || "N/A"}\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+          }, { quoted: msg });
+        }
+
+        const num = parseInt(replyText);
+        const chosen = downloads[num - 1];
+
+        if (!chosen) {
+          return conn.sendMessage(from, { text: "*Invalid number.*" }, { quoted: msg });
+        }
+
+        if (chosen.title) {
+          const match = chosen.title.match(/(\d+(?:\.\d+)?)\s*(GB|MB)/i);
+          if (match) {
+            const sizeVal = parseFloat(match[1]);
+            const unit = match[2].toUpperCase();
+            const sizeInGB = unit === "GB" ? sizeVal : sizeVal / 1024;
+
+            if (sizeInGB > 2) {
+              return conn.sendMessage(from, {
+                text: `⚠️ *Large File (${sizeVal}${unit})*`
+              }, { quoted: msg });
+            }
+          }
+        }
+
+        await conn.sendMessage(from, { react: { text: "⏳", key: msg.key } });
+
+        let finalDownloadUrl = "";
+        let fileName = "";
+
+        if (chosen.source === "GoogleDrive" || chosen.url.includes("drive.google.com")) {
+          const gdriveRes = await axios.get(`https://m-api-five.vercel.app/downloader/gdrive?url=${encodeURIComponent(chosen.url)}`);
+          finalDownloadUrl = gdriveRes.data?.result?.downloadUrl;
+          fileName = gdriveRes.data?.result?.fileName || `${selected.title}.mp4`;
+        }
+        else if (chosen.source === "Mega" || chosen.url.includes("mega.nz")) {
+          const megaRes = await axios.get(`https://m-api-five.vercel.app/downloader/megadl?url=${encodeURIComponent(chosen.url)}`);
+          finalDownloadUrl = megaRes.data?.result?.downloadurl;
+          const rawFilename = megaRes.data?.result?.filename;
+          fileName = (rawFilename && !rawFilename.includes("Error")) ? rawFilename : `${selected.title}.mp4`;
+        }
+
+        if (!finalDownloadUrl) {
+          return conn.sendMessage(from, { text: "⚠️ *Unable to generate direct download link.*" }, { quoted: msg });
+        }
+
+        await conn.sendMessage(from, { react: { text: "📥", key: msg.key } });
+
+        await conn.sendMessage(from, {
+          document: { url: finalDownloadUrl },
+          mimetype: "video/mp4",
+          fileName: fileName,
+          caption: `🎬 *${movie.maintitle || selected.title}*\n🎥 *Quality:* ${chosen.title}\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+        }, { quoted: msg });
+      }
+    };
+
+    conn.ev.on("messages.upsert", listener);
+
+  } catch (err) {
+    await conn.sendMessage(from, { text: `*Error:* ${err.message}` }, { quoted: mek });
+  }
+});
+
+cmd({
   pattern: "cinesubztv",
   alias: ["cinetv"],
   react: "📺",
