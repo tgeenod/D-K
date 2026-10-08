@@ -1049,7 +1049,7 @@ cmd({
     textList += "\n💬 *Reply with movie number to view details.*";
 
     const sentMsg = await conn.sendMessage(from, {
-      text: `*🔍 𝐏𝐈𝐑𝐀𝐓𝐄𝐋𝐊 𝐂𝐈𝐍𝐄𝐌𝐀 𝐒𝐄𝐀𝐑𝐂𝐇 🎥*\n\n${textList}\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+      text: `*🔍 𝐏𝐈𝐑𝐀𝐓𝐄𝐋𝐊 𝐂𝐈𝐍𝐄𝐌𝐀 𝐒𝐄𝐀𝐑𝐂𝐇 🎥*\n\n${textList}\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝑇-𝚇𝙼𝙳`
     }, { quoted: mek });
 
     const movieMap = new Map();
@@ -1093,8 +1093,6 @@ cmd({
           movie.downloads.Mega.forEach(d => flatDownloads.push({ source: "Mega", title: d.title, url: d.url }));
         }
 
-        const subZip = movie.downloads?.subtitleZip;
-
         if (!flatDownloads.length) {
           return conn.sendMessage(from, { text: "*No movie download links available.*" }, { quoted: msg });
         }
@@ -1106,14 +1104,10 @@ cmd({
           `⭐ *IMDb:* ${movie.imdb || selected.imdb || "N/A"}\n\n` +
           `🎥 *𝑫𝒐𝒘𝒏𝒍𝒐𝒂𝒅 𝑳𝒊𝒏𝒌𝒔:* 📥\n\n`;
 
-        if (subZip) {
-          info += `🔹 0. *Sinhala Subtitle Zip* (${subZip.fileSize || "Zip"})\n\n`;
-        }
-
         flatDownloads.forEach((d, i) => {
-          info += `♦️ ${i + 1}. [${d.source}] ${d.title}\n`;
+          info += `♦️ ${i + 1}. *[${d.source}]* ${d.title}\n`;
         });
-        info += "\n🔢 *Reply with number (or 0 for Subtitles) to download.*";
+        info += "\n🔢 *Reply with number to download.*";
 
         const movieImage = movie.image || selected.image;
 
@@ -1122,26 +1116,11 @@ cmd({
           caption: info
         }, { quoted: msg });
 
-        movieMap.set(downloadMsg.key.id, { selected, movie, downloads: flatDownloads, subZip });
+        movieMap.set(downloadMsg.key.id, { selected, movie, downloads: flatDownloads });
       }
 
       else if (movieMap.has(repliedId)) {
-        const { selected, movie, downloads, subZip } = movieMap.get(repliedId);
-
-        if (replyText === "0") {
-          if (!subZip) {
-            return conn.sendMessage(from, { text: "*Subtitle file not available for this movie.*" }, { quoted: msg });
-          }
-
-          await conn.sendMessage(from, { react: { text: "📥", key: msg.key } });
-
-          return await conn.sendMessage(from, {
-            document: { url: subZip.url },
-            mimetype: "application/zip",
-            fileName: subZip.fileName || `${selected.title} Subtitle.zip`,
-            caption: `📜 *Title:* ${subZip.title || selected.title}\n📥 ${subZip.downloadCount || "N/A"}\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
-          }, { quoted: msg });
-        }
+        const { selected, movie, downloads } = movieMap.get(repliedId);
 
         const num = parseInt(replyText);
         const chosen = downloads[num - 1];
@@ -1153,14 +1132,9 @@ cmd({
         if (chosen.title) {
           const match = chosen.title.match(/(\d+(?:\.\d+)?)\s*(GB|MB)/i);
           if (match) {
-            const sizeVal = parseFloat(match[1]);
-            const unit = match[2].toUpperCase();
-            const sizeInGB = unit === "GB" ? sizeVal : sizeVal / 1024;
-
-            if (sizeInGB > 2) {
-              return conn.sendMessage(from, {
-                text: `⚠️ *Large File (${sizeVal}${unit})*`
-              }, { quoted: msg });
+            const sizeVal = parseFloat(match[1]), unit = match[2].toUpperCase();
+            if ((unit === "GB" ? sizeVal : sizeVal / 1024) > 2) {
+              return conn.sendMessage(from, { text: `⚠️ *Large File (${sizeVal}${unit})*` }, { quoted: msg });
             }
           }
         }
@@ -1168,18 +1142,14 @@ cmd({
         await conn.sendMessage(from, { react: { text: "⏳", key: msg.key } });
 
         let finalDownloadUrl = "";
-        let fileName = "";
 
         if (chosen.source === "GoogleDrive" || chosen.url.includes("drive.google.com")) {
           const gdriveRes = await axios.get(`https://m-api-five.vercel.app/downloader/gdrive?url=${encodeURIComponent(chosen.url)}`);
           finalDownloadUrl = gdriveRes.data?.result?.downloadUrl;
-          fileName = gdriveRes.data?.result?.fileName || `${selected.title}.mp4`;
         }
         else if (chosen.source === "Mega" || chosen.url.includes("mega.nz")) {
           const megaRes = await axios.get(`https://m-api-five.vercel.app/downloader/megadl?url=${encodeURIComponent(chosen.url)}`);
           finalDownloadUrl = megaRes.data?.result?.downloadurl;
-          const rawFilename = megaRes.data?.result?.filename;
-          fileName = (rawFilename && !rawFilename.includes("Error")) ? rawFilename : `${selected.title}.mp4`;
         }
 
         if (!finalDownloadUrl) {
@@ -1187,12 +1157,12 @@ cmd({
         }
 
         await conn.sendMessage(from, { react: { text: "📥", key: msg.key } });
-
+        
         await conn.sendMessage(from, {
           document: { url: finalDownloadUrl },
           mimetype: "video/mp4",
-          fileName: fileName,
-          caption: `🎬 *${movie.maintitle || selected.title}*\n🎥 *Quality:* ${chosen.title}\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+          fileName: `${movie.title || selected.title} - ${chosen.title}.mp4`;,
+          caption: `🎬 *${movie.title || selected.title}*\n🎥 *Quality:* ${chosen.title}\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝑇-𝚇𝙼𝙳`
         }, { quoted: msg });
       }
     };
