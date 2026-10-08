@@ -154,22 +154,23 @@ cmd({
         const posterUrl = "https://files.catbox.moe/ajfxoo.jpg";
 
         let menu = `
- 🎬 𝐀𝐋𝐋 𝐂𝐈𝐍𝐄𝐌𝐀 𝐒𝐄𝐀𝐑𝐂𝐇 🎬
- ━━━━━━━━━━━━━━━━
+🎬 𝐀𝐋𝐋 𝐂𝐈𝐍𝐄𝐌𝐀 𝐒𝐄𝐀𝐑𝐂𝐇 🎬
+━━━━━━━━━━━━━━━━
  
- 🔍 𝐘𝐎𝐔𝐑 𝐒𝐄𝐀𝐑𝐂𝐇 : ${q.toUpperCase()}
+🔍 𝐘𝐎𝐔𝐑 𝐒𝐄𝐀𝐑𝐂𝐇 : ${q.toUpperCase()}
   
- 🔢 𝑹𝒆𝒑𝒍𝒚 𝑩𝒆𝒍𝒐𝒘 𝑵𝒖𝒎𝒃𝒆𝒓
+🔢 𝑹𝒆𝒑𝒍𝒚 𝑩𝒆𝒍𝒐𝒘 𝑵𝒖𝒎𝒃𝒆𝒓
 
- 1️⃣ 𝑪𝑰𝑵𝑬𝑺𝑼𝑩𝒁 𝑆𝐸𝐴𝐑𝐶𝐻
- 2️⃣ 𝑺𝑰𝑵𝑯𝑨𝑳𝑨𝑺𝑼𝑩 𝑆𝐸𝐴𝐑𝐶𝐻    
- 3️⃣ 𝑩𝑨𝑰𝑺𝑬𝑪𝑶𝑷𝑬𝑺 𝑆𝐸𝐴𝐑𝐶𝐻 
- 4️⃣ 𝑪𝑯𝑰𝑻𝑯𝑹𝑨𝑷𝑨𝑻𝑨 𝑺𝑬𝑨𝑹𝑪𝑯         
- 5️⃣ 𝑺𝑼𝑩𝒁𝑳𝑲 𝑆𝐸𝐴𝐑𝐶𝐻
- 6️⃣ 𝐌𝐎𝐕𝐈𝐄𝐏𝐑𝐎 𝑆𝐸𝐴𝐑𝐶𝐻
- 7️⃣ 𝐏𝐔𝐏𝐈𝐋𝐕𝐈𝐃𝐄𝐎 𝑆𝐸𝐴𝐑𝐶𝐻
+1️⃣ 𝑪𝑰𝑵𝑬𝑺𝑼𝑩𝒁 𝑆𝐸𝐴𝐑𝐶𝐻
+2️⃣ 𝑺𝑰𝑵𝑯𝑨𝑳𝑨𝑺𝑼𝑩 𝑆𝐸𝐴𝐑𝐶𝐻    
+3️⃣ 𝑩𝑨𝑰𝑺𝑬𝑪𝑶𝑷𝑬𝑺 𝑆𝐸𝐴𝐑𝐶𝐻 
+4️⃣ 𝑪𝑯𝑰𝑻𝑯𝑹𝑨𝑷𝑨𝑻𝑨 𝑺𝑬𝑨𝑹𝑪𝑯         
+5️⃣ 𝐏𝐈𝐑𝐀𝐓𝐄𝐋𝐊 𝑺𝑬𝑨𝑹𝑪𝑯
+6️⃣ 𝑺𝑼𝑩𝒁𝑳𝑲 𝑆𝐸𝐴𝐑𝐶𝐻
+7️⃣ 𝐌𝐎𝐕𝐈𝐄𝐏𝐑𝐎 𝑆𝐸𝐴𝐑𝐶𝐻
+8️⃣ 𝐏𝐔𝐏𝐈𝐋𝐕𝐈𝐃𝐄𝐎 𝑆𝐸𝐴𝐑𝐶𝐻
 
- 8️⃣ 𝑪𝑰𝑵𝑬𝑺𝑼𝑩𝒁 𝐓𝐕 𝑆𝐸𝐴𝐑𝐶𝐻
+9️⃣ 𝑪𝑰𝑵𝑬𝑺𝑼𝑩𝒁 𝐓𝐕 𝑆𝐸𝐴𝐑𝐶𝐻
  
  © Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳
  `;
@@ -192,11 +193,12 @@ cmd({
                     else if (selText === '2') targetPattern = "sinhalasub";
                     else if (selText === '3') targetPattern = "baiscopes";
                     else if (selText === '4') targetPattern = "chithrapata";
-                    else if (selText === '5') targetPattern = "subzlk";
-                    else if (selText === '6') targetPattern = "moviepro";
-                    else if (selText === '7') targetPattern = "pupilvideo";
-                    else if (selText === '8') targetPattern = "cinesubztv";
-                     
+                    else if (selText === '5') targetPattern = "piratelk";
+                    else if (selText === '6') targetPattern = "subzlk";
+                    else if (selText === '7') targetPattern = "moviepro";
+                    else if (selText === '8') targetPattern = "pupilvideo";
+                    else if (selText === '9') targetPattern = "cinesubztv";
+                    
                     if (targetPattern) {
                         await conn.sendMessage(from, { react: { text: "🔍", key: selection.msg.key } });
                         
