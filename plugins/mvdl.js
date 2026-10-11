@@ -1347,11 +1347,11 @@ cmd({
             caption: dlInfo
           }, { quoted: msg });
 
-          movieMap.set(downloadMsg.key.id, { step: "DOWNLOAD", downloads: dllinks, mainTitle: title, episodeTitle: chosenEp.title });
+          movieMap.set(downloadMsg.key.id, { step: "DOWNLOAD", downloads: dllinks, maintitle: epData.title, episodetitle: chosenEp.title });
         }
 
         else if (sessionData.step === "DOWNLOAD") {
-          const { downloads, title, episodeTitle } = sessionData;
+          const { downloads, maintitle, episodetitle } = sessionData;
           const chosen = downloads[num - 1];
           if (!chosen) {
             return conn.sendMessage(from, { text: "*Invalid quality number.*" }, { quoted: msg });
@@ -1387,8 +1387,8 @@ cmd({
           await conn.sendMessage(from, {
             document: { url: finalDownloadUrl },
             mimetype: "video/mp4",
-            fileName: `${mainTitle} - ${episodeTitle} - ${chosen.quality}.mp4`,
-            caption: `🎬 *${mainTitle}*\n📺 *${episodeTitle}*\n🎥 *${chosen.quality}*\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+            fileName: `${maintitle} - ${episodetitle} - ${chosen.quality}.mp4`,
+            caption: `🎬 *${maintitle}*\n📺 *${episodetitle}*\n🎥 *${chosen.quality}*\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
           }, { quoted: msg });
         }
       }
