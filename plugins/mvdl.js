@@ -1347,7 +1347,7 @@ cmd({
             caption: dlInfo
           }, { quoted: msg });
 
-          movieMap.set(downloadMsg.key.id, { step: "DOWNLOAD", downloads: dllinks, mainTitle: mainTitle, episodeTitle: chosenEp.title });
+          movieMap.set(downloadMsg.key.id, { step: "DOWNLOAD", downloads: dllinks, mainTitle: title, episodeTitle: chosenEp.title });
         }
 
         else if (sessionData.step === "DOWNLOAD") {
