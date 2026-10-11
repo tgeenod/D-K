@@ -1351,7 +1351,7 @@ cmd({
         }
 
         else if (sessionData.step === "DOWNLOAD") {
-          const { downloads, mainTitle, episodeTitle } = sessionData;
+          const { downloads, title, episodeTitle } = sessionData;
           const chosen = downloads[num - 1];
           if (!chosen) {
             return conn.sendMessage(from, { text: "*Invalid quality number.*" }, { quoted: msg });
