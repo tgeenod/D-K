@@ -2043,112 +2043,125 @@ cmd({
 
 cmd({
   pattern: "pastpaper",
-  alias: ["pastp"],
-  react: "🗂️",
+  alias: ["textbook", "paper"],
+  react: "📖",
   filename: __filename
 }, async (conn, mek, m, { from, q }) => {
 
   if (!q) {
-    return conn.sendMessage(from, {
-      text: "❗ Use: .papers <paper name>"
+    return await conn.sendMessage(from, {
+      text: "Use: .pastpaper <paper name / year>"
     }, { quoted: mek });
   }
 
   try {
-    const searchUrl = `https://api-pass.vercel.app/api/search?query=${encodeURIComponent(q)}`;
-    const res = await axios.get(searchUrl);
-    const data = res.data;
+    const cacheKey = `pastpaper_${q.toLowerCase()}`;
+    let data = movieCache.get(cacheKey);
 
-    if (!data.results || data.results.length === 0) {
-      return conn.sendMessage(from, { text: "❌ No papers found." }, { quoted: mek });
+    if (!data) {
+      const url = `https://m-api-five.vercel.app/pastpapers/wiki/search?text=${encodeURIComponent(q)}`;
+      const res = await axios.get(url);
+      data = res.data;
+
+      if (!data.status || !data.result?.length) {
+        throw new Error("No past papers found for your search query.");
+      }
+
+      movieCache.set(cacheKey, data);
     }
 
-    const list = data.results.map((v, i) => ({
-      id: i + 1,
-      title: v.title,
-      url: v.url,
-      thumb: v.thumbnail,
-      desc: v.description
+    const paperList = data.result.map((p, i) => ({
+      number: i + 1,
+      title: p.title,
+      link: p.link,
+      image: p.image
     }));
 
-    let text = "🔢 𝑅𝑒𝑝𝑙𝑦 𝐵𝑒𝑙𝑜𝑤 𝑁𝑢𝑚𝑏𝑒𝑟\n━━━━━━━━━━━━━━\n\n";
-    list.forEach(p => {
-      text += `📘 *${p.id}. ${p.title}*\n\n`;
+    let textList = "🔢 𝑅𝑒𝑝𝑙𝑦 𝐵𝑒𝑙𝑜𝑤 𝑁𝑢𝑚𝑏𝑒𝑟\n━━━━━━━━━━━━━━━\n\n";
+    paperList.forEach((p) => {
+      textList += `📄 *${p.number}. ${p.title}*\n`;
     });
+    textList += "\n💬 *Reply with number to view details.*";
 
-    const listMsg = await conn.sendMessage(from, {
-      text: `🔍 𝐏𝐀𝐒𝐓 𝐏𝐀𝐏𝐄𝐑𝐒 𝐒𝐄𝐀𝐑𝐂𝐇 🗂️\n\n${text}`
+    const sentMsg = await conn.sendMessage(from, {
+      text: `*🔍 𝑷𝑨𝑺𝑻 𝑷𝑨𝑷𝑬𝑹𝑺 𝑾𝑰𝑲𝑰 𝑺𝑬𝑨𝑹𝑪𝑯 📚*\n\n${textList}\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝑇-𝚇𝙼𝙳`
     }, { quoted: mek });
+
+    const paperMap = new Map();
 
     const listener = async (update) => {
       const msg = update.messages?.[0];
       if (!msg?.message?.extendedTextMessage) return;
 
-      const reply = msg.message.extendedTextMessage.text.trim();
+      const replyText = msg.message.extendedTextMessage.text.trim();
       const repliedId = msg.message.extendedTextMessage.contextInfo?.stanzaId;
 
-      if (repliedId !== listMsg.key.id) return;
-
-      const num = parseInt(reply);
-      const selected = list.find(x => x.id === num);
-      if (!selected) {
-        return conn.sendMessage(from, { text: "❌ Invalid number." }, { quoted: msg });
+      if (replyText.toLowerCase() === "done") {
+        conn.ev.off("messages.upsert", listener);
+        return conn.sendMessage(from, { text: "✅ *Cancelled*" }, { quoted: msg });
       }
 
-      await conn.sendMessage(from, { react: { text: "📃", key: msg.key } });
-
-      const dUrl = `https://api-pass.vercel.app/api/download?url=${encodeURIComponent(selected.url)}`;
-      const dRes = await axios.get(dUrl);
-      const d = dRes.data;
-
-      const info =
-        `📑 *${d.download_info.file_title}*\n\n` +
-        `📝 *Examination:* ${d.paper_details.examination}\n` +
-        `📖 *Medium:* ${d.paper_details.medium}\n` +
-        `📚 *Description:* ${selected.desc}\n\n` +
-        `⬇️ *Reply with* 1 *to download*\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`;
-
-      const detailMsg = await conn.sendMessage(from, {
-        image: { url: selected.thumb },
-        caption: info
-      }, { quoted: msg });
-
-      const downloadListener = async (up) => {
-        const m2 = up.messages?.[0];
-        if (!m2?.message?.extendedTextMessage) return;
-
-        const r = m2.message.extendedTextMessage.text.trim();
-        const rId = m2.message.extendedTextMessage.contextInfo?.stanzaId;
-
-        if (rId !== detailMsg.key.id) return;
-
-        if (r !== "1") {
-          return conn.sendMessage(from, { text: "❌ Invalid option." }, { quoted: m2 });
+      if (repliedId === sentMsg.key.id) {
+        const num = parseInt(replyText);
+        const selected = paperList.find(p => p.number === num);
+        if (!selected) {
+          return conn.sendMessage(from, { text: "⚠️ *Invalid paper number.*" }, { quoted: msg });
         }
 
-        await conn.sendMessage(from, { react: { text: "🗃️", key: m2.key } });
+        await conn.sendMessage(from, { react: { text: "🔎", key: msg.key } });
+
+        const detailApiUrl = `https://m-api-five.vercel.app/pastpapers/wiki/details?url=${encodeURIComponent(selected.link)}`;
+        const detailRes = await axios.get(detailApiUrl);
+        const paper = detailRes.data.result;
+
+        if (!paper || !paper.pdfDetails?.downloadUrl) {
+          return conn.sendMessage(from, { text: "❌ *No download link available.*"}, { quoted: msg });
+        }
+
+        let info =
+          `📝 *Title:* ${paper.title || selected.title}\n\n` +
+          `🗓️ *Date:* ${paper.date || "N/A"}\n` +
+          `📂 *Category:* ${paper.category || "N/A"}\n` +
+          `📖 *Description:* ${paper.description || "No description available."}\n\n` +
+          `🔢 *Reply '1' to download the PDF document.*`;
+
+        const downloadMsg = await conn.sendMessage(from, {
+          image: { url: paper.image || selected.image },
+          caption: info
+        }, { quoted: msg });
+
+        paperMap.set(downloadMsg.key.id, { 
+          title: paper.pdfDetails.title || selected.title, 
+          downloadUrl: paper.pdfDetails.downloadUrl 
+        });
+      }
+
+      else if (paperMap.has(repliedId)) {
+        const { title, downloadUrl } = paperMap.get(repliedId);
+        
+        if (replyText !== "1") {
+          return conn.sendMessage(from, { text: "*Reply with '1' to get the PDF.*" }, { quoted: msg });
+        }
+
+        await conn.sendMessage(from, { react: { text: "📥", key: msg.key } });
+
+        if (!downloadUrl) {
+          return conn.sendMessage(from, { text: "*PDF download link not found.*" }, { quoted: msg });
+        }
         
         await conn.sendMessage(from, {
-          document: { url: d.download_info.download_url },
+          document: { url: downloadUrl },
           mimetype: "application/pdf",
-          fileName: d.download_info.file_name,
-          caption: `📚 ${d.download_info.file_title}\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
-        }, { quoted: m2 });
-
-        conn.ev.off("messages.upsert", downloadListener);
-      };
-
-      conn.ev.on("messages.upsert", downloadListener);
-      conn.ev.off("messages.upsert", listener);
+          fileName: `${title}.pdf`,
+          caption: `📚 *${title}*\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝑇-𝚇𝙼𝙳`
+        }, { quoted: msg });
+      }
     };
 
     conn.ev.on("messages.upsert", listener);
 
-  } catch (e) {
-    console.error(e);
-    conn.sendMessage(from, {
-      text: "⚠️ Error occurred while fetching paper."
-    }, { quoted: mek });
+  } catch (err) {
+    await conn.sendMessage(from, { text: `*Error:* ${err.message}` }, { quoted: mek }); 
   }
 });
 
