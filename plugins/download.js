@@ -1860,14 +1860,14 @@ cmd({
         const data = search.videos[0];
         const ytUrl = data.url;
 
-        const api = `https://dark-knight-yt-dl-api.vercel.app/download/ytmp3?url=${encodeURIComponent(ytUrl)}`;
+        const api = `https://m-api-five.vercel.app/downloader/ytmp3?url=${encodeURIComponent(ytUrl)}`;
         const { data: apiRes } = await axios.get(api);
 
         if (!apiRes?.status || !apiRes.download?.url) {
             return reply("❌ Unable to download the song. Please try another one!");
         }
 
-        const result = apiRes.download;
+        const downloadUrl = apiRes.result.url;
 
         const caption = `
 🎵 *Song Downloader.* 📥
@@ -1907,7 +1907,7 @@ cmd({
         switch (receivedText.trim()) {
                 case "1":
                     await conn.sendMessage(senderID, {
-                        audio: { url: result.url },
+                        audio: { url: downloadUrl },
                         mimetype: "audio/mpeg",
                         ptt: false,
                     }, { quoted: receivedMsg });
@@ -1915,7 +1915,7 @@ cmd({
 
                 case "2":
                     await conn.sendMessage(senderID, {
-                        document: { url: result.url },
+                        document: { url: downloadUrl },
                         mimetype: "audio/mpeg",
                         fileName: `${data.title}.mp3`
                     }, { quoted: receivedMsg });
@@ -1923,7 +1923,7 @@ cmd({
 
                 case "3":
                     await conn.sendMessage(senderID, {
-                        audio: { url: result.url },
+                        audio: { url: downloadUrl },
                         mimetype: "audio/mpeg",
                         ptt: true,
                     }, { quoted: receivedMsg });
@@ -2725,8 +2725,7 @@ cmd({
                     return reply(`❌ Unable to download the ${selectedFormat} version. Try another one!`);
                 }
 
-                const downloadData = apiRes.result.download;
-                const downloadUrl = downloadData.url;
+                const downloadUrl = apiRes.result.url;
                 
                 if (isDocument) {
                     await conn.sendMessage(senderID, {
