@@ -1863,7 +1863,7 @@ cmd({
         const api = `https://m-api-five.vercel.app/downloader/ytmp3?url=${encodeURIComponent(ytUrl)}`;
         const { data: apiRes } = await axios.get(api);
 
-        if (!apiRes?.status || !apiRes.download?.url) {
+        if (!apiRes?.status || !apiRes.result?.url) {
             return reply("❌ Unable to download the song. Please try another one!");
         }
 
@@ -2721,7 +2721,7 @@ cmd({
 
                 const { data: apiRes } = await axios.get(formats[selectedFormat]);
 
-                if (!apiRes?.status || !apiRes.result?.download?.url) {
+                if (!apiRes?.status || !apiRes.result?.url) {
                     return reply(`❌ Unable to download the ${selectedFormat} version. Try another one!`);
                 }
 
