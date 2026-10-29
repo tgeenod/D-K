@@ -354,7 +354,7 @@ cmd({
         const dllinks = movie?.dllinks?.filter(d => d.dllink && !d.dllink.includes("t.me")) || [];
 
         if (!dllinks.length) {
-          return conn.sendMessage(from, { text: "*No direct download links available.*" }, { quoted: msg });
+          return conn.sendMessage(from, { text: "*No direct download links available.*" }, { quoted: mek });
         }
 
         let info =
@@ -966,23 +966,27 @@ cmd({
 
         if (chosen.dllink.includes("drive.csplayer2.space")) {
           try {
-        const downloadApiUrl = `https://m-api-five.vercel.app/movie/cinesubz/download?url=${encodeURIComponent(chosen.dllink)}`;
-        const downloadRes = await axios.get(downloadApiUrl);
-        const downloadData = downloadRes.data?.result;
+            const downloadApiUrl = `https://m-api-five.vercel.app/movie/cinesubz/download?url=${encodeURIComponent(chosen.dllink)}`;
+            const downloadRes = await axios.get(downloadApiUrl);
+            const downloadData = downloadRes.data?.result;
 
-        if (!downloadData || !downloadData.downloadUrls?.length) {
-          return conn.sendMessage(from, { text: "*Failed to fetch download links.*" }, { quoted: msg });
+            if (!downloadData || !downloadData.downloadUrls?.length) {
+              return conn.sendMessage(from, { text: "*Failed to fetch download links.*" }, { quoted: msg });
+            }
+
+            const validUrls = downloadData.downloadUrls
+              .map(d => d.url)
+              .filter(u => u && !u.includes("telegram.me") && !u.includes("t.me"));
+
+            if (!validUrls.length) {
+              return conn.sendMessage(from, { text: "*No valid download links available.*" }, { quoted: msg });
+            }
+
+            finalDownloadUrl = validUrls[0];
+          } catch (err) {
+            console.log("Cinesubz download link fetch error:", err.message);
+          }
         }
-
-        const validUrls = downloadData.downloadUrls
-          .map(d => d.url)
-          .filter(u => u && !u.includes("telegram.me") && !u.includes("t.me"));
-
-        if (!validUrls.length) {
-          return conn.sendMessage(from, { text: "*No valid download links available.*" }, { quoted: msg });
-        }
-
-        let finalDownloadUrl = validUrls[0];
 
         const size = chosen.size.toLowerCase();
         const sizeGB = size.includes("gb") ? parseFloat(size) : parseFloat(size) / 1024;
@@ -1046,14 +1050,14 @@ cmd({
       imdb: item.imdb
     }));
 
-    let textList = "🔢 𝑅𝑒𝑝𝑙𝑦 𝐵𝑒𝑙𝑜𝑤 𝑁𝑢𝑚𝑏𝑒𝑟\n━━━━━━━━━━━━━━━━━\n\n";
+    let textList = "🔢 𝑅𝑒𝑝𝑙𝑦 𝐵𝑒𝑙𝑜ｗ 𝑁𝑢𝑚𝑏𝑒𝑟\n━━━━━━━━━━━━━━━━━\n\n";
     movieList.forEach((item) => {
       textList += `🔸 *${item.number}. ${item.title}*\n`;
     });
     textList += "\n💬 *Reply with movie number to view details.*";
 
     const sentMsg = await conn.sendMessage(from, {
-      text: `*🔍 𝐏𝐈𝐑𝐀𝐓𝐄𝐋𝐊 𝐂𝐈𝐍𝐄𝐌𝐀 𝐒𝐄𝐀𝐑𝐂𝐇 🎥*\n\n${textList}\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝑇-𝚇𝙼𝙳`
+      text: `*🔍 𝐏𝐈𝐑𝐀𝐓𝐄𝐋𝐊 𝐂𝐈𝐍𝐄𝐌𝐀 𝐒𝐄𝐀𝐑𝐂𝐇 🎥*\n\n${textList}\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
     }, { quoted: mek });
 
     const movieMap = new Map();
@@ -1166,7 +1170,7 @@ cmd({
           document: { url: finalDownloadUrl },
           mimetype: "video/mp4",
           fileName: `${movie.title || selected.title} - ${chosen.title}.mp4`,
-          caption: `🎬 *${movie.title || selected.title}*\n🎥 *Quality:* ${chosen.title}\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝑇-𝚇𝙼𝙳`
+          caption: `🎬 *${movie.title || selected.title}*\n🎥 *Quality:* ${chosen.title}\n\n> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
         }, { quoted: msg });
       }
     };
@@ -1363,27 +1367,27 @@ cmd({
 
           await conn.sendMessage(from, { react: { text: "📥", key: msg.key } });
 
-         let finalDownloadUrl = chosen.dllink;
+          let finalDownloadUrl = chosen.dllink;
 
-         if (chosen.dllink.includes("drive.csplayer2.space")) {
+          if (chosen.dllink.includes("drive.csplayer2.space")) {
             try {
-          const downloadApiUrl = `https://m-api-five.vercel.app/movie/cinesubz/download?url=${encodeURIComponent(chosen.dllink)}`;
-          const downloadRes = await axios.get(downloadApiUrl);
-          const downloadData = downloadRes.data?.result;
+              const downloadApiUrl = `https://m-api-five.vercel.app/movie/cinesubz/download?url=${encodeURIComponent(chosen.dllink)}`;
+              const downloadRes = await axios.get(downloadApiUrl);
+              const downloadData = downloadRes.data?.result;
 
-          if (!downloadData || !downloadData.downloadUrls?.length) {
-            return conn.sendMessage(from, { text: "*Failed to fetch download links.*" }, { quoted: msg });
+              if (downloadData && downloadData.downloadUrls?.length) {
+                const validUrls = downloadData.downloadUrls
+                  .map(d => d.url)
+                  .filter(u => u && !u.includes("telegram.me") && !u.includes("t.me"));
+
+                if (validUrls.length) {
+                  finalDownloadUrl = validUrls[0];
+                }
+              }
+            } catch (err) {
+              console.log("Cinesubz TV download fetch error:", err.message);
+            }
           }
-
-          const validUrls = downloadData.downloadUrls
-            .map(d => d.url)
-            .filter(u => u && !u.includes("telegram.me") && !u.includes("t.me"));
-
-          if (!validUrls.length) {
-            return conn.sendMessage(from, { text: "*No valid direct download links available.*" }, { quoted: msg });
-          }
-
-          let finalDownloadUrl = validUrls[0];
 
           const size = chosen.size.toLowerCase();
           const sizeGB = size.includes("gb") ? parseFloat(size) : parseFloat(size) / 1024;
