@@ -962,6 +962,10 @@ cmd({
 
         await conn.sendMessage(from, { react: { text: "📥", key: msg.key } });
 
+        let finalDownloadUrl = chosen.dllink;
+
+        if (chosen.dllink.includes("drive.csplayer2.space")) {
+          try {
         const downloadApiUrl = `https://m-api-five.vercel.app/movie/cinesubz/download?url=${encodeURIComponent(chosen.dllink)}`;
         const downloadRes = await axios.get(downloadApiUrl);
         const downloadData = downloadRes.data?.result;
@@ -1359,6 +1363,10 @@ cmd({
 
           await conn.sendMessage(from, { react: { text: "📥", key: msg.key } });
 
+         let finalDownloadUrl = chosen.dllink;
+
+         if (chosen.dllink.includes("drive.csplayer2.space")) {
+            try {
           const downloadApiUrl = `https://m-api-five.vercel.app/movie/cinesubz/download?url=${encodeURIComponent(chosen.dllink)}`;
           const downloadRes = await axios.get(downloadApiUrl);
           const downloadData = downloadRes.data?.result;
