@@ -2588,7 +2588,7 @@ cmd({
                     case "2.1": selectedFormat = "144p"; isDocument = true; break;
                     case "2.2": selectedFormat = "240p"; isDocument = true; break;
                     case "2.3": selectedFormat = "360p"; isDocument = true; break;
-                    case "2.4": selectedFormat = "480p"; isDocument = true.break;
+                    case "2.4": selectedFormat = "480p"; isDocument = true; break;
                     case "2.5": selectedFormat = "720p"; isDocument = true; break;
                     case "2.6": selectedFormat = "1080p"; isDocument = true; break;
 
