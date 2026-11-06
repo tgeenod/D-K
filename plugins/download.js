@@ -2501,133 +2501,10 @@ cmd(
             await reply("*❌ Error: " + e + "*");
         }
     }
-);
+);               
 
 cmd({
     pattern: "video",
-    react: "🎬",
-    use: ".video <query>",
-    filename: __filename
-}, async (conn, mek, m, { from, reply, q }) => {
-    try {
-        if (!q) return reply("❓ What video do you want to download?");
-
-        const search = await yts(q);
-        if (!search.videos.length) return reply("❌ No results found for your query.");
-
-        const data = search.videos[0];
-        const ytUrl = data.url;
-
-        const formats = {
-            "144p": `https://api-ytdlwsmd-mini.vercel.app/api/download?url=${encodeURIComponent(ytUrl)}&quality=144p`,
-            "240p": `https://api-ytdlwsmd-mini.vercel.app/api/download?url=${encodeURIComponent(ytUrl)}&quality=240p`,
-            "360p": `https://api-ytdlwsmd-mini.vercel.app/api/download?url=${encodeURIComponent(ytUrl)}&quality=360p`,
-            "480p": `https://api-ytdlwsmd-mini.vercel.app/api/download?url=${encodeURIComponent(ytUrl)}&quality=480p`,
-            "720p": `https://api-ytdlwsmd-mini.vercel.app/api/download?url=${encodeURIComponent(ytUrl)}&quality=720p`,
-            "1080p": `https://api-ytdlwsmd-mini.vercel.app/api/download?url=${encodeURIComponent(ytUrl)}&quality=1080p`
-        };
-
-        const caption = `
-🎥 *Video Downloader.* 📥
-
-📑 *Title:* ${data.title}
-⏱️ *Duration:* ${data.timestamp}
-📆 *Uploaded:* ${data.ago}
-📊 *Views:* ${data.views}
-🔗 *Link:* ${data.url}
-
-🔢 *Reply Below Number*
-
-🎥 *Video Types*
-🔹 1.1 144p (Video)
-🔹 1.2 240p (Video)
-🔹 1.3 360p (Video)
-🔹 1.4 480p (Video)
-🔹 1.5 720p (Video)
-🔹 1.6 1080p (Video)
-
-📁 *Document Types:*
-🔹 2.1 144p (Document)
-🔹 2.2 240p (Document)
-🔹 2.3 360p (Document)
-🔹 2.4 480p (Document)
-🔹 2.5 720p (Document)
-🔹 2.6 1080p (Document)
-
-> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳
-        `;
-
-        const sentMsg = await conn.sendMessage(from, {
-            image: { url: data.thumbnail },
-            caption
-        }, { quoted: m });
-
-        const messageID = sentMsg.key.id;
-
-        conn.ev.on("messages.upsert", async (msgData) => {
-            const receivedMsg = msgData.messages[0];
-            if (!receivedMsg?.message) return;
-
-            const receivedText = receivedMsg.message.conversation || receivedMsg.message.extendedTextMessage?.text;
-            const senderID = receivedMsg.key.remoteJid;
-            const isReplyToBot = receivedMsg.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
-
-            if (isReplyToBot) {
-                await conn.sendMessage(senderID, { react: { text: '⏳', key: receivedMsg.key } });
-
-                let selectedFormat, isDocument = false;
-
-                switch (receivedText.trim().toUpperCase()) {
-                    case "1.1": selectedFormat = "144p"; break;
-                    case "1.2": selectedFormat = "240p"; break;
-                    case "1.3": selectedFormat = "360p"; break;
-                    case "1.4": selectedFormat = "480p"; break;
-                    case "1.5": selectedFormat = "720p"; break;
-                    case "1.6": selectedFormat = "1080p"; break;
-                    
-                    case "2.1": selectedFormat = "144p"; isDocument = true; break;
-                    case "2.2": selectedFormat = "240p"; isDocument = true; break;
-                    case "2.3": selectedFormat = "360p"; isDocument = true; break;
-                    case "2.4": selectedFormat = "480p"; isDocument = true; break;
-                    case "2.5": selectedFormat = "720p"; isDocument = true; break;
-                    case "2.6": selectedFormat = "1080p"; isDocument = true; break;
-
-                    default:
-                        return reply("❌ Invalid option! Please reply with 1.1-1.6 or 2.1-2.6.");
-                }
-
-                const { data: apiRes } = await axios.get(formats[selectedFormat]);
-
-                if (!apiRes?.status || !apiRes.result?.download) {
-                    return reply(`❌ Unable to download the ${selectedFormat} version. Try another one!`);
-                }
-
-                const downloadUrl = apiRes.result.download;
-
-                if (isDocument) {
-                    await conn.sendMessage(senderID, {
-                        document: { url: downloadUrl },
-                        mimetype: "video/mp4",
-                        fileName: `${data.title}.mp4`
-                    }, { quoted: receivedMsg });
-                } else {
-                    await conn.sendMessage(senderID, {
-                        video: { url: downloadUrl },
-                        mimetype: "video/mp4",
-                        ptt: false,
-                    }, { quoted: receivedMsg });
-                }
-            }
-        });
-
-    } catch (error) {
-        console.error("Video Command Error:", error);
-        reply("❌ An error occurred while processing your request. Please try again later.");
-    }
-});
-
-cmd({
-    pattern: "video2",
     react: "🎬",
     use: ".video <query>",
     filename: __filename
@@ -2727,6 +2604,129 @@ cmd({
 
                 const downloadUrl = apiRes.result.url;
                 
+                if (isDocument) {
+                    await conn.sendMessage(senderID, {
+                        document: { url: downloadUrl },
+                        mimetype: "video/mp4",
+                        fileName: `${data.title}.mp4`
+                    }, { quoted: receivedMsg });
+                } else {
+                    await conn.sendMessage(senderID, {
+                        video: { url: downloadUrl },
+                        mimetype: "video/mp4",
+                        ptt: false,
+                    }, { quoted: receivedMsg });
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error("Video Command Error:", error);
+        reply("❌ An error occurred while processing your request. Please try again later.");
+    }
+});
+
+cmd({
+    pattern: "video2",
+    react: "🎬",
+    use: ".video <query>",
+    filename: __filename
+}, async (conn, mek, m, { from, reply, q }) => {
+    try {
+        if (!q) return reply("❓ What video do you want to download?");
+
+        const search = await yts(q);
+        if (!search.videos.length) return reply("❌ No results found for your query.");
+
+        const data = search.videos[0];
+        const ytUrl = data.url;
+
+        const formats = {
+            "144p": `https://sai-green.vercel.app/manump4?url=${encodeURIComponent(ytUrl)}&quality=144`,
+            "240p": `https://sai-green.vercel.app/manump4?url=${encodeURIComponent(ytUrl)}&quality=240`,
+            "360p": `https://sai-green.vercel.app/manump4?url=${encodeURIComponent(ytUrl)}&quality=360`,
+            "480p": `https://sai-green.vercel.app/manump4?url=${encodeURIComponent(ytUrl)}&quality=480`,
+            "720p": `https://sai-green.vercel.app/manump4?url=${encodeURIComponent(ytUrl)}&quality=720`,
+            "1080p": `https://sai-green.vercel.app/manump4?url=${encodeURIComponent(ytUrl)}&quality=1080`
+        };
+
+        const caption = `
+🎥 *Video Downloader.* 📥
+
+📑 *Title:* ${data.title}
+⏱️ *Duration:* ${data.timestamp}
+📆 *Uploaded:* ${data.ago}
+📊 *Views:* ${data.views}
+🔗 *Link:* ${data.url}
+
+🔢 *Reply Below Number*
+
+🎥 *Video Types*
+🔹 1.1 144p (Video)
+🔹 1.2 240p (Video)
+🔹 1.3 360p (Video)
+🔹 1.4 480p (Video)
+🔹 1.5 720p (Video)
+🔹 1.6 1080p (Video)
+
+📁 *Document Types:*
+🔹 2.1 144p (Document)
+🔹 2.2 240p (Document)
+🔹 2.3 360p (Document)
+🔹 2.4 480p (Document)
+🔹 2.5 720p (Document)
+🔹 2.6 1080p (Document)
+
+> Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳
+        `;
+
+        const sentMsg = await conn.sendMessage(from, {
+            image: { url: data.thumbnail },
+            caption
+        }, { quoted: m });
+
+        const messageID = sentMsg.key.id;
+
+        conn.ev.on("messages.upsert", async (msgData) => {
+            const receivedMsg = msgData.messages[0];
+            if (!receivedMsg?.message) return;
+
+            const receivedText = receivedMsg.message.conversation || receivedMsg.message.extendedTextMessage?.text;
+            const senderID = receivedMsg.key.remoteJid;
+            const isReplyToBot = receivedMsg.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
+
+            if (isReplyToBot) {
+                await conn.sendMessage(senderID, { react: { text: '⏳', key: receivedMsg.key } });
+
+                let selectedFormat, isDocument = false;
+
+                switch (receivedText.trim().toUpperCase()) {
+                    case "1.1": selectedFormat = "144p"; break;
+                    case "1.2": selectedFormat = "240p"; break;
+                    case "1.3": selectedFormat = "360p"; break;
+                    case "1.4": selectedFormat = "480p"; break;
+                    case "1.5": selectedFormat = "720p"; break;
+                    case "1.6": selectedFormat = "1080p"; break;
+                    
+                    case "2.1": selectedFormat = "144p"; isDocument = true; break;
+                    case "2.2": selectedFormat = "240p"; isDocument = true; break;
+                    case "2.3": selectedFormat = "360p"; isDocument = true; break;
+                    case "2.4": selectedFormat = "480p"; isDocument = true; break;
+                    case "2.5": selectedFormat = "720p"; isDocument = true; break;
+                    case "2.6": selectedFormat = "1080p"; isDocument = true; break;
+
+                    default:
+                        return reply("❌ Invalid option! Please reply with 1.1-1.6 or 2.1-2.6.");
+                }
+
+                const { data: apiRes } = await axios.get(formats[selectedFormat]);
+
+                if (!apiRes?.status || !apiRes.download?.url) {
+                    return reply(`❌ Unable to download the ${selectedFormat} version. Try another one!`);
+                }
+
+                const downloadUrl = apiRes.download.url;
+
                 if (isDocument) {
                     await conn.sendMessage(senderID, {
                         document: { url: downloadUrl },
