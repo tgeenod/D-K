@@ -1762,16 +1762,14 @@ cmd({
         if (!search.videos.length) return reply("❌ No results found for your query.");
 
         const data = search.videos[0];
-        const ytUrl = data.url;
-
-        const api = `https://sai-green.vercel.app/manump3?url=${encodeURIComponent(ytUrl)}`;
+        const api = `https://m-api-five.vercel.app/downloader/ytmp3v2?url=${encodeURIComponent(data.url)}`;
         const { data: apiRes } = await axios.get(api);
 
-        if (!apiRes?.status || !apiRes.download?.url) {
+        if (!apiRes?.status || !apiRes.result?.status || !apiRes.result?.audioUrl) {
             return reply("❌ Unable to download the song. Please try another one!");
         }
 
-        const result = apiRes.download;
+        const downloadUrl = apiRes.result.audioUrl;
 
         const caption = `
 🎵 *Song Downloader.* 📥
@@ -1797,52 +1795,52 @@ cmd({
 
         const messageID = sentMsg.key.id;
 
-    conn.ev.on("messages.upsert", async (msgData) => {
-      const receivedMsg = msgData.messages[0];
-      if (!receivedMsg?.message) return;
+        conn.ev.on("messages.upsert", async (msgData) => {
+            const receivedMsg = msgData.messages[0];
+            if (!receivedMsg?.message) return;
 
-      const receivedText = receivedMsg.message.conversation || receivedMsg.message.extendedTextMessage?.text;
-      const senderID = receivedMsg.key.remoteJid;
-      const isReplyToBot = receivedMsg.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
+            const receivedText = receivedMsg.message.conversation || receivedMsg.message.extendedTextMessage?.text;
+            const senderID = receivedMsg.key.remoteJid;
+            const isReplyToBot = receivedMsg.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
 
-      if (isReplyToBot) {
-        await conn.sendMessage(senderID, { react: { text: '⏳', key: receivedMsg.key } });
+            if (isReplyToBot) {
+                await conn.sendMessage(senderID, { react: { text: '⏳', key: receivedMsg.key } });
 
-        switch (receivedText.trim()) {
-                case "1":
-                    await conn.sendMessage(senderID, {
-                        audio: { url: result.url },
-                        mimetype: "audio/mpeg",
-                        ptt: false,
-                    }, { quoted: receivedMsg });
-                    break;
+                switch (receivedText.trim()) {
+                    case "1":
+                        await conn.sendMessage(senderID, {
+                            audio: { url: downloadUrl },
+                            mimetype: "audio/mpeg",
+                            ptt: false,
+                        }, { quoted: receivedMsg });
+                        break;
 
-                case "2":
-                    await conn.sendMessage(senderID, {
-                        document: { url: result.url },
-                        mimetype: "audio/mpeg",
-                        fileName: `${data.title}.mp3`
-                    }, { quoted: receivedMsg });
-                    break;
+                    case "2":
+                        await conn.sendMessage(senderID, {
+                            document: { url: downloadUrl },
+                            mimetype: "audio/mpeg",
+                            fileName: `${data.title}.mp3`
+                        }, { quoted: receivedMsg });
+                        break;
 
-                case "3":
-                    await conn.sendMessage(senderID, {
-                        audio: { url: result.url },
-                        mimetype: "audio/mpeg",
-                        ptt: true,
-                    }, { quoted: receivedMsg });
-                    break;
+                    case "3":
+                        await conn.sendMessage(senderID, {
+                            audio: { url: downloadUrl },
+                            mimetype: "audio/mpeg",
+                            ptt: true,
+                        }, { quoted: receivedMsg });
+                        break;
 
-          default:
-            reply("❌ Invalid option! Please reply with 1, 2, or 3.");
-        }
-      }
-    });
+                    default:
+                        reply("❌ Invalid option! Please reply with 1, 2, or 3.");
+                }
+            }
+        });
 
-  } catch (error) {
-    console.error("Song Command Error:", error);
-    reply("❌ An error occurred while processing your request. Please try again later.");
-  }
+    } catch (error) {
+        console.error("Song Command Error:", error);
+        reply("❌ An error occurred while processing your request. Please try again later.");
+    }
 });
 
 cmd({
@@ -2504,7 +2502,7 @@ cmd(
 );               
 
 cmd({
-    pattern: "video",
+    pattern: "video2",
     react: "🎬",
     use: ".video <query>",
     filename: __filename
@@ -2517,15 +2515,6 @@ cmd({
 
         const data = search.videos[0];
         const ytUrl = data.url;
-
-        const formats = {
-            "144p": `https://m-api-five.vercel.app/downloader/ytmp4?url=${encodeURIComponent(ytUrl)}&format=144`,
-            "240p": `https://m-api-five.vercel.app/downloader/ytmp4?url=${encodeURIComponent(ytUrl)}&format=240`,
-            "360p": `https://m-api-five.vercel.app/downloader/ytmp4?url=${encodeURIComponent(ytUrl)}&format=360`,
-            "480p": `https://m-api-five.vercel.app/downloader/ytmp4?url=${encodeURIComponent(ytUrl)}&format=480`,
-            "720p": `https://m-api-five.vercel.app/downloader/ytmp4?url=${encodeURIComponent(ytUrl)}&format=720`,
-            "1080p": `https://m-api-five.vercel.app/downloader/ytmp4?url=${encodeURIComponent(ytUrl)}&format=1080`
-        };
 
         const caption = `
 🎥 *Video Downloader.* 📥
@@ -2575,35 +2564,41 @@ cmd({
             if (isReplyToBot) {
                 await conn.sendMessage(senderID, { react: { text: '⏳', key: receivedMsg.key } });
 
-                let selectedFormat, isDocument = false;
+                let quality, isDocument = false;
 
                 switch (receivedText.trim().toUpperCase()) {
-                    case "1.1": selectedFormat = "144p"; break;
-                    case "1.2": selectedFormat = "240p"; break;
-                    case "1.3": selectedFormat = "360p"; break;
-                    case "1.4": selectedFormat = "480p"; break;
-                    case "1.5": selectedFormat = "720p"; break;
-                    case "1.6": selectedFormat = "1080p"; break;
+                    case "1.1": quality = "144"; break;
+                    case "1.2": quality = "240"; break;
+                    case "1.3": quality = "360"; break;
+                    case "1.4": quality = "480"; break;
+                    case "1.5": quality = "720"; break;
+                    case "1.6": quality = "1080"; break;
                     
-                    case "2.1": selectedFormat = "144p"; isDocument = true; break;
-                    case "2.2": selectedFormat = "240p"; isDocument = true; break;
-                    case "2.3": selectedFormat = "360p"; isDocument = true; break;
-                    case "2.4": selectedFormat = "480p"; isDocument = true; break;
-                    case "2.5": selectedFormat = "720p"; isDocument = true; break;
-                    case "2.6": selectedFormat = "1080p"; isDocument = true; break;
+                    case "2.1": quality = "144"; isDocument = true; break;
+                    case "2.2": quality = "240"; isDocument = true; break;
+                    case "2.3": quality = "360"; isDocument = true; break;
+                    case "2.4": quality = "480"; isDocument = true; break;
+                    case "2.5": quality = "720"; isDocument = true; break;
+                    case "2.6": quality = "1080"; isDocument = true; break;
 
                     default:
                         return reply("❌ Invalid option! Please reply with 1.1-1.6 or 2.1-2.6.");
                 }
 
-                const { data: apiRes } = await axios.get(formats[selectedFormat]);
+                const api = `https://m-api-five.vercel.app/downloader/ytmp4v2?url=${encodeURIComponent(ytUrl)}&format=${quality}`;
+                const { data: apiRes } = await axios.get(api);
 
-                if (!apiRes?.status || !apiRes.result?.url) {
-                    return reply(`❌ Unable to download the ${selectedFormat} version. Try another one!`);
+                if (!apiRes?.status || !apiRes.result?.status) {
+                    return reply(`❌ Unable to download the ${quality}p version. Try another one!`);
                 }
 
-                const downloadUrl = apiRes.result.url;
-                
+                const videoData = apiRes.result.prepared?.[`video:${quality}`];
+                if (!videoData?.url) {
+                    return reply(`❌ The ${quality}p video URL is not available right now!`);
+                }
+
+                const downloadUrl = videoData.url;
+
                 if (isDocument) {
                     await conn.sendMessage(senderID, {
                         document: { url: downloadUrl },
@@ -2627,7 +2622,7 @@ cmd({
 });
 
 cmd({
-    pattern: "video2",
+    pattern: "video",
     react: "🎬",
     use: ".video <query>",
     filename: __filename
@@ -2640,15 +2635,6 @@ cmd({
 
         const data = search.videos[0];
         const ytUrl = data.url;
-
-        const formats = {
-            "144p": `https://sai-green.vercel.app/manump4?url=${encodeURIComponent(ytUrl)}&quality=144`,
-            "240p": `https://sai-green.vercel.app/manump4?url=${encodeURIComponent(ytUrl)}&quality=240`,
-            "360p": `https://sai-green.vercel.app/manump4?url=${encodeURIComponent(ytUrl)}&quality=360`,
-            "480p": `https://sai-green.vercel.app/manump4?url=${encodeURIComponent(ytUrl)}&quality=480`,
-            "720p": `https://sai-green.vercel.app/manump4?url=${encodeURIComponent(ytUrl)}&quality=720`,
-            "1080p": `https://sai-green.vercel.app/manump4?url=${encodeURIComponent(ytUrl)}&quality=1080`
-        };
 
         const caption = `
 🎥 *Video Downloader.* 📥
@@ -2698,34 +2684,35 @@ cmd({
             if (isReplyToBot) {
                 await conn.sendMessage(senderID, { react: { text: '⏳', key: receivedMsg.key } });
 
-                let selectedFormat, isDocument = false;
+                let quality, isDocument = false;
 
                 switch (receivedText.trim().toUpperCase()) {
-                    case "1.1": selectedFormat = "144p"; break;
-                    case "1.2": selectedFormat = "240p"; break;
-                    case "1.3": selectedFormat = "360p"; break;
-                    case "1.4": selectedFormat = "480p"; break;
-                    case "1.5": selectedFormat = "720p"; break;
-                    case "1.6": selectedFormat = "1080p"; break;
+                    case "1.1": quality = "144"; break;
+                    case "1.2": quality = "240"; break;
+                    case "1.3": quality = "360"; break;
+                    case "1.4": quality = "480"; break;
+                    case "1.5": quality = "720"; break;
+                    case "1.6": quality = "1080"; break;
                     
-                    case "2.1": selectedFormat = "144p"; isDocument = true; break;
-                    case "2.2": selectedFormat = "240p"; isDocument = true; break;
-                    case "2.3": selectedFormat = "360p"; isDocument = true; break;
-                    case "2.4": selectedFormat = "480p"; isDocument = true; break;
-                    case "2.5": selectedFormat = "720p"; isDocument = true; break;
-                    case "2.6": selectedFormat = "1080p"; isDocument = true; break;
+                    case "2.1": quality = "144"; isDocument = true; break;
+                    case "2.2": quality = "240"; isDocument = true; break;
+                    case "2.3": quality = "360"; isDocument = true; break;
+                    case "2.4": quality = "480"; isDocument = true; break;
+                    case "2.5": quality = "720"; isDocument = true; break;
+                    case "2.6": quality = "1080"; isDocument = true; break;
 
                     default:
                         return reply("❌ Invalid option! Please reply with 1.1-1.6 or 2.1-2.6.");
                 }
 
-                const { data: apiRes } = await axios.get(formats[selectedFormat]);
+                const api = `https://m-api-five.vercel.app/downloader/ytmp4?url=${encodeURIComponent(ytUrl)}&format=${quality}`;
+                const { data: apiRes } = await axios.get(api);
 
-                if (!apiRes?.status || !apiRes.download?.url) {
-                    return reply(`❌ Unable to download the ${selectedFormat} version. Try another one!`);
+                if (!apiRes?.status || !apiRes.result?.url) {
+                    return reply(`❌ Unable to download the ${quality}p version. Try another one!`);
                 }
 
-                const downloadUrl = apiRes.download.url;
+                const downloadUrl = apiRes.result.url;
 
                 if (isDocument) {
                     await conn.sendMessage(senderID, {
