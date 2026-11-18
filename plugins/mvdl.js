@@ -642,7 +642,7 @@ cmd({
         const runtimeText = selected.duration && selected.duration > 0 ? `${Math.floor(selected.duration / 60)} min` : "N/A";
 
         let info = 
-          `🎬 *Title:* ${selected.title || "N/A"}\n` +
+          `🎬 *Title:* ${selected.title || "N/A"}\n\n` +
           `🎞️ *Type:* ${selected.type || "N/A"}\n` +
           `⭐ *IMDb Rating:* ${selected.imdbRating || "N/A"}\n` +
           `🎭 *Genre:* ${selected.genre || "N/A"}\n` +
@@ -650,7 +650,7 @@ cmd({
           `🕐 *Duration:* ${runtimeText}\n` +
           `📅 *Release Date:* ${selected.releaseDate || "N/A"}\n\n` +
           `🎥 *𝑫𝒐𝒘𝒏𝒍𝒐𝒂𝒅 𝑳𝒊𝒏𝒌𝒔:* 📥\n\n` +
-          `♦️ 0. *Watch Trailer*\n`;
+          `♦️ 0. *Watch Trailer*\n\n`;
         
         qualities.forEach((d, i) => {  
           const sizeMB = Number(d.size_mb) || 0;
