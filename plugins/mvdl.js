@@ -573,28 +573,32 @@ cmd({
     let data = movieCache.get(cacheKey);
 
     if (!data) {
-      const url = `https://movieboxapi.vercel.app/api/search?query=${encodeURIComponent(q)}`;
+      const url = `https://m-api-five.vercel.app/movie/moviebox/search?text=${encodeURIComponent(q)}`;
       const res = await axios.get(url);
       
       data = res.data;
 
-      if (!data.data?.items?.length) throw new Error("No results found.");
+      if (!data.status || !data.result?.results?.length) throw new Error("No results found.");
 
       movieCache.set(cacheKey, data);
     }
 
-    const movieList = data.data.items.map((m, i) => ({
+    const filteredResults = data.result.results.filter(m => m.type?.toLowerCase() !== "tv");
+
+    if (!filteredResults.length) throw new Error("No movies found.");
+
+    const movieList = filteredResults.map((m, i) => ({
       number: i + 1,
       id: m.subjectId,
       detailPath: m.detailPath,
       title: m.title,
-      year: m.releaseDate,
-      time: m.duration,
+      type: m.type,
+      imdbRating: m.imdbRating,
       genre: m.genre,
-      thumbnail: m.cover?.url,
-      country: m.countryName,
-      imdb: m.imdbRatingValue,
-      post: m.postTitle
+      country: m.country,
+      duration: m.duration,
+      releaseDate: m.releaseDate,
+      cover: m.cover
     }));
 
     let textList = "🔢 𝑅𝑒𝑝𝑙𝑦 𝐵𝑒𝑙𝑜𝑤 𝑁𝑢𝑚𝑏𝑒𝑟\n━━━━━━━━━━━━━━━━━\n\n";
@@ -627,61 +631,78 @@ cmd({
 
         await conn.sendMessage(from, { react: { text: "🎯", key: msg.key } });
 
-        const streamUrl = `https://movieboxapi.vercel.app/api/stream?subjectId=${selected.id}&detailPath=${selected.detailPath}`;
-        const streamRes = await axios.get(streamUrl);
+        const detailUrl = `https://m-api-five.vercel.app/movie/moviebox/details?url=${selected.detailPath}`;
+        const detailRes = await axios.get(detailUrl);
     
-        const streams = streamRes.data?.data?.data?.streams;
+        const detailsData = detailRes.data?.result;
+        const qualities = detailsData?.download_links?.qualities;
 
-        if (!streams?.length) return conn.sendMessage(from, { text: "*No download links available.*" }, { quoted: msg });
+        if (!qualities?.length) return conn.sendMessage(from, { text: "*No download links available.*" }, { quoted: msg });
 
-        const runtimeText = selected.time && selected.time > 0 ? `${Math.floor(selected.time / 60)} min` : "N/A";
+        const runtimeText = selected.duration && selected.duration > 0 ? `${Math.floor(selected.duration / 60)} min` : "N/A";
 
         let info = 
           `🎬 *Title:* ${selected.title || "N/A"}\n` +
-          `📅 *Release Date:* ${selected.year || "N/A"}\n` +
-          `🕐 *Duration:* ${runtimeText}\n` +
+          `🎞️ *Type:* ${selected.type || "N/A"}\n` +
+          `⭐ *IMDb Rating:* ${selected.imdbRating || "N/A"}\n` +
           `🎭 *Genre:* ${selected.genre || "N/A"}\n` +
           `🌍 *Country:* ${selected.country || "N/A"}\n` +
-          `⭐ *IMDb Rating:* ${selected.imdb || "N/A"}\n` +
-          `📝 *Post Title:* ${selected.post || "N/A"}\n\n` +
-          `🎥 *𝑫𝒐𝒘𝒏𝒍𝒐𝒂𝒅 𝑳𝒊𝒏𝒌𝒔:* 📥\n\n`;
+          `🕐 *Duration:* ${runtimeText}\n` +
+          `📅 *Release Date:* ${selected.releaseDate || "N/A"}\n\n` +
+          `🎥 *𝑫𝒐𝒘𝒏𝒍𝒐𝒂𝒅 𝑳𝒊𝒏𝒌𝒔:* 📥\n\n` +
+          `♦️ 0. *Watch Trailer*\n`;
         
-        streams.forEach((d, i) => {  
-          const formattedSize = parseInt(d.size) >= 1024 * 1024 * 1024 ? `${(parseInt(d.size) / (1024 * 1024 * 1024)).toFixed(2)} GB` : `${(parseInt(d.size) / (1024 * 1024)).toFixed(1)} MB`;
+        qualities.forEach((d, i) => {  
+          const sizeMB = Number(d.size_mb) || 0;
+          const formattedSize = sizeMB >= 1024 ? `${(sizeMB / 1024).toFixed(2)} GB` : `${sizeMB.toFixed(2)} MB`;
           
-          info += `♦️ ${i + 1}. *${d.resolutions}p* (${d.format}) — ${formattedSize}\n`;
+          info += `♦️ ${i + 1}. *${d.resolution}p* (${d.codec || 'mp4'}) — ${formattedSize}\n`;
         });
         info += "\n🔢 Reply with number to download.";
 
         const downloadMsg = await conn.sendMessage(from, {
-          image: { url: selected.thumbnail },
+          image: { url: selected.cover },
           caption: info
         }, { quoted: msg });
 
-        movieMap.set(downloadMsg.key.id, { selected, streams });
+        movieMap.set(downloadMsg.key.id, { selected, qualities, detailsData });
       }
 
       else if (movieMap.has(repliedId)) {
-        const { selected, streams } = movieMap.get(repliedId);
+        const { selected, qualities, detailsData } = movieMap.get(repliedId);
         const num = parseInt(replyText);
-        const chosen = streams[num - 1];
+
+        if (num === 0) {
+          await conn.sendMessage(from, { react: { text: "🎥", key: msg.key } });
+          
+          const trailerUrl = detailsData?.trailer?.url;
+
+          if (!trailerUrl) return conn.sendMessage(from, { text: "*No trailer video available.*" }, { quoted: msg });
+
+          return await conn.sendMessage(from, {
+            video: { url: trailerUrl },
+            caption: `🎬 *Trailer: ${selected.title}*\n\n> © Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+          }, { quoted: msg });
+        }
+
+        const chosen = qualities[num - 1];
         if (!chosen) return conn.sendMessage(from, { text: "*Invalid number.*" }, { quoted: msg });
 
         await conn.sendMessage(from, { react: { text: "📥", key: msg.key } });
 
-        const sizeInBytes = parseInt(chosen.size);
-        const sizeGB = sizeInBytes / (1024 * 1024 * 1024);
-        
-        const sizeMB = (sizeInBytes / (1024 * 1024)).toFixed(1);
-        const formattedSize = sizeMB >= 1024 ? `${(sizeMB / 1024).toFixed(2)} GB` : `${sizeMB} MB`;
+        const sizeMB = Number(chosen.size_mb) || 0;
+        const sizeGB = sizeMB / 1024;
+        const formattedSize = sizeGB >= 1 ? `${sizeGB.toFixed(2)} GB` : `${sizeMB.toFixed(2)} MB`;
         
         if (sizeGB > 2) return conn.sendMessage(from, { text: `⚠️ Large file (${formattedSize})` }, { quoted: msg });
 
+        const downloadUrl = chosen.dllink || chosen.url;
+
         await conn.sendMessage(from, {
-          document: { url: chosen.url },
+          document: { url: downloadUrl },
           mimetype: "video/mp4",
-          fileName: `${selected.title} - ${chosen.resolutions}p.mp4`,
-          caption: `🎬 *${selected.title}*\n🎥 *${chosen.resolutions}p*\n\n> © Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
+          fileName: `${selected.title} - ${chosen.resolution}p.mp4`,
+          caption: `🎬 *${selected.title}*\n🎥 *${chosen.resolution}p*\n\n> © Powered by 𝙳𝙰𝚁𝙺-𝙺𝙽𝙸𝙶𝙷𝚃-𝚇𝙼𝙳`
         }, { quoted: msg });
       }
     };
