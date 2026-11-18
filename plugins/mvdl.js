@@ -696,7 +696,7 @@ cmd({
         
         if (sizeGB > 2) return conn.sendMessage(from, { text: `⚠️ Large file (${formattedSize})` }, { quoted: msg });
 
-        const downloadUrl = chosen.dllink || chosen.url;
+        const downloadUrl = chosen.dllink;
 
         await conn.sendMessage(from, {
           document: { url: downloadUrl },
