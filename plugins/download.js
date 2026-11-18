@@ -2293,7 +2293,7 @@ cmd(
                 return await reply("Please enter video name.");
             }
             
-            const xnxxSearchapi = await fetchJson(`https://api.deline.web.id/search/xnxx?q=${encodeURIComponent(q)}`);
+            const xnxxSearchapi = await fetchJson(`https://m-api-five.vercel.app/search/xnxx?text=${encodeURIComponent(q)}`);
             
             if (!xnxxSearchapi || !xnxxSearchapi.result || xnxxSearchapi.result.length === 0) {
                 return await reply("No result found you enter video name.");
@@ -2302,7 +2302,7 @@ cmd(
             let list = "🔍 Xnxx Search Results.🔞\n\n🔢 *Reply Below Number.*\n\n";
             
             xnxxSearchapi.result.forEach((xnxx, i) => {
-                list += `*\`${i + 1}\` | | ${xnxx.title || "No title"}*\n`;
+                list += `*\`${i + 1}\` | | ${xnxx.title || "No title"}* (${xnxx.duration || "N/A"})\n`;
             });
           
             const listMsg = await conn.sendMessage(from, { text: list + "\n🔢 *reply with the number to Choose a video*\n\n" + tharuzz_footer }, { quoted: mek });
@@ -2325,15 +2325,15 @@ cmd(
               
                 const chosen = xnxxSearchapi.result[index];
               
-                const xnxxDownloadapi = await fetchJson(`https://api.deline.web.id/downloader/xnxx?url=${encodeURIComponent(chosen.link)}`);
+                const xnxxDownloadapi = await fetchJson(`https://m-api-five.vercel.app/downloader/xnxx?url=${encodeURIComponent(chosen.link)}`);
 
                 const infoMap = xnxxDownloadapi?.result;
-                const downloadUrllow = infoMap?.files?.low;
-                const downloadUrlhigh = infoMap?.files?.high;
+                const downloadUrllow = infoMap?.urlLow;
+                const downloadUrlhigh = infoMap?.urlHigh;
               
                 const askType = await conn.sendMessage(
                     from, {
-                        image: { url: infoMap?.image || infoMap?.files?.thumb },
+                        image: { url: infoMap?.image },
                         caption: `🔍 *Xnxx Video Info.* 🔞\n\n` +
                         `📑 *Title:* ${infoMap?.title || "N/A"}\n` + 
                         `📝 *Info:* ${infoMap?.info || "N/A"}\n` + 
@@ -2409,18 +2409,18 @@ cmd(
                 return await reply("Please enter video name.");
             }
             
-            const xvSearchapi = await fetchJson(`https://api.deline.web.id/search/xvideos?q=${encodeURIComponent(q)}`);
+            const xvSearchapi = await fetchJson(`https://m-api-five.vercel.app/search/xvideos?text=${encodeURIComponent(q)}`);
             
-            const items = xvSearchapi?.result?.items;
+            const items = xvSearchapi?.result;
 
-            if (!items || items.length === 0) {
+            if (!items || !Array.isArray(items) || items.length === 0) {
                 return await reply("No result found you enter video name.");
             }
             
             let list = "🔍 Xvideo Search Results.🔞\n\n🔢 *Reply Below Number.*\n\n";
             
             items.forEach((xv, i) => {
-                list += `*\`${i + 1}\` | | ${xv.title || "No title"}*\n`;
+                list += `*\`${i + 1}\` | | ${xv.title || "No title"}* (${xv.duration || "N/A"})\n`;
             });
           
             const listMsg = await conn.sendMessage(from, { text: list + "\n🔢 *reply with the number to Choose a video*\n\n" + tharuzz_footer }, { quoted: mek });
@@ -2443,18 +2443,18 @@ cmd(
               
                 const chosen = items[index];
               
-                const xvDownloadapi = await fetchJson(`https://api.deline.web.id/downloader/xvideos?url=${encodeURIComponent(chosen.url)}`);
+                const xvDownloadapi = await fetchJson(`https://m-api-five.vercel.app/downloader/xvideos?url=${encodeURIComponent(chosen.url)}`);
 
                 const infoMap = xvDownloadapi?.result;
-                const downloadUrllow = infoMap?.videos?.videos?.low;
-                const downloadUrlhigh = infoMap?.videos?.videos?.high;
+                const downloadUrllow = infoMap?.urlLow;
+                const downloadUrlhigh = infoMap?.urlHigh;
               
                 const askType = await conn.sendMessage(
                     from, {
-                        image: { url: infoMap?.thumb || infoMap?.videos?.thumb || chosen.cover },
+                        image: { url: infoMap?.thumb || chosen.img },
                         caption: `🔍 *Xvideo Info.* 🔞\n\n` +
                         `📑 *Title:* ${infoMap?.title || chosen.title || "N/A"}\n` + 
-                        `🎬 *Resolution:* ${chosen.resolution || "N/A"}\n` + 
+                        `👁️ *Views:* ${infoMap?.views || "N/A"}\n` + 
                         `⏰ *Duration:* ${chosen.duration || "N/A"}\n\n` +
                         `🔢 *Reply Below Number:*\n\n` +
                         `1️⃣ *Video High Quality*\n` +
@@ -2499,7 +2499,7 @@ cmd(
             await reply("*❌ Error: " + e + "*");
         }
     }
-);               
+);
 
 cmd({
     pattern: "video2",
